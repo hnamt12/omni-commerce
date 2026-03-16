@@ -1,0 +1,65 @@
+- **[2026-03-15 22:07] - Tạo Migration và Model cho Category, Product theo kiến trúc Hybrid EAV**:
+  - **Files Changed**: 
+    - `app/Models/Category.php`
+    - `app/Models/Product.php`
+    - `app/Models/ProductVariant.php`
+    - `database/migrations/2026_03_15_150813_create_categories_table.php`
+    - `database/migrations/2026_03_15_150814_create_products_table.php`
+    - `database/migrations/2026_03_15_150815_create_product_variants_table.php`
+  - **Logic Summary**: Tự động tạo và ghi đầy đủ nội dung Migration & Model cho Category, Product, ProductVariant theo kiến trúc Hybrid EAV (sử dụng các cột JSON cho attributes tự do) và khai báo ràng buộc như `$fillable`, kiểu cast dạng mảng PHP 8.2+ đầy đủ, và Type Hinting (VD: BelongsTo, HasMany).
+
+- **[2026-03-16 08:03] - PHASE 2: PRODUCT CATALOG COMPLETION**:
+  - **Files Changed**:
+    - `app/Models/Product.php`
+    - `app/Models/Brand.php`
+    - `app/Models/ProductVariant.php`
+    - `app/Models/Attribute.php`
+    - `app/Models/AttributeValue.php`
+    - `database/migrations/2026_03_16_010735_create_brands_table.php`
+    - `database/migrations/2026_03_16_010735_create_attributes_table.php`
+    - `database/migrations/2026_03_16_010736_create_attribute_values_table.php`
+  - **Logic Summary**: Sửa $fillable full của Product, tạo Brand, ProductVariant, Attribute, AttributeValue kèm migration chuẩn xác rules (cascadeOnDelete array cast relations đầy đủ).
+
+- **[2026-03-16 08:12] - PHASE 3: AUTH, RBAC & CUSTOMER MODULE**:
+  - **Files Changed**:
+    - `app/Models/User.php`
+    - `app/Models/Customer.php`
+    - `database/migrations/0001_01_01_000000_create_users_table.php`
+    - `database/migrations/2026_03_16_012044_create_customers_table.php`
+    - `database/seeders/RolePermissionSeeder.php`
+  - **Logic Summary**: Setup Spatie RBAC, thêm `HasRoles` vào User. Sửa field `users` table chuẩn requirements (avatar, is_active). Tạo Authentication `Customer` Model (kéo theo `SoftDeletes`, extend `Authenticatable`) và setup `RolePermissionSeeder` với 3 core roles cùng default Super Admin account.
+
+- **[2026-03-16 08:23] - PHASE 3: MULTI-AUTH & IDENTITY SEPARATION**:
+  - **Files Changed**:
+    - `config/auth.php`
+    - `database/migrations/0001_01_01_000000_create_users_table.php`
+    - `app/Models/Customer.php`
+  - **Logic Summary**: Cấu hình Multi-Auth guard `customer` và provider `customers`. Thêm `softDeletes` vào User migration. Bổ sung quan hệ `hasMany` `Order` và `Address` cho model `Customer`.
+
+- **[2026-03-16 08:28] - PHASE 4: CART, VOUCHER & ORDER MODULES**:
+  - **Files Changed**:
+    - `app/Models/Cart.php` (Model + Migration)
+    - `app/Models/Voucher.php` (Model + Migration)
+    - `app/Models/Order.php` (Model + Migration)
+    - `app/Models/OrderItem.php` (Model + Migration)
+  - **Logic Summary**: Tạo hệ thống Cart (with variant nullOnDelete), Voucher System (Order & Shipping level, Percent & Fixed). Cấu trúc Order engine bao gồm Order & OrderItem (snapshot variant_options using JSON) được casting qua mảng chuẩn Laravel 11.
+
+- **[2026-03-16 08:33] - PHASE 5: CUSTOMER INTERACTION & MEDIA MODULE**:
+  - **Files Changed**:
+    - `app/Models/Address.php` (Model + Migration)
+    - `app/Models/ProductImage.php` (Model + Migration)
+    - `app/Models/Favorite.php` (Model + Migration)
+    - `app/Models/Review.php` (Model + Migration)
+  - **Logic Summary**: Thêm Address schema cho customer, cấu trúc ProductImage xử lý media. Khởi tạo Favorite (unique pairs `customer_id` `product_id`) và Review hệ thống cho Product interactions. Soft deletes config đầy đủ cho reviews và images.
+
+- **[2026-03-16 08:40] - PHASE 6: FINAL DATABASE & KNOWLEDGE BASE GENERATION**:
+  - **Files Changed**:
+    - `PROJECT_RULES.md`
+    - `SYSTEM_ARCHITECTURE.md` (New Documentation)
+    - `app/Models/CategoryNews.php` & `database/migrations/..._create_category_news_table.php`
+    - `app/Models/News.php` & `database/migrations/..._create_news_table.php`
+    - `app/Models/FlashSale.php` & `database/migrations/..._create_flash_sales_table.php`
+    - `app/Models/FlashSaleItem.php` & `database/migrations/..._create_flash_sale_items_table.php`
+    - `app/Models/Transaction.php` & `database/migrations/..._create_transactions_table.php`
+    - `app/Models/Contact.php` & `database/migrations/..._create_contacts_table.php`
+  - **Logic Summary**: Thêm rules số 5. Khởi tạo docs nội bộ giải thích luồng Multi-Auth, Order Snapshot (sử dụng JSON options) và cấu trúc Hybrid EAV giúp transfer knowledge. Hoàn tất setup migration + model cho các module về News, Contact, Transaction (JSON data array), FlashSale. Khép lại kiến trúc DB tổng với đầy đủ setup model constraints, casting.
