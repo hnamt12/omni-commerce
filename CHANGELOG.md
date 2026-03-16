@@ -63,3 +63,11 @@
     - `app/Models/Transaction.php` & `database/migrations/..._create_transactions_table.php`
     - `app/Models/Contact.php` & `database/migrations/..._create_contacts_table.php`
   - **Logic Summary**: Thêm rules số 5. Khởi tạo docs nội bộ giải thích luồng Multi-Auth, Order Snapshot (sử dụng JSON options) và cấu trúc Hybrid EAV giúp transfer knowledge. Hoàn tất setup migration + model cho các module về News, Contact, Transaction (JSON data array), FlashSale. Khép lại kiến trúc DB tổng với đầy đủ setup model constraints, casting.
+
+- **[2026-03-16 08:46] - PHASE 7: ENTERPRISE STANDARD SETUP (CI/CD & CODE QUALITY)**:
+  - **Files Changed**:
+    - `phpstan.neon` (New Config)
+    - `pint.json` (New Config)
+    - `.github/workflows/run-tests.yml` (New Workflow CI)
+    - `SYSTEM_ARCHITECTURE.md`
+  - **Logic Summary**: Transform hệ thống lên chuẩn Enterprise bằng cách setup `larastan` tĩnh (Level 5) quản lý bugs, `pint` định dạng code chuẩn xác và thiết lập `run-tests.yml` tự động chạy 2 quy trình trên mỗi khi code được push lên origin branch `feature/*` và `main`. Cập nhật docs để onboard Devs.

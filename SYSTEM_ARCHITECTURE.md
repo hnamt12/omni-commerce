@@ -23,3 +23,8 @@ Khi user mua, data dồn vào bảng `carts`. Bảng này lưu trực tiếp cá
 Các Order lưu lại ở 2 bảng `orders` (tổng hợp billing, trạng thái, voucher) và chi tiết ở `order_items`. Đáng chú ý ở kiến trúc này:
 - **Snapshot variant_options**: Vì schema và option sản phẩm có thể đổi qua thời gian, khi user đã hoàn tất Order thanh toán thì item đó không được phép phụ thuộc relation sang `product_variants` nữa (nếu bị edit thì history mất tính minh bạch). Để giải quyết: Cột `variant_options` JSON trên `order_items` sẽ "chụp" (Snapshot) mảng options lúc người dùng ấn nút thanh toán. Các cột tên sp, mã SKU, giá (`price`, `total_price`) cũng đều được chụp lưu bằng raw data tương tự.
 - **Voucher Validation**: Tác động từ `Voucher` model được map thông qua `voucher_id` nullable ở bảng orders. Do đã tách scope (Order, Shipping) và type (Percent, Fixed). Quá trình validation voucher được áp dụng cho cột `discount_amount` tổng lúc compile order.
+
+## 4. Code Quality & Enterprise Standards
+OmniCommerce áp dụng các chuẩn code khắt khe thông qua pipeline CI/CD ở mỗi lần push code (GitHub Actions `.github/workflows/run-tests.yml`):
+- **Laravel Pint**: Cấu hình tại `pint.json` với preset chuẩn của team Laravel, đảm bảo format source code đồng nhất.
+- **Larastan**: Chạy Static Analysis (PHPStan) cấp độ 5 nằm tại `phpstan.neon`, giúp phát hiện các lỗi type hint, logic flow và missing properties mà không cần chạy code. Góp phần phòng tránh rủi ro runtime crash.
