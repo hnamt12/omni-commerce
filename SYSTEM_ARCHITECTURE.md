@@ -22,7 +22,20 @@ Khi user mua, data dồn vào bảng `carts`. Bảng này lưu trực tiếp cá
 ### Hệ Thống Order và Lưu Snapshot Giá Bằng JSON
 Các Order lưu lại ở 2 bảng `orders` (tổng hợp billing, trạng thái, voucher) và chi tiết ở `order_items`. Đáng chú ý ở kiến trúc này:
 - **Snapshot variant_options**: Vì schema và option sản phẩm có thể đổi qua thời gian, khi user đã hoàn tất Order thanh toán thì item đó không được phép phụ thuộc relation sang `product_variants` nữa (nếu bị edit thì history mất tính minh bạch). Để giải quyết: Cột `variant_options` JSON trên `order_items` sẽ "chụp" (Snapshot) mảng options lúc người dùng ấn nút thanh toán. Các cột tên sp, mã SKU, giá (`price`, `total_price`) cũng đều được chụp lưu bằng raw data tương tự.
-- **Voucher Validation**: Tác động từ `Voucher` model được map thông qua `voucher_id` nullable ở bảng orders. Do đã tách scope (Order, Shipping) và type (Percent, Fixed). Quá trình validation voucher được áp dụng cho cột `discount_amount` tổng lúc compile order.
+- **Voucher Validation**: Tác động từ `Voucher` model được map thông qua `voucher_id` nullable ở bảng orders. Do đã tách scope (Order, Shipping) và type (Percent, Fixed).Lưu quá trình validation voucher được áp dụng cho cột `discount_amount` tổng lúc compile order.
+
+## 5. Multi-Auth Frontend Architecture (Inertia.js & Vue 3)
+OmniCommerce sử dụng Inertia.js để kết nối Backend Laravel với Frontend Vue 3 mà không cần xây dựng API RESTful phức tạp:
+- **Tách biệt Logic Login**: `Admin/AuthController` và `Client/AuthController` xử lý login/logout cho 2 guard riêng biệt (`web` và `customer`).
+- **Guard-based Middleware**: 
+    - Các route Admin (`/admin/*`) được bảo vệ bởi middleware `auth:web`.
+    - Các route Customer được bảo vệ bởi middleware `auth:customer`.
+- **Custom Redirect Logic**: 
+    - Trong Laravel 11 (`bootstrap/app.php`), logic `redirectGuestsTo` được tùy chỉnh dựa trên tiền tố URL.
+    - Nếu request là `/admin/*`, user chưa log in sẽ bị redirect về `admin.login`.
+    - Các request khác sẽ bị redirect về `login` (trang đăng nhập của khách hàng).
+- **Cấu trúc Pages**: Các file Vue được tổ chức trong `resources/js/Pages/Admin` và `resources/js/Pages/Client`.
+- **Shared Middleware**: `HandleInertiaRequests` middleware tự động chia sẻ dữ liệu chung (auth user, flash messages) từ server xuống client Vue components.
 
 ## 4. Code Quality & Enterprise Standards
 OmniCommerce áp dụng các chuẩn code khắt khe thông qua pipeline CI/CD ở mỗi lần push code (GitHub Actions `.github/workflows/run-tests.yml`):

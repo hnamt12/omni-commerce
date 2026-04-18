@@ -12,6 +12,9 @@ class Address extends Model
         'name',
         'phone_number',
         'address',
+        'province_id',
+        'district_id',
+        'ward_id',
         'is_default',
     ];
 

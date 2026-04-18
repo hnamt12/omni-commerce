@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Str;
+
+class CategoryController extends Controller
+{
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+
+        $categories = Category::with('parent')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Categories/Index', [
+            'categories' => $categories,
+            'filters' => $request->only(['search'])
+        ]);
+    }
+
+    public function create()
+    {
+        $parentCategories = Category::whereNull('parent_id')->orWhere('parent_id', 0)->get();
+        return Inertia::render('Admin/Categories/Form', [
+            'parentCategories' => $parentCategories
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'is_active' => 'boolean'
+        ]);
+        
+        $data['slug'] = Str::slug($data['name']);
+        if (empty($data['parent_id'])) {
+            $data['parent_id'] = null;
+        }
+
+        Category::create($data);
+
+        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
+    }
+
+    public function edit(Category $category)
+    {
+        $parentCategories = Category::whereNull('parent_id')->orWhere('parent_id', 0)->get();
+        return Inertia::render('Admin/Categories/Form', [
+            'category' => $category,
+            'parentCategories' => $parentCategories
+        ]);
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'is_active' => 'boolean'
+        ]);
+        
+        $data['slug'] = Str::slug($data['name']);
+        if (empty($data['parent_id'])) {
+            $data['parent_id'] = null;
+        }
+
+        $category->update($data);
+
+        return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công.');
+    }
+
+    public function destroy(Category $category)
+    {
+        $category->delete();
+        return redirect()->back()->with('success', 'Xóa danh mục thành công.');
+    }
+
+    public function trashed(Request $request)
+    {
+        $search = $request->input('search');
+        $categories = Category::onlyTrashed()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Categories/Trashed', [
+            'categories' => $categories,
+            'filters' => $request->only(['search'])
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+        $category->restore();
+        return redirect()->back()->with('success', 'Khôi phục danh mục thành công.');
+    }
+
+    public function forceDelete($id)
+    {
+        $category = Category::withTrashed()->findOrFail($id);
+        $category->forceDelete();
+        return redirect()->back()->with('success', 'Đã xóa vĩnh viễn danh mục.');
+    }
+}

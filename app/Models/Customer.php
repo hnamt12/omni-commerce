@@ -15,6 +15,7 @@ class Customer extends Authenticatable
         'email',
         'phone',
         'password',
+        'gender',
         'avatar',
         'is_active',
         'email_verified_at',

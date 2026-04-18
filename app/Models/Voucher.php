@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Voucher extends Model
 {
     protected $fillable = [
+        'name',
         'code',
         'scope',
         'type',
@@ -15,6 +16,8 @@ class Voucher extends Model
         'max_discount_amount',
         'min_order_value',
         'usage_limit',
+        'limit_per_user',
+        'image',
         'start_date',
         'end_date',
         'is_active',

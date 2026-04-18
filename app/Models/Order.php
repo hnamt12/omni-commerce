@@ -24,6 +24,20 @@ class Order extends Model
         'payment_status',
         'status',
         'cancel_reason',
+        'shipping_province_id',
+        'shipping_district_id',
+        'shipping_ward_id',
+        'email',
+        'tax_amount',
+        'shipping_discount_amount',
+        'canceled_by',
+        'shipping_method',
+        'tracking_number',
+        'staff_id',
+        'shipping_voucher_id',
+        'voucher_code',
+        'shipping_voucher_code',
+        'payment_date',
     ];
 
     /**
@@ -57,5 +71,20 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function staff(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'staff_id');
+    }
+
+    public function shippingVoucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class, 'shipping_voucher_id');
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class);
     }
 }

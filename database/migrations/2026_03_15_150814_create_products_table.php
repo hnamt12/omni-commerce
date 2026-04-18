@@ -11,9 +11,13 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->string('sku')->nullable()->unique();
             $table->decimal('base_price', 15, 2)->default(0);
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->json('specifications')->nullable();
             $table->timestamps();
         });

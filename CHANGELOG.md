@@ -71,3 +71,182 @@
     - `.github/workflows/run-tests.yml` (New Workflow CI)
     - `SYSTEM_ARCHITECTURE.md`
   - **Logic Summary**: Transform hệ thống lên chuẩn Enterprise bằng cách setup `larastan` tĩnh (Level 5) quản lý bugs, `pint` định dạng code chuẩn xác và thiết lập `run-tests.yml` tự động chạy 2 quy trình trên mỗi khi code được push lên origin branch `feature/*` và `main`. Cập nhật docs để onboard Devs.
+
+- **[2026-03-16 09:05] - PHASE 8: DUMMY DATA SEEDING (FACTORIES & SEEDERS)**:
+  - **Files Changed**:
+    - `database/factories/CategoryFactory.php`
+    - `database/factories/BrandFactory.php`
+    - `database/factories/ProductFactory.php`
+    - `database/seeders/DatabaseSeeder.php`
+    - `app/Models/Product.php` & `Category.php` & `Brand.php` (Model Fixes)
+    - `database/migrations/..._create_products_table.php` (Migration Fix)
+    - `database/migrations/..._create_brands_table.php` (Order Fix)
+  - **Logic Summary**: Khởi tạo dữ liệu giả lập sử dụng Faker. Tạo 5 Brands, 10 Categories và 50 Products base data. 
+    - **Fixes**: Tự động bổ sung `HasFactory` trait vào các Model để sử dụng được Factory. Fix lỗi thiếu cột `slug`, `brand_id`, `description` ở bảng `products`. Điều chỉnh thứ tự migration (`brands` chạy trước `products`) để tránh lỗi khóa ngoại. 
+    - **Data**: Column JSON `specifications` ở bảng Product được giả lập sinh ra các array configs. Hệ thống chạy `migrate:fresh --seed` thành công 100%.
+
+- **[2026-03-16 09:15] - PHASE 9: MULTI-AUTH LOGIC & INERTIA VUE SETUP**:
+  - **Files Changed**:
+    - `app/Http/Controllers/Admin/AuthController.php`
+    - `app/Http/Controllers/Client/AuthController.php`
+    - `routes/web.php`
+    - `resources/js/Pages/Admin/Login.vue`
+    - `resources/js/Pages/Admin/Dashboard.vue`
+    - `resources/js/Pages/Client/Login.vue`
+    - `resources/js/Pages/Client/Home.vue`
+    - `bootstrap/app.php`
+    - `resources/views/app.blade.php`
+    - `vite.config.js`
+    - `resources/js/app.js`
+  - **Logic Summary**: Thiết lập môi trường Inertia.js và Vue 3 thủ công. Triển khai luồng Multi-Auth tách biệt hoàn toàn giữa Admin (guard `web`) và Customer (guard `customer`). Tạo các controller, route và giao diện login/home cơ bản bằng Vue 3 Composition API.
+
+- **[2026-03-16 10:05] - PHASE 11: SECURITY ENFORCEMENT & ROUTE FIX**:
+  - **Files Changed**:
+    - `bootstrap/app.php`
+    - `routes/web.php`
+    - `resources/js/Components/TextInput.vue`
+    - `resources/js/Pages/Admin/Login.vue`
+    - `SYSTEM_ARCHITECTURE.md`
+  - **Logic Summary**: Gia cố bảo mật hệ thống định tuyến Multi-Auth.
+    - **Middleware**: Tùy chỉnh `redirectGuestsTo` để redirect user về đúng trang login dựa trên guard (Admin vs Customer).
+    - **Routing**: Bọc Admin routes trong `auth:web` và Client routes trong `auth:customer`. Đặt tên route đăng nhập khách hàng là `login` (chuẩn core).
+    - **Frontend**: Bổ sung thuộc tính `autocomplete` cho `TextInput` để hỗ trợ trình duyệt bảo mật.
+    - **Maintenance**: Chạy `php artisan route:clear` để cập nhật hệ thống route mới nhất.
+
+- **[2026-03-16 09:55] - PHASE 10: SECURE AUTH UI BUILD (TAILWIND + VUE 3)**:
+  - **Files Changed**:
+    - `tailwind.config.js` & `postcss.config.js` (New Config)
+    - `resources/css/app.css`
+    - `resources/views/app.blade.php`
+    - `vite.config.js`
+    - `resources/js/Components/TextInput.vue` & `PrimaryButton.vue` (New Components)
+    - `resources/js/Layouts/AuthLayout.vue` (New Layout)
+    - `resources/js/Pages/Admin/Login.vue` (Refactored)
+  - **Logic Summary**: Nâng cấp toàn diện giao diện Auth sang Tailwind CSS. Xây dựng hệ thống component dùng chung (TextInput, PrimaryButton) theo chuẩn Enterprise. Thiết lập AuthLayout chuyên nghiệp và refactor trang Admin Login với giao diện hiện đại, bảo mật và Responsive. Cấu hình Vite alias `@` để tối ưu hóa việc import component.
+
+- **[2026-03-19 16:48] - PHASE 25: SYSTEM RULES INJECTION & AUTH REDIRECTION FIX**:
+  - **Files Changed**:
+    - `routes/web.php` (Verified)
+  - **Logic Summary**: Đọc và áp dụng quy chuẩn dự án để hiểu cấu trúc (Hybrid EAV, Inertia, Multi-Auth). Thực thi dọn dẹp toàn bộ hệ thống Cache (composer, route, config, view, optimize) để xử lý lỗi 404 Dashboard. Xác nhận cấu trúc tại `web.php` đã chính xác middleware. Lưu ý: `AuthenticatedSessionController` không tồn tại do dự án dùng `Admin/AuthController.php` (đã được cấu hình chuẩn).
+
+- **[2026-03-19 18:07] - PHASE 26: FORCE DASHBOARD ROUTING & AUTOLOAD FIX**:
+  - **Files Changed**:
+    - `app/Http/Controllers/Admin/AuthController.php`
+    - `routes/web.php`
+    - `app/Http/Controllers/DashboardController.php` (Created)
+  - **Logic Summary**: Xử lý triệt để vòng lặp Session Intended bằng cách ép `redirect()->route('dashboard')` trong Admin Auth. Dọn dẹp lại `web.php`, đưa Route `/dashboard` ra khỏi scope tự động sinh prefix `/admin` để khớp chính xác URL mong muốn, bọc bằng middleware `auth:web` và `verified`. Tự động tạo lại file `DashboardController.php` bị thiếu để sửa lỗi Class Not Found. Thực thi `composer dump-autoload` và `optimize:clear` để load lại map nội bộ.
+
+- **[2026-03-19 18:13] - PHASE 27: ARCHITECTURE DOCUMENTATION & RULE EXTRACTION**:
+  - **Files Changed**:
+    - `docs/auth-architecture.md` (Created)
+  - **Logic Summary**: Tự động tạo thư mục và tài liệu `auth-architecture.md` nhằm tổng hợp toàn bộ các quy tắc xương sống liên quan đến Authentication, Session Database (Tránh lỗi 419 + Permission trên Windows Laragon), config Vite IPv4 `127.0.0.1` phòng AdBlock chặn cổng, cơ chế phá vòng lặp Session Intended tại Auth Controller và tái khẳng định route tiêu chuẩn `/dashboard`. Đồng thời quy định thêm các lệnh Cleanup chuẩn của dự án.
+
+- **[2026-03-19 23:15] - PHASE 28: ADVANCED DASHBOARD UI/UX DEVELOPMENT**:
+  - **Files Changed**:
+    - `resources/js/Layouts/AuthenticatedLayout.vue` (New)
+    - `resources/js/Pages/Admin/Dashboard.vue` (Updated)
+  - **Logic Summary**: Xây dựng kiến trúc giao diện Dashboard mang hơi hướm SaaS chuyên nghiệp. Tạo thành công component `AuthenticatedLayout` với tính năng Collapse Sidebar động qua Transition, tích hợp Header có Search, Notification Badge Dropdown và Profile Menu thả xuống. Áp dụng chuẩn Tailwind Aesthetic (Indigo-600, Rounded-lg, p-6 padding) vào trang `Admin/Dashboard.vue` với Stats Widget và mô phỏng Chart động/Activity List. Code đạt chuẩn sạch và tái sử dụng cho Vue 3 Composition API.
+
+- **[2026-03-19 23:31] - PHASE 29: E-COMMERCE UI PIVOT, DARK MODE & SIDEBAR SYNC**:
+  - **Files Changed**:
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+    - `resources/js/Pages/Admin/Dashboard.vue`
+  - **Logic Summary**: Xoay trục hoàn toàn giao diện sang nghiệp vụ E-Commerce (Bàn phím Store - OmniCommerce) thay vì chức năng Đặt phòng khách sạn trước đó. Đồng bộ hóa Sidebar Menu với cấu trúc quản lý Cửa hàng, Sản phẩm, Đơn hàng chuẩn. Tích hợp Native Dark/Light mode toggle có khả năng lưu state trên `localStorage` và class list `<html class="dark">`. Nâng cấp Dashboard với danh sách Bảng Đơn Hàng gần đây và Top Sản phẩm bán chạy. CSS class setup đầy đủ cho `dark:bg-slate-900`, `dark:border-slate-700` toàn diện.
+
+- **[2026-03-19 23:44] - PHASE 30: CATALOG MODULE - CATEGORIES & BRANDS CRUD STANDARDIZATION**:
+  - **Files Changed**:
+    - `routes/web.php`
+    - `app/Http/Controllers/Admin/CategoryController.php` (New)
+    - `app/Http/Controllers/Admin/BrandController.php` (New)
+    - `resources/js/Pages/Admin/Categories/Index.vue` (New)
+    - `resources/js/Pages/Admin/Brands/Index.vue` (New)
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+  - **Logic Summary**: Thực hiện chuẩn hóa module Catalog cốt lõi của E-Commerce. Khai báo Route `resource` và xây dựng trọn vẹn logic trong CategoryController/BrandController hỗ trợ Search và Pagination. Tạo UI `Index.vue` sử dụng Tailwind CSS, Inertia, Modal Form để thực thi CRUD trực tiếp không chuyển trang (Single Page), xác nhận hành động xóa. Đồng bộ Layout Sidebar để định tuyến động (`route()`) tự động bắt link và active class chính xác cho `/admin/categories` và `/admin/brands`. Giao diện giữ nguyên tính nhất quán với Dark Mode system.
+
+- **[2026-03-19 23:50] - PHASE 30.1: HOTFIX - VUE RESOLVE COMPONENT LINK**:
+  - **Files Changed**:
+    - `resources/js/Pages/Admin/Brands/Index.vue`
+    - `resources/js/Pages/Admin/Categories/Index.vue`
+  - **Logic Summary**: Bổ sung `Link` component vào import của `@inertiajs/vue3` tại `Index.vue` của Brands và Categories để sửa lỗi phân trang bị Vue báo fail to resolve component. Đảm bảo UI pagination render đúng thành các thẻ Inertia `<Link>`.
+
+- **[2026-03-20 00:00] - PHASE 31: FIX BLANK SCREEN (MODAL REFACTOR) & ATTRIBUTES CRUD DEVELOPMENT**:
+  - **Files Changed**:
+    - `resources/js/Components/Modal.vue` (New)
+    - `resources/js/Pages/Admin/Brands/Index.vue`
+    - `resources/js/Pages/Admin/Categories/Index.vue`
+    - `app/Http/Controllers/Admin/AttributeController.php` (New)
+    - `routes/web.php`
+    - `resources/js/Pages/Admin/Attributes/Index.vue` (New)
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+  - **Logic Summary**: Vá lỗi màn hình trắng khi mở popup Thêm mới/Chỉnh sửa Thương hiệu và Danh mục bằng cách sử dụng Component `Modal.vue` chuẩn từ Laravel Breeze thay cho mã HTML thuần túy. Xây dựng hoàn thiện trọn vẹn CRUD Module Thuộc tính Sản phẩm (Attributes) bao gồm Controller phân trang tìm kiếm, Resource Route, logic validate gán Slug và giao diện `Index.vue` có Dark Mode hỗ trợ đầy đủ các kiểu hiển thị (Text, Select, Color). Thực thi gỡ lỗi cache và migrate data.
+
+- **[2026-03-20 00:01] - PHASE 32: REFACTOR CRUD FROM MODAL TO SEPARATE PAGES (BRANDS & CATEGORIES)**:
+  - **Files Changed**:
+    - `app/Http/Controllers/Admin/BrandController.php`
+    - `app/Http/Controllers/Admin/CategoryController.php`
+    - `resources/js/Pages/Admin/Brands/Form.vue` (New)
+    - `resources/js/Pages/Admin/Categories/Form.vue` (New)
+    - `resources/js/Pages/Admin/Brands/Index.vue`
+    - `resources/js/Pages/Admin/Categories/Index.vue`
+  - **Logic Summary**: Chuyển đổi kiến trúc của CRUD module Danh mục và Thương hiệu từ việc sử dụng cửa sổ nổi Modal sang chuyển hẳn sang từng trang form tách rời chuẩn định dạng E-commerce. Bổ sung hàm `create()` và `edit($id)` vào trong các Controller để return phương thức `Inertia::render` tới file `Form.vue` tương ứng. Gỡ bỏ hoàn toàn logic Modal trong các component `Index.vue` và sử dụng `<Link>` để load SPA cho luồng CRUD trơn tru. Sửa lỗi redirect trong các Request lưu trữ `store`/`update` sang `redirect()->route(...)` về view Danh sách Index.
+
+- **[2026-03-20 00:15] - PHASE 33: THE ULTIMATE DARK MODE FIX & BRAND FORM PROFESSIONAL REFACTOR**:
+  - **Files Changed**:
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+    - `app/Http/Controllers/Admin/BrandController.php`
+    - `resources/js/Pages/Admin/Brands/Form.vue`
+  - **Logic Summary**: Tối ưu hóa cực điểm UI/UX với chuẩn Dark Mode: thay thế hàng loạt `transition-colors` bằng `transition-all duration-300 ease-in-out` trên File `AuthenticatedLayout.vue` giúp chế độ ban Đêm chuyển cảnh mượt mà như nhung lên Background, Sidebar, Card và Header. Nâng cấp form Brands trở nên siêu hiện đại với Dropzone File Upload cho phép người dùng up Logo kèm Preview Real-time. Xử lý backend với tính năng auto-generate Slug, validate ảnh `mimes:jpeg,png...` tối đa 2MB, và tự động gọi Trash để xóa ảnh Logo cũ trên máy chủ khi update Thương hiệu mới (Thông qua `Storage::disk('public')`). Lệnh `storage:link` đã được thực thi để kết nối ổ ảo.
+
+- **[2026-03-20 00:36] - PHASE 34: UX/UI OVERHAUL - SIDEBAR PERSISTENCE, CUSTOM MODALS & E-COMMERCE ATTRIBUTES**:
+  - **Files Changed**:
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+    - `resources/js/Pages/Admin/Brands/Index.vue`
+    - `resources/js/Pages/Admin/Categories/Index.vue`
+    - `app/Http/Controllers/Admin/AttributeController.php`
+    - `resources/js/Pages/Admin/Attributes/Form.vue`
+    - `resources/js/Pages/Admin/Attributes/Index.vue`
+    - `routes/web.php`
+    - `app/Http/Controllers/Admin/ProductController.php` (New)
+    - `resources/js/Pages/Admin/Products/Index.vue` (New)
+  - **Logic Summary**:
+    - Nâng cấp **Sidebar**: Xây dựng UI Group Dropdown (Accordion) có mũi tên trỏ xuống. Lưu trạng thái mở/đóng Sidebar vào biến `localStorage` qua theo dõi `watch` của Composition API, đảm bảo trạng thái không bị mất khi reload (Persistent). Tối ưu hover tooltip và Active highlighter.
+    - Cấu trúc lại **Deletion Modals**: Xóa sổ hoàn toàn hàm Alert `window.confirm()` tại index của Thương hiệu và Danh Mục. Thay thế bằng Component Modal tùy chỉnh của TailwindCSS chuyên dùng cảnh báo.
+    - Đại phẫu **Kho Thuộc Tính (Attributes)**: Chuyển đổi popup đơn giản thành Trang riêng để quản lý, thiết kế luồng "Dynamic Tag" cho phép nhập và ấn Enter để sinh ra Chip các Giá Trị (Đỏ, Xanh, XXL..). Code Vue đồng bộ tự động dữ liệu sang Backend và `AttributeController` xử lý sync One-to-Many vào bảng `attribute_values` hoàn chỉnh (Tự tạo mới và drop giá trị cũ).
+    - Tạo Scaffold rỗng chuẩn E-commerce cho Module **Tất cả Sản phẩm** (`ProductController` + `Products/Index.vue`) chống lỗi undefined route trên template.
+
+- **[2026-03-20 00:50] - PHASE 35: DYNAMIC FORM ARCHITECTURE - ATTRIBUTES & PRODUCT CREATE**:
+  - **Files Changed**:
+    - `resources/js/Pages/Admin/Attributes/Form.vue`
+    - `app/Http/Controllers/Admin/ProductController.php`
+    - `resources/js/Pages/Admin/Products/Form.vue` (New)
+  - **Logic Summary**:
+    - **Tối ưu form Attributes**: Refactor UI chia thành 2 Card riêng biệt ("Thông tin cơ bản" và "Giá trị thuộc tính"). Xây dựng Local Temporary State cho khu vực "Thêm giá trị mới" bằng biến array độc lập trên Frontend, cho phép gõ enter liên tục đẩy thẻ tags xuống mà không cần chọc vào database ngay; dữ liệu sinh sau cùng mới được post đi đồng loại với `submit`.
+    - **Kiến trúc Grid Form Sản Phẩm Khủng**: Dựng base giao diện Thêm mới Sản phẩm `Products/Form.vue` theo chuẩn e-commerce Master với tỷ lệ Cột Trái 8/12 - Cột Phải 4/12 bằng TailwindCSS mạnh mẽ. Khởi tạo Layout các component: General Info, Shipping, Publish Switch Toggle, Image Uploads.
+    - **Cấu hình Variant Builder Skeleton**: Cột trái chèn một Card Master với logic `Attribute::with('values')->get()` load động danh sách các Nhóm Thuộc tính (checkboxes). Tạo sẵn khung Table ảo lập trình cấu hình Biến Thể kho (Price, SKU, Stock) đáp ứng trực tiếp dựa trên thuật toán tích Đề Cát (đang chờ ráp nối logic ở Phase sau).
+
+- **[2026-03-20 01:03] - PHASE 36: GLOBAL SOFT DELETES INTEGRATION & TRASH MANAGEMENT**:
+  - **Files Changed**:
+    - `database/migrations/2026_03_19_175850_add_soft_deletes_to_core_tables.php` (New)
+    - `app/Models/{Brand,Category,Attribute,Product}.php`
+    - `routes/web.php`
+    - `app/Http/Controllers/Admin/{Brand,Category,Attribute}Controller.php`
+    - `resources/js/Layouts/AuthenticatedLayout.vue`
+    - `resources/js/Pages/Admin/{Brands,Categories,Attributes}/Trashed.vue` (New)
+  - **Logic Summary**:
+    - **Soft Deletes Database**: Phóng lệnh Artisan tạo Migration chèn cột `deleted_at` cho 4 bảng lõi `brands`, `categories`, `attributes`, `products` để bảo vệ dữ liệu toàn vẹn, tránh xóa nhầm bọc khóa ngoại chéo ngầm định. Nạp traight `SoftDeletes` vào 4 tệp Models tương ứng.
+    - **Backend Trash Controllers**: Đấu nối API Routes gồm `trashed` (Lấy danh sách rác), `restore` (Phục hồi POST) và `force-delete` (Xóa chết DELETE). Controller xử lý filter data bằng logic query `onlyTrashed()` và phục sinh qua `withTrashed()->findOrFail($id)->restore()`.
+    - **Frontend Thùng Rác (UI)**: Layout được bổ sung nguyên một Tab Accordion "Thùng Rác". Sao chép thiết kế Trang Index thông minh sang các view Trashed.vue, thay đổi nút hành động sang màu "Xanh Khôi Phục" và "Đỏ Xóa Vĩnh Viễn" (kèm Modal Confirm Taildwind cảnh cáo không thể xoay chuyển).
+
+- **[2026-03-20 01:45] - PHASE 37: ADVANCED PRODUCT CRUD & DYNAMIC VARIANT GENERATION**:
+  - **Files Changed**:
+    - `database/migrations/2026_03_20_000001_update_products_and_variants_tables.php` (New)
+    - `app/Models/ProductVariant.php` (New)
+    - `app/Models/ProductVariantAttribute.php` (New)
+    - `app/Models/Product.php`
+    - `app/Http/Controllers/Admin/ProductController.php`
+    - `resources/js/Pages/Admin/Products/Form.vue`
+    - `resources/js/Pages/Admin/Products/Index.vue`
+  - **Logic Summary**:
+    - **Models & Migrations**: Phóng lệnh Artisan tạo Migration cập nhật bảng `products` (thêm weight, dimenions...), `product_variants` (thêm original_price) và khởi tạo bảng pivot `product_variant_attributes`. Nối chuẩn Relational Eloquent.
+    - **Backend Transaction Store**: Hoàn thiện hàm `store` hứng luồng data khổng lồ sử dụng `DB::beginTransaction()` để bảo toàn dữ liệu. Xử lý lưu ảnh Image Uploads an toàn qua Storage Disk và giải mã chuỗi JSON `variants` từ Frontend, sau đó vòng lặp tạo mới Models Biến thể kèm insert pivot thông minh Attributes (Màu M, Size L).
+    - **Cartesian Variant Generator Algorithm (Vue 3)**: Đây là linh hồn của tính năng! Form.vue được nâng cấp với thuật toán Tích Đề-Các (`cartesian`) mix array linh hoạt. Lắng nghe qua Vue `watch` Deep: Bất kỳ lúc nào người dùng tick Checkbox Thuộc tính (Màu, Size) -> Auto sinh bảng input Biến Thể Kho hàng (Price, SKU, Stock) mà vẫn không làm mất data đã gõ nhờ cơ chế map lưu giữ qua biến `_key` thông minh. Map `JSON.stringify` để gửi trót lọt Multipart Request sang backend.
