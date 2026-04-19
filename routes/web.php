@@ -46,6 +46,8 @@ Route::prefix('admin')->group(function () {
         Route::resource('attributes', \App\Http\Controllers\Admin\AttributeController::class)->names('admin.attributes');
         Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->names('admin.products');
         Route::put('orders/{id}/update-status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+        Route::get('orders/export', [\App\Http\Controllers\Admin\OrderController::class, 'export'])->name('admin.orders.export');
+        Route::get('orders/{id}/print', [\App\Http\Controllers\Admin\OrderController::class, 'print'])->name('admin.orders.print');
         Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->names('admin.orders');
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->names('admin.vouchers');
         Route::resource('cancel-requests', \App\Http\Controllers\Admin\CancelRequestController::class)->only(['index'])->names('admin.cancel-requests');
@@ -61,6 +63,7 @@ Route::prefix('admin')->group(function () {
         Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class)->names('admin.staff');
 
         // Banner Routes
+        Route::resource('banner-locations', \App\Http\Controllers\Admin\BannerLocationController::class)->except(['show', 'create', 'edit'])->names('admin.banner-locations');
         Route::post('banners/reorder', [\App\Http\Controllers\Admin\BannerController::class, 'reorder'])->name('admin.banners.reorder');
         Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class)->names('admin.banners');
 

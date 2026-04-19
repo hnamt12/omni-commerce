@@ -156,13 +156,20 @@ const toggleDropdown = (id) => {
                 <h1 class="text-xl font-bold text-gray-800 uppercase tracking-wide">Quản lý Đơn hàng</h1>
                 <p class="text-gray-500 text-sm mt-1">Theo dõi và xử lý đơn hàng của hệ thống.</p>
             </div>
-            <Link :href="route('admin.orders.create')"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tạo đơn mới
-            </Link>
+            <div class="flex items-center gap-2">
+                <a :href="route('admin.orders.export')"
+                    class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-full text-sm font-semibold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    ⬇️ Xuất Excel
+                </a>
+                <Link :href="route('admin.orders.create')"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tạo đơn mới
+                </Link>
+            </div>
         </div>
 
         <!-- Search -->

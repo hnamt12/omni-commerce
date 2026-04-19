@@ -256,6 +256,25 @@ class OrderController extends Controller
         }
     }
 
+    public function export()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\OrdersExport(),
+            'don-hang-' . now()->format('Ymd_His') . '.xlsx'
+        );
+    }
+
+    public function print($id)
+    {
+        $order = Order::with([
+            'items.product',
+            'items.variant.attributeValues.attribute',
+            'items.variant.attributeValues.value',
+        ])->findOrFail($id);
+
+        return view('admin.orders.print', compact('order'));
+    }
+
     public function destroy($id)
     {
         $order = Order::findOrFail($id);

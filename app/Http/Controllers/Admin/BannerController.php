@@ -12,24 +12,28 @@ class BannerController extends Controller
 {
     public function index()
     {
+        $locations = \App\Models\BannerLocation::where('is_active', true)->get();
         $banners = \App\Models\Banner::orderBy('sort_order', 'asc')->get();
         
-        // Ép kiểu mảng tĩnh để Vue dễ map dữ liệu
-        $groupedBanners = [
-            'home_hero' => $banners->where('position', 'home_hero')->values()->all(),
-            'home_hero_right' => $banners->where('position', 'home_hero_right')->values()->all(),
-            'home_hero_bottom' => $banners->where('position', 'home_hero_bottom')->values()->all(),
-            'home_mid' => $banners->where('position', 'home_mid')->values()->all(),
-        ];
+        // Nhóm banner theo mã code của location
+        $groupedBanners = [];
+        foreach ($locations as $loc) {
+            $groupedBanners[$loc->code] = $banners->where('position', $loc->code)->values()->all();
+        }
 
         return Inertia::render('Admin/Banners/Index', [
+            'locations' => $locations,
             'groupedBanners' => $groupedBanners
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/Banners/Form', ['banner' => null]);
+        $locations = \App\Models\BannerLocation::where('is_active', true)->get();
+        return Inertia::render('Admin/Banners/Form', [
+            'banner' => null,
+            'locations' => $locations
+        ]);
     }
 
     public function store(Request $request)
@@ -60,8 +64,10 @@ class BannerController extends Controller
     public function edit($id)
     {
         $banner = \App\Models\Banner::findOrFail($id);
+        $locations = \App\Models\BannerLocation::where('is_active', true)->get();
         return \Inertia\Inertia::render('Admin/Banners/Form', [
-            'banner' => $banner
+            'banner' => $banner,
+            'locations' => $locations
         ]);
     }
 

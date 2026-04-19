@@ -3,7 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { watch, computed, ref } from 'vue';
 import { showToast } from '@/Utils/helpers';
 
-const props = defineProps({ banner: Object }); // null = create mode
+const props = defineProps({ banner: Object, locations: { type: Array, default: () => [] } }); // null = create mode
 const page  = usePage();
 const isEdit = computed(() => !!props.banner);
 
@@ -16,7 +16,7 @@ const form = useForm({
     title:       props.banner?.title       ?? '',
     images:      [],
     link_url:    props.banner?.link_url    ?? '',
-    position:    props.banner?.position    ?? 'home_hero',
+    position:    props.banner?.position    ?? (props.locations[0]?.code || 'home_hero'),
     is_active:   props.banner?.is_active   ?? true,
     _method:     isEdit.value ? 'PUT' : 'POST',
 });
@@ -39,12 +39,7 @@ const handleImageUpload = (e) => {
     }
 };
 
-const positionOptions = [
-    { value: 'home_hero',       label: '🏠 Slider Trang chủ (Lớn)' },
-    { value: 'home_hero_right', label: '🖼️ 2 Banner Phải (Cạnh Slider)' },
-    { value: 'home_hero_bottom',label: '⬇️ Hàng Banner Dưới Slider (4 cái)' },
-    { value: 'home_mid',        label: '📂 Giữa trang (Xen kẽ danh mục)' },
-];
+
 </script>
 
 <template>
@@ -95,32 +90,18 @@ const positionOptions = [
                             <div class="mt-5 p-4 bg-gray-50 border border-gray-200 rounded-xl">
                                 <p class="text-xs font-bold text-gray-500 uppercase mb-3">Live Preview</p>
                                 
-                                <div v-if="form.position === 'home_hero'" class="flex gap-3 overflow-x-auto pb-2">
-                                    <div v-for="(url, i) in (previewUrls || [])" :key="i" class="w-2/3 shrink-0 h-40 rounded-lg overflow-hidden border-2 border-indigo-500 ring-4 ring-indigo-100 flex items-center justify-center">
+                                <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                                    <div v-for="(url, i) in (previewUrls || [])" :key="i" class="w-64 h-36 shrink-0 rounded-lg overflow-hidden border-2 border-indigo-500 ring-4 ring-indigo-50 relative group">
                                         <img :src="url" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center pointer-events-none">
+                                             <span class="text-white font-bold text-xs bg-black/60 px-2 py-1 rounded">Ảnh {{ i + 1 }}</span>
+                                        </div>
                                     </div>
-                                    <div v-if="!previewUrls?.length" class="w-full h-40 bg-white rounded-lg border border-dashed border-gray-300 flex items-center justify-center">
-                                        <span class="text-gray-400 font-bold text-xs">Slider Chính (Hero)</span>
-                                    </div>
-                                </div>
-                                
-                                <div v-else-if="form.position === 'home_hero_right'" class="flex flex-col gap-2 h-40 w-1/3">
-                                    <div class="flex-1 rounded-lg overflow-hidden border-2 border-indigo-500 ring-2 ring-indigo-100 flex items-center justify-center">
-                                        <img v-if="previewUrls[0]" :src="previewUrls[0]" class="w-full h-full object-cover">
-                                        <span v-else class="text-gray-400 font-bold text-[10px] text-center px-1">Banner Cạnh 1</span>
-                                    </div>
-                                    <div class="flex-1 rounded-lg overflow-hidden border-2 border-indigo-500 ring-2 ring-indigo-100 flex items-center justify-center">
-                                        <img v-if="previewUrls[1]" :src="previewUrls[1]" class="w-full h-full object-cover">
-                                        <span v-else class="text-gray-400 font-bold text-[10px] text-center px-1">Banner Cạnh 2</span>
-                                    </div>
-                                </div>
-
-                                <div v-else class="flex flex-wrap gap-2">
-                                    <div v-for="(url, i) in (previewUrls || [])" :key="i" class="h-24 w-32 bg-indigo-50 border-2 border-indigo-400 border-dashed rounded-lg flex items-center justify-center overflow-hidden">
-                                        <img :src="url" class="w-full h-full object-cover opacity-80">
-                                    </div>
-                                    <div v-if="!previewUrls?.length" class="h-24 w-full bg-white border border-dashed border-gray-200 rounded-lg flex items-center justify-center">
-                                        <span class="text-indigo-400 text-xs font-bold bg-white/70 px-2 py-1 rounded">Vị trí hiển thị</span>
+                                    <div v-if="!previewUrls?.length" class="w-full h-36 bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <svg class="mx-auto h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span class="mt-2 block text-sm font-semibold text-gray-400">Xem trước hình ảnh</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -145,7 +126,7 @@ const positionOptions = [
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1.5">Vị trí</label>
                         <select v-model="form.position" class="w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 text-sm focus:ring-indigo-500">
-                            <option v-for="opt in positionOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                            <option v-for="loc in locations" :key="loc.code" :value="loc.code">{{ loc.name }}</option>
                         </select>
                     </div>
 

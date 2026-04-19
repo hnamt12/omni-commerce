@@ -4,20 +4,14 @@ import { ref, computed } from 'vue';
 import Swal from 'sweetalert2';
 
 const props = defineProps({
-    groupedBanners: { type: Object, default: () => ({}) }
+    groupedBanners: { type: Object, default: () => ({}) },
+    locations: { type: Array, default: () => [] }
 });
 
-const tabs = [
-    { id: 'home_hero',       name: 'Slider Chính',     description: 'Banner to ở giữa. Nên dùng ảnh tỉ lệ 16:9.' },
-    { id: 'home_hero_right', name: '2 Banner Phải',    description: 'Nằm bên phải Slider. Tỉ lệ phù hợp: Chữ nhật ngang nhỏ.' },
-    { id: 'home_hero_bottom',name: 'Hàng Banner Dưới', description: 'Nằm ngay dưới cụm Slider. Tối đa 4 cái xếp ngang.' },
-    { id: 'home_mid',        name: 'Giữa Trang',       description: 'Banner ngang dài quảng cáo giữa các mục sản phẩm.' }
-];
-
-const activeTab = ref(tabs[0].id);
+const activeTab = ref(props.locations[0]?.code);
 
 // Lấy ra Object Tab hiện tại
-const currentTabObj = computed(() => tabs.find(t => t.id === activeTab.value) || tabs[0]);
+const currentTabObj = computed(() => props.locations.find(t => t.code === activeTab.value) || props.locations[0] || {});
 
 // Lấy ra danh sách Banner của Tab hiện hành
 const currentBanners = computed(() => props.groupedBanners[activeTab.value] || []);
@@ -91,13 +85,13 @@ const toggleActive = (banner) => {
 
         <!-- Navigation Tabs -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 p-2 flex gap-2 overflow-x-auto">
-            <button v-for="tab in tabs" :key="tab.id" type="button" @click="activeTab = tab.id"
+            <button v-for="loc in locations" :key="loc.code" type="button" @click="activeTab = loc.code"
                 class="px-5 py-2.5 rounded-lg text-sm font-bold transition whitespace-nowrap flex items-center gap-2"
-                :class="activeTab === tab.id ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'text-gray-600 hover:bg-gray-50'">
-                {{ tab.name }}
+                :class="activeTab === loc.code ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'text-gray-600 hover:bg-gray-50'">
+                {{ loc.name }}
                 <span class="px-2 py-0.5 rounded-full text-xs"
-                    :class="activeTab === tab.id ? 'bg-indigo-200 text-indigo-800' : 'bg-gray-200 text-gray-700'">
-                    {{ (groupedBanners[tab.id] || []).length }}
+                    :class="activeTab === loc.code ? 'bg-indigo-200 text-indigo-800' : 'bg-gray-200 text-gray-700'">
+                    {{ (groupedBanners[loc.code] || []).length }}
                 </span>
             </button>
         </div>

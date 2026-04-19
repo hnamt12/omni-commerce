@@ -19,4 +19,9 @@ class Banner extends Model
         'is_active'  => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    public function location()
+    {
+        return $this->belongsTo(BannerLocation::class, 'position', 'code');
+    }
 }

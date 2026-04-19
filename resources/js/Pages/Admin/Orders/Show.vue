@@ -146,7 +146,12 @@ const parseVariantInfo = (item) => {
                 </span>
             </div>
             <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2 text-sm text-slate-500 dark:text-slate-400">
-                <i class="far fa-calendar-alt mt-1"></i> {{ formatDate(order.created_at) }}
+                <a :href="route('admin.orders.print', order.id)" target="_blank"
+                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    🖨️ In Hóa Đơn / VAT
+                </a>
+                <span class="flex items-center gap-1 text-slate-400 text-xs"><i class="far fa-calendar-alt mt-1"></i> {{ formatDate(order.created_at) }}</span>
             </div>
         </div>
 
