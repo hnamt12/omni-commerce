@@ -1,12 +1,29 @@
 <script setup>
 
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { showToast, confirmDelete } from '@/Utils/helpers';
 
 const props = defineProps({
     attributes: Object,
     filters: Object
+});
+
+const openDropdownId = ref(null);
+const toggleDropdown = (id) => {
+    openDropdownId.value = openDropdownId.value === id ? null : id;
+};
+
+const closeDropdowns = () => {
+    openDropdownId.value = null;
+};
+
+onMounted(() => {
+    document.addEventListener('click', closeDropdowns);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdowns);
 });
 
 const search = ref(props.filters.search || '');
@@ -69,14 +86,21 @@ const getTypeLabel = (type) => {
                                     <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
                                 </div>
                                 <div>
-                                    <Link :href="route('admin.attributes.edit', attribute.id)"><h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">{{ attribute.name }}</h3></Link>
+                                    <Link :href="route('admin.attributes.edit', attribute.id)"><h3 class="font-bold text-lg text-gray-900 dark:text-white hover:text-indigo-600 transition-colors">{{ attribute.name }}</h3></Link>
                                     <p class="text-xs text-gray-400 font-mono mt-0.5">{{ attribute.slug }}</p>
                                 </div>
                             </div>
-                            <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button @click.prevent="deleteAttribute(attribute.id)" class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition" title="Xóa">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            
+                            <!-- Dropdown Actions -->
+                            <div class="relative" @click.stop>
+                                <button @click="toggleDropdown(attribute.id)" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition focus:outline-none transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
                                 </button>
+                                
+                                <div v-if="openDropdownId === attribute.id" class="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 transform transition-all">
+                                    <Link :href="route('admin.attributes.edit', attribute.id)" class="block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-indigo-600 transition-colors">Thiết lập lại</Link>
+                                    <button @click.prevent="deleteAttribute(attribute.id); closeDropdowns()" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Xóa thuộc tính</button>
+                                </div>
                             </div>
                         </div>
                         
@@ -89,13 +113,13 @@ const getTypeLabel = (type) => {
 
                             <div class="flex flex-wrap gap-2 mt-2">
                                 <template v-if="attribute.values && attribute.values.length > 0">
-                                    <span v-for="val in attribute.values.slice(0, 5)" :key="val.id" class="px-2.5 py-1 text-xs font-bold rounded-lg border shadow-sm flex items-center gap-1.5"
+                                    <span v-for="val in attribute.values.slice(0, 3)" :key="val.id" class="px-2.5 py-1 text-xs font-bold rounded-lg border shadow-sm flex items-center gap-1.5"
                                         :class="attribute.type === 'color' ? 'bg-white border-gray-200 text-gray-700' : 'bg-gray-50 border-gray-200 text-gray-700'">
                                         <span v-if="attribute.type === 'color' && val.value.startsWith('#')" class="w-2.5 h-2.5 rounded-full border border-gray-200 shadow-sm" :style="{ backgroundColor: val.value }"></span>
                                         {{ val.value }}
                                     </span>
-                                    <span v-if="attribute.values.length > 5" class="px-2 py-1 text-xs font-medium rounded-lg bg-gray-50 text-gray-500 border border-dashed border-gray-300">
-                                        +{{ attribute.values.length - 5 }}
+                                    <span v-if="attribute.values.length > 3" class="px-2 py-1 text-xs font-medium rounded-lg bg-gray-50 text-gray-500 border border-dashed border-gray-300">
+                                        +{{ attribute.values.length - 3 }}
                                     </span>
                                 </template>
                                 <span v-else class="text-xs italic text-gray-400">Chưa thiết lập giá trị...</span>

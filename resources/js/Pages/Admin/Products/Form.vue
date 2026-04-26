@@ -339,7 +339,6 @@ const submitForm = () => {
                             <h2 class="text-indigo-600 dark:text-indigo-400 font-bold mb-3">Mô tả sản phẩm</h2>
                             <textarea v-model="form.description" rows="6" class="w-full border border-gray-200 dark:border-slate-700 rounded-md p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Biên soạn nội dung giới thiệu sản phẩm..."></textarea>
                         </div>
-                    </div>
 
                     <!-- TAB 3: Specifications -->
                     <div v-show="activeTab === 'specs'">
