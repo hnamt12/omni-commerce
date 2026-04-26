@@ -18,6 +18,7 @@ class AttributeController extends Controller
         $attributes = Attribute::when($search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%");
             })
+            ->with(['values'])
             ->withCount('values')
             ->orderBy('id', 'desc')
             ->paginate(10)

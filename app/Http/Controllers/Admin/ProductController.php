@@ -20,19 +20,28 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search     = $request->input('search');
+        $categoryId = $request->input('category_id');
+        $brandId    = $request->input('brand_id');
+        $isActive   = $request->input('is_active'); // '1', '0', or null (all)
+
+        $sortField = $request->input('sort', 'created_at');
+        $sortDir = $request->input('direction', 'desc');
+
         $products = Product::with(['category', 'brand', 'variants'])
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('sku', 'like', "%{$search}%");
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(10)
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%"))
+            ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
+            ->when($brandId,    fn($q) => $q->where('brand_id', $brandId))
+            ->when($isActive !== null && $isActive !== '', fn($q) => $q->where('is_active', (bool) $isActive))
+            ->orderBy($sortField, $sortDir)
+            ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Admin/Products/Index', [
-            'products' => $products,
-            'filters' => $request->only(['search'])
+            'products'   => $products,
+            'categories' => Category::orderBy('name')->get(['id', 'name']),
+            'brands'     => Brand::orderBy('name')->get(['id', 'name']),
+            'filters'    => $request->only(['search', 'category_id', 'brand_id', 'is_active', 'sort', 'direction']),
         ]);
     }
 
@@ -40,12 +49,11 @@ class ProductController extends Controller
     {
         $categories = Category::all(); 
         $brands = Brand::all();
-        $attributes = Attribute::with('values')->get();
 
         return Inertia::render('Admin/Products/Form', [
             'categories' => $categories,
             'brands' => $brands,
-            'attributes' => $attributes
+            'attributes' => \App\Models\Attribute::with('values')->get(),
         ]);
     }
 
@@ -85,6 +93,7 @@ class ProductController extends Controller
                 'image_url' => $imageUrl,
                 'base_price' => $request->base_price ?? 0,
                 'sku' => $request->sku ?? strtoupper(Str::random(8)),
+                'specifications' => json_decode($request->specifications, true) ?: null,
             ]);
 
             $variantsData = json_decode($request->variants, true);
@@ -155,14 +164,13 @@ class ProductController extends Controller
         $product = Product::with('variants.attributeValues')->findOrFail($id);
         $categories = Category::all(); 
         $brands = Brand::all();
-        $attributes = Attribute::with('values')->get();
         $item_images = ProductImage::where('product_id', $id)->get();
 
         return Inertia::render('Admin/Products/Form', [
             'product' => $product,
             'categories' => $categories,
             'brands' => $brands,
-            'attributes' => $attributes,
+            'attributes' => \App\Models\Attribute::with('values')->get(),
             'item_images' => $item_images
         ]);
     }
@@ -190,6 +198,7 @@ class ProductController extends Controller
                 'height' => $request->height ? (float)$request->height : 0,
                 'is_active' => filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN),
                 'is_featured' => filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN),
+                'specifications' => json_decode($request->specifications, true) ?: null,
             ]);
 
             if ($request->hasFile('image')) {
