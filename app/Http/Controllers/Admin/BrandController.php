@@ -11,20 +11,30 @@ use Illuminate\Support\Facades\Storage;
 
 class BrandController extends Controller
 {
+    public function show(Brand $brand)
+    {
+        return Inertia::render('Admin/Brands/Show', [
+            'brand' => $brand
+        ]);
+    }
+
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $query = Brand::query();
 
-        $brands = Brand::when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $sortField = $request->input('sort', 'id');
+        $sortDir = $request->input('direction', 'desc');
+        $query->orderBy($sortField, $sortDir);
+
+        $brands = $query->paginate(15)->withQueryString();
 
         return Inertia::render('Admin/Brands/Index', [
             'brands' => $brands,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'sort', 'direction'])
         ]);
     }
 

@@ -70,10 +70,7 @@ const submit = () => {
                     </div>
 
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="text-sm font-semibold text-gray-700">Mật khẩu</label>
-                            <a href="#" class="text-xs font-semibold text-indigo-600 hover:underline">Quên mật khẩu?</a>
-                        </div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mật khẩu</label>
                         <div class="relative">
                             <input v-model="form.password" :type="showPass ? 'text' : 'password'" name="password" required autocomplete="current-password"
                                 placeholder="••••••••"
@@ -87,17 +84,20 @@ const submit = () => {
                         <p v-if="form.errors.password" class="mt-1 text-xs text-red-600 font-medium">{{ form.errors.password }}</p>
                     </div>
 
-                    <div class="flex items-center">
+                    <div class="flex items-center -mt-1 mb-2">
                         <input id="remember" v-model="form.remember" type="checkbox"
                             class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
                         <label for="remember" class="ml-2 text-sm text-gray-600 cursor-pointer">Ghi nhớ đăng nhập</label>
                     </div>
 
-                    <button type="submit" :disabled="form.processing"
-                        class="w-full flex justify-center items-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white bg-gray-900 hover:bg-black shadow-lg transition-all disabled:opacity-50">
-                        <svg v-if="form.processing" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        {{ form.processing ? 'Đang xác thực...' : 'ĐĂNG NHẬP' }}
-                    </button>
+                    <div class="flex items-center justify-between gap-4 mt-4">
+                        <a href="#" class="text-sm font-semibold text-gray-500 hover:text-indigo-600 hover:underline transition-colors shrink-0">Quên mật khẩu?</a>
+                        <button type="submit" :disabled="form.processing"
+                            class="w-full flex justify-center items-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white bg-gray-900 hover:bg-black shadow-lg transition-all disabled:opacity-50">
+                            <svg v-if="form.processing" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            {{ form.processing ? 'Đang vào...' : 'ĐĂNG NHẬP' }}
+                        </button>
+                    </div>
                 </form>
 
                 <p class="mt-8 text-center text-sm text-gray-500">

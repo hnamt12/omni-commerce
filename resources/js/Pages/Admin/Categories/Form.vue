@@ -47,33 +47,68 @@ const submit = () => {
                 </div>
             </div>
 
-            <!-- Form Card -->
-            <div class="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
-                <form @submit.prevent="submit" class="p-5 space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên danh mục <span class="text-red-500">*</span></label>
-                        <input v-model="form.name" type="text" class="w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors" required>
-                        <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
+            <!-- Form Layout (2 Columns) -->
+            <form @submit.prevent="submit" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column (2/3) -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-700 pb-4">
+                            <span class="text-2xl">🏷️</span>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Thông tin danh mục</h2>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Tên danh mục <span class="text-red-500">*</span></label>
+                                <input v-model="form.name" type="text" class="w-full border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-4 transition-all" required placeholder="Cấu trúc danh mục...">
+                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-2">{{ form.errors.name }}</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">Danh mục cha (Tùy chọn)</label>
+                                <select v-model="form.parent_id" class="w-full border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 p-4 transition-all appearance-none cursor-pointer">
+                                    <option value="">-- Trống (Tạo danh mục gốc) --</option>
+                                    <option v-for="cat in parentCategories" :key="cat.id" :value="cat.id" :disabled="isEditing && cat.id === category?.id">
+                                        {{ cat.name }}
+                                    </option>
+                                </select>
+                                <div v-if="form.errors.parent_id" class="text-red-500 text-xs mt-2">{{ form.errors.parent_id }}</div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Danh mục cha</label>
-                        <select v-model="form.parent_id" class="w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors">
-                            <option value="">-- Trống (Tạo danh mục gốc) --</option>
-                            <option v-for="cat in parentCategories" :key="cat.id" :value="cat.id" :disabled="isEditing && cat.id === category?.id">
-                                {{ cat.name }}
-                            </option>
-                        </select>
-                        <div v-if="form.errors.parent_id" class="text-red-500 text-xs mt-1">{{ form.errors.parent_id }}</div>
-                    </div>
-                    
-                    <div class="flex items-center mt-4 border-t border-gray-100 dark:border-slate-700 pt-6">
-                        <input id="is_active" v-model="form.is_active" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:border-slate-600 dark:bg-slate-900 transition-colors">
-                        <label for="is_active" class="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300">
-                            Kích hoạt hiển thị
+                </div>
+
+                <!-- Right Column (1/3) -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Right Card 1: Status -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-700 pb-4">
+                            <span class="text-2xl">⚡</span>
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Trạng thái Menu</h2>
+                        </div>
+                        
+                        <label class="relative flex items-center justify-between cursor-pointer group">
+                            <span class="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 transition-colors">Kích hoạt hiển thị</span>
+                            <div class="relative">
+                                <input type="checkbox" v-model="form.is_active" class="sr-only peer">
+                                <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                            </div>
                         </label>
+                        <p class="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-50 dark:border-slate-700">Tắt thẻ này nếu bạn chưa muốn khách hàng điều hướng qua Menu.</p>
                     </div>
-                </form>
-            </div>
+
+                    <!-- Right Card 2: Placeholder Image/Icon (Future-proofing) -->
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all duration-300">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-700 pb-4">
+                            <span class="text-2xl">🖼️</span>
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Ảnh / Icon</h2>
+                        </div>
+                        <div class="w-full aspect-square rounded-2xl border-2 border-dashed border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center text-gray-400">
+                            <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            <span class="text-xs text-center font-medium">Coming soon...<br>Tính năng tạm khóa bởi HT</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </template>

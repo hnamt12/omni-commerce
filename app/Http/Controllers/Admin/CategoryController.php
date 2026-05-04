@@ -10,21 +10,30 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    public function show(Category $category)
+    {
+        return Inertia::render('Admin/Categories/Show', [
+            'category' => $category->load('parent')
+        ]);
+    }
+
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $query = Category::with('parent');
 
-        $categories = Category::with('parent')
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $sortField = $request->input('sort', 'id');
+        $sortDir = $request->input('direction', 'desc');
+        $query->orderBy($sortField, $sortDir);
+
+        $categories = $query->paginate(15)->withQueryString();
 
         return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'sort', 'direction'])
         ]);
     }
 

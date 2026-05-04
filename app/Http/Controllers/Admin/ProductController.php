@@ -92,6 +92,8 @@ class ProductController extends Controller
                 'is_featured' => filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN),
                 'image_url' => $imageUrl,
                 'base_price' => $request->base_price ?? 0,
+                'sale_price' => $request->sale_price ?: null,
+                'cost_price' => $request->cost_price ?: null,
                 'sku' => $request->sku ?? strtoupper(Str::random(8)),
                 'specifications' => json_decode($request->specifications, true) ?: null,
             ]);
@@ -104,6 +106,8 @@ class ProductController extends Controller
                         'sku' => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
                         'price' => $v['price'] ?? 0,
                         'original_price' => $v['original_price'] ?? null,
+                        'sale_price' => $v['sale_price'] ?? null,
+                        'cost_price' => $v['cost_price'] ?? null,
                         'stock' => $v['stock'] ?? 0,
                         'options' => $v['options'] ?? null,
                     ]);
@@ -198,6 +202,9 @@ class ProductController extends Controller
                 'height' => $request->height ? (float)$request->height : 0,
                 'is_active' => filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN),
                 'is_featured' => filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN),
+                'base_price' => $request->base_price ?? $product->base_price,
+                'sale_price' => $request->sale_price ?: null,
+                'cost_price' => $request->cost_price ?: null,
                 'specifications' => json_decode($request->specifications, true) ?: null,
             ]);
 
@@ -216,15 +223,22 @@ class ProductController extends Controller
                         $variant = \App\Models\ProductVariant::find($variantId);
                         if ($variant && $variant->product_id == $product->id) {
                             $variant->update([
-                                'sku' => $v['sku'], 'price' => $v['price'],
-                                'original_price' => $v['original_price'], 'stock' => $v['stock'],
-                            ]);
+                            'sku' => $v['sku'], 'price' => $v['price'],
+                            'original_price' => $v['original_price'] ?? null,
+                            'sale_price' => $v['sale_price'] ?? null,
+                            'cost_price' => $v['cost_price'] ?? null,
+                            'stock' => $v['stock'],
+                        ]);
                             $keptVariantIds[] = $variant->id;
                         }
                     } else {
                         $variant = $product->variants()->create([
                             'sku' => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
-                            'price' => $v['price'] ?? 0, 'original_price' => $v['original_price'] ?? null, 'stock' => $v['stock'] ?? 0,
+                            'price' => $v['price'] ?? 0,
+                            'original_price' => $v['original_price'] ?? null,
+                            'sale_price' => $v['sale_price'] ?? null,
+                            'cost_price' => $v['cost_price'] ?? null,
+                            'stock' => $v['stock'] ?? 0,
                         ]);
                         $keptVariantIds[] = $variant->id;
                     }

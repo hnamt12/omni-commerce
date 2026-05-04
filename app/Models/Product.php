@@ -20,6 +20,8 @@ class Product extends Model
         'slug',
         'sku',
         'base_price',
+        'sale_price',
+        'cost_price',
         'description',
         'weight',
         'length',
@@ -31,6 +33,8 @@ class Product extends Model
         'specifications',
     ];
 
+    protected $appends = ['final_price'];
+
     /**
      * @return array<string, string>
      */
@@ -38,8 +42,15 @@ class Product extends Model
     {
         return [
             'base_price' => 'decimal:2',
+            'sale_price' => 'decimal:2',
+            'cost_price' => 'decimal:2',
             'specifications' => 'array',
         ];
+    }
+
+    public function getFinalPriceAttribute()
+    {
+        return $this->sale_price > 0 ? $this->sale_price : $this->base_price;
     }
 
     public function category(): BelongsTo

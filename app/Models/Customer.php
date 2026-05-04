@@ -19,6 +19,9 @@ class Customer extends Authenticatable
         'avatar',
         'is_active',
         'email_verified_at',
+        'google_id',
+        'facebook_id',
+        'apple_id',
     ];
 
     protected $hidden = [

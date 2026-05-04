@@ -78,7 +78,7 @@ const getTypeLabel = (type) => {
             <!-- Grid Attribute Cards -->
             <div v-if="attributes.data.length > 0">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <div v-for="attribute in attributes.data" :key="attribute.id" class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-indigo-50 dark:border-slate-700 shadow-sm hover:shadow-md transition-all relative group flex flex-col hover:-translate-y-1">
+                    <div v-for="attribute in attributes.data" :key="attribute.id" @click="router.get(route('admin.attributes.show', attribute.id))" class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-indigo-50 dark:border-slate-700 shadow-sm hover:shadow-md transition-all relative group flex flex-col hover:-translate-y-1 cursor-pointer hover:border-indigo-400">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
                                 <div class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -91,16 +91,20 @@ const getTypeLabel = (type) => {
                                 </div>
                             </div>
                             
-                            <!-- Dropdown Actions -->
-                            <div class="relative" @click.stop>
-                                <button @click="toggleDropdown(attribute.id)" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition focus:outline-none transition-all">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                            <!-- Card Actions -->
+                            <div class="flex items-center gap-1.5" @click.stop>
+                                <button @click.stop="router.get(route('admin.attributes.show', attribute.id))" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
                                 </button>
-                                
-                                <div v-if="openDropdownId === attribute.id" class="absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 transform transition-all">
-                                    <Link :href="route('admin.attributes.edit', attribute.id)" class="block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-indigo-600 transition-colors">Thiết lập lại</Link>
-                                    <button @click.prevent="deleteAttribute(attribute.id); closeDropdowns()" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Xóa thuộc tính</button>
-                                </div>
+                                <button @click.stop="router.get(route('admin.attributes.edit', attribute.id))" class="p-2 text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Sửa">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
+                                <button @click.stop="deleteAttribute(attribute.id)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
                         </div>
                         

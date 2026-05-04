@@ -11,6 +11,13 @@ use Illuminate\Support\Str;
 
 class AttributeController extends Controller
 {
+    public function show(Attribute $attribute)
+    {
+        return Inertia::render('Admin/Attributes/Show', [
+            'attribute' => $attribute->load('values')
+        ]);
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');
