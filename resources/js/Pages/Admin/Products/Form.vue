@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted } from 'vue';
-import { showToast } from '@/Utils/helpers';
+import { showToast, parseMoney } from '@/Utils/helpers';
 
 import ProductBasicTab from './Components/ProductBasicTab.vue';
 import ProductSpecTab from './Components/ProductSpecTab.vue';
@@ -140,7 +140,15 @@ const submitForm = () => {
 
     form.transform((data) => ({
         ...data,
-        variants: JSON.stringify(data.variants),
+        base_price: parseMoney(data.base_price),
+        sale_price: data.sale_price ? parseMoney(data.sale_price) : null,
+        cost_price: data.cost_price ? parseMoney(data.cost_price) : null,
+        variants: JSON.stringify((data.variants || []).map(v => ({
+            ...v,
+            price: parseMoney(v.price),
+            sale_price: v.sale_price ? parseMoney(v.sale_price) : null,
+            cost_price: v.cost_price ? parseMoney(v.cost_price) : null,
+        }))),
         specifications: JSON.stringify(data.specifications),
         selected_attributes: JSON.stringify(selectedAttrIds.value)
     })).post(submitUrl, {

@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
-import { showToast, confirmDelete } from '@/Utils/helpers';
+import { showToast, confirmDelete, formatCurrency } from '@/Utils/helpers';
 import { debounce } from 'lodash';
 
 const props = defineProps({
@@ -58,9 +58,7 @@ const deleteProduct = async (id) => {
     }
 };
 
-const formatMoney = (amount) => {
-    return new Intl.NumberFormat('vi-VN').format(amount || 0) + 'đ';
-};
+const formatMoney = formatCurrency;
 
 const getTotalStock = (product) => {
     if (!product.variants || product.variants.length === 0) return 0;

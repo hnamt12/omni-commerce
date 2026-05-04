@@ -11,21 +11,55 @@ export const vnSlugify = (str) => {
     return str.replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
 };
 
-// Dùng cho ô Input nhập liệu (chỉ có số và dấu chấm)
+// ===== MONEY FORMATTING (DRY - Single Source of Truth) =====
+// CRITICAL: Laravel DECIMAL(15,2) returns strings like "2000000.00"
+// We must parseFloat FIRST to handle the decimal point correctly,
+// then Math.round to get clean integer (VND has no subunits).
+
+// Dùng cho ô Input nhập liệu (chỉ có số và dấu chấm phân cách hàng nghìn)
 export const formatMoney = (val) => {
     if (!val && val !== 0) return '';
-    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    // Handle Laravel decimal strings like "2000000.00"
+    const num = Math.round(parseFloat(val));
+    if (isNaN(num) || num === 0) return '';
+    return new Intl.NumberFormat('vi-VN').format(num);
 };
 
+// Parse chuỗi tiền tệ thành số nguyên thuần (loại bỏ mọi ký tự không phải số)
+// Input có thể là: "2.000.000" (formatted) hoặc "2000000.00" (Laravel decimal) hoặc 2000000 (integer)
 export const parseMoney = (val) => {
-    if (!val) return '';
-    return val.toString().replace(/\D/g, '');
+    if (!val && val !== 0) return 0;
+    // If already a number, just round it
+    if (typeof val === 'number') return Math.round(val);
+    // If it's a Laravel decimal string (has exactly one dot followed by digits at end), parse as float
+    const str = String(val);
+    if (/^\d+\.\d{1,2}$/.test(str)) {
+        return Math.round(parseFloat(str));
+    }
+    // Otherwise it's a formatted string like "2.000.000" — strip all non-digits
+    const cleaned = str.replace(/[^0-9]/g, '');
+    return cleaned ? parseInt(cleaned, 10) : 0;
 };
 
-// Dùng cho hiển thị UI (Có chữ đ phía sau)
+// Dùng cho hiển thị UI chính thức (Có chữ đ phía sau)
 export const formatCurrency = (amount) => {
     if (!amount && amount !== 0) return '0đ';
-    return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+    const num = Math.round(parseFloat(amount));
+    if (isNaN(num)) return '0đ';
+    return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
+};
+
+// Event handler cho @input trên ô tiền - gán số thô vào reactive object
+export const handleMoneyInput = (e, obj, field) => {
+    const raw = e.target.value.replace(/[^0-9]/g, '');
+    obj[field] = raw ? parseInt(raw, 10) : '';
+};
+
+// Event handler cho @blur trên ô tiền - format lại hiển thị khi rời ô
+export const handleMoneyBlur = (e, obj, field) => {
+    if (obj[field]) {
+        e.target.value = formatMoney(obj[field]);
+    }
 };
 
 // Hàm hiển thị thông báo góc màn hình (Toast)

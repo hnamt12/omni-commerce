@@ -193,6 +193,7 @@ class ProductController extends Controller
             $product->update([
                 'name' => $request->name,
                 'slug' => Str::slug($request->name),
+                'sku' => $request->sku ?? $product->sku,
                 'category_id' => $request->category_id,
                 'brand_id' => $request->brand_id ?: null,
                 'description' => $request->description,

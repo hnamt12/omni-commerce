@@ -8,39 +8,28 @@ const props = defineProps({
 
 const emit = defineEmits([
     'add-attribute', 
-    'remove-attribute', 
-    'add-value', 
-    'remove-value'
+    'remove-attribute',
 ]);
 
-const initSelection = (attr) => {
-    if (!attr.selected_values) {
-        attr.selected_values = [...(attr.values || [])];
-    }
+const getAvailableValues = (attributeId) => {
+    if (!attributeId) return [];
+    const attr = props.attributes.find(a => a.id === attributeId);
+    return attr ? attr.values : [];
 };
 
-const isSelected = (attr, val) => {
-    initSelection(attr);
-    return attr.selected_values.includes(val);
+const isAttributeDisabled = (attributeId, currentIndex) => {
+    return props.form.attributes.some((attr, index) => attr.attribute_id === attributeId && index !== currentIndex);
 };
 
-const toggleValue = (attr, val) => {
-    initSelection(attr);
-    const idx = attr.selected_values.indexOf(val);
-    if (idx > -1) {
-        attr.selected_values.splice(idx, 1);
-    } else {
-        attr.selected_values.push(val);
-    }
+const selectAllValues = (index) => {
+    const attrId = props.form.attributes[index].attribute_id;
+    if (!attrId) return;
+    const available = getAvailableValues(attrId);
+    props.form.attributes[index].values = available.map(v => v.value);
 };
 
-const toggleAll = (attr) => {
-    initSelection(attr);
-    if (attr.selected_values.length === attr.values.length) {
-        attr.selected_values = [];
-    } else {
-        attr.selected_values = [...attr.values];
-    }
+const deselectAllValues = (index) => {
+    props.form.attributes[index].values = [];
 };
 </script>
 
@@ -68,40 +57,42 @@ const toggleAll = (attr) => {
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">Tên thuộc tính</label>
                         <select v-model="attr.attribute_id" class="w-full py-2.5 px-4 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white text-sm shadow-sm">
                             <option value="">-- Chọn thuộc tính --</option>
-                            <option v-for="a in attributes" :key="a.id" :value="a.id">{{ a.name }}</option>
+                            <option v-for="a in attributes" :key="a.id" :value="a.id" :disabled="isAttributeDisabled(a.id, index)">
+                                {{ a.name }} {{ isAttributeDisabled(a.id, index) ? '(Đã chọn ở khối khác)' : '' }}
+                            </option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">Giá trị (Gõ và nhấn Enter)</label>
-                        <div class="flex flex-wrap gap-2 p-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 shadow-sm min-h-[44px] focus-within:ring-2 focus-within:ring-indigo-500 transition">
-                            <input type="text" placeholder="Thêm giá trị..." @keydown.enter.prevent="emit('add-value', index, $event)" class="border-none focus:ring-0 p-0 text-sm flex-1 min-w-[100px] bg-transparent text-gray-900 dark:text-white placeholder-gray-400">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1 uppercase">
+                                <span class="text-green-500">✨</span> Chọn giá trị
+                            </label>
+                            <div v-if="attr.attribute_id" class="flex gap-2">
+                                <button type="button" @click="selectAllValues(index)" class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-tighter">Chọn tất cả</button>
+                                <span class="text-gray-300 dark:text-gray-600 text-[10px]">|</span>
+                                <button type="button" @click="deselectAllValues(index)" class="text-[10px] font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 uppercase tracking-tighter">Bỏ chọn</button>
+                            </div>
+                        </div>
+                        
+                        <div v-if="!attr.attribute_id" class="text-sm text-gray-400 dark:text-gray-500 italic p-3 bg-gray-50 dark:bg-slate-900 rounded-xl border border-dashed border-gray-200 dark:border-slate-700">
+                            Vui lòng chọn Tên thuộc tính trước...
+                        </div>
+                        
+                        <div v-else class="flex flex-wrap gap-3 p-3 border border-gray-200 dark:border-slate-600 rounded-xl bg-gray-50 dark:bg-slate-900 shadow-sm min-h-[46px]">
+                            <label v-for="val in getAvailableValues(attr.attribute_id)" :key="val.id" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all has-[:checked]:bg-indigo-500 has-[:checked]:text-white has-[:checked]:border-indigo-500 dark:text-gray-200 shadow-sm">
+                                <input type="checkbox" :value="val.value" v-model="attr.values" class="hidden">
+                                <span v-if="val.value.includes('#')" class="w-3.5 h-3.5 rounded-full border border-gray-300 shadow-inner" :style="{ backgroundColor: val.value.split(':').pop() }"></span>
+                                <span>{{ val.value.split(':')[0] }}</span>
+                            </label>
+                            
+                            <div v-if="getAvailableValues(attr.attribute_id).length === 0" class="text-sm text-gray-400 dark:text-gray-500 italic w-full">
+                                Thuộc tính này chưa có giá trị nào được cấu hình.
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Selectable Value Chips -->
-                <div v-if="attr.values && attr.values.length > 0" class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-600">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">✅ Chọn giá trị cho Ma trận</label>
-                        <button type="button" @click="toggleAll(attr)" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold focus:outline-none">
-                            Chọn / Bỏ chọn tất cả
-                        </button>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <label v-for="(val, vIndex) in attr.values" :key="vIndex" 
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm cursor-pointer transition-all select-none"
-                            :class="isSelected(attr, val) 
-                                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-700 ring-1 ring-indigo-200' 
-                                : 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-slate-600 line-through opacity-60'">
-                            <input type="checkbox" :checked="isSelected(attr, val)" @change="toggleValue(attr, val)" class="w-3.5 h-3.5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                            {{ val }}
-                            <button type="button" @click.prevent="emit('remove-value', index, vIndex)" class="hover:text-red-500 focus:outline-none ml-0.5">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </label>
-                    </div>
-                </div>
             </div>
 
             <button type="button" @click="emit('add-attribute')" class="w-full py-3.5 mt-2 rounded-2xl border-2 border-dashed border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-indigo-50 hover:border-indigo-400 transition duration-300">

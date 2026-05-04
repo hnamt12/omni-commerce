@@ -1,16 +1,8 @@
 <script setup>
 import { ref } from 'vue';
-import { vnSlugify } from '@/Utils/helpers';
+import { vnSlugify, formatMoney, parseMoney, handleMoneyInput, handleMoneyBlur } from '@/Utils/helpers';
 
-const fmtMoney = (val) => {
-    if (!val && val !== 0) return '';
-    const n = parseInt(String(val).replace(/\D/g, ''));
-    return isNaN(n) ? '' : new Intl.NumberFormat('vi-VN').format(n);
-};
-const parseMoney = (str) => {
-    if (!str) return '';
-    return parseInt(String(str).replace(/\D/g, '')) || '';
-};
+const fmtMoney = formatMoney;
 
 const props = defineProps({
     form: Object,
@@ -79,14 +71,14 @@ const removeGalleryImage = (index) => {
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-1.5">Giá niêm yết (₫)</label>
                         <div class="relative">
-                            <input type="text" :value="fmtMoney(form.base_price)" @input="e => form.base_price = parseMoney(e.target.value)" class="w-full py-2.5 pl-4 pr-14 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="0">
+                            <input type="text" :value="fmtMoney(form.base_price)" @input="e => handleMoneyInput(e, form, 'base_price')" @blur="e => handleMoneyBlur(e, form, 'base_price')" class="w-full py-2.5 pl-4 pr-14 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="0">
                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">VND</span>
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1.5">🏷️ Giá khuyến mãi (₫)</label>
                         <div class="relative">
-                            <input type="text" :value="fmtMoney(form.sale_price)" @input="e => form.sale_price = parseMoney(e.target.value)" class="w-full py-2.5 pl-4 pr-14 border border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" placeholder="Để trống nếu không KM">
+                            <input type="text" :value="fmtMoney(form.sale_price)" @input="e => handleMoneyInput(e, form, 'sale_price')" @blur="e => handleMoneyBlur(e, form, 'sale_price')" class="w-full py-2.5 pl-4 pr-14 border border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" placeholder="Để trống nếu không KM">
                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">VND</span>
                         </div>
                         <p class="text-xs text-gray-400 mt-1">Nếu điền, giá này sẽ hiển thị cho khách hàng.</p>
@@ -96,7 +88,7 @@ const removeGalleryImage = (index) => {
                             ⚠️ Giá vốn / Nhập (₫)
                         </label>
                         <div class="relative">
-                            <input type="text" :value="fmtMoney(form.cost_price)" @input="e => form.cost_price = parseMoney(e.target.value)" class="w-full py-2.5 pl-4 pr-14 border border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="Nội bộ">
+                            <input type="text" :value="fmtMoney(form.cost_price)" @input="e => handleMoneyInput(e, form, 'cost_price')" @blur="e => handleMoneyBlur(e, form, 'cost_price')" class="w-full py-2.5 pl-4 pr-14 border border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition" placeholder="Nội bộ">
                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">VND</span>
                         </div>
                         <p class="text-xs text-red-400 mt-1 font-medium">🔒 Chỉ Admin nhìn thấy. Không hiển thị cho khách.</p>
