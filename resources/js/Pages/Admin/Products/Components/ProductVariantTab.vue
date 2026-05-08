@@ -80,27 +80,28 @@ const generateSeniorSKU = (variant) => {
 
 const removeVariantRow = (index) => { props.form.variants.splice(index, 1); };
 
-// Bulk Actions
-const bulkPrice = ref('');
-const bulkSalePrice = ref('');
-const bulkCostPrice = ref('');
-const bulkStock = ref('');
+// Bulk Actions — unified reactive object + single apply
+const bulk = ref({ price: '', sale_price: '', cost_price: '', stock: '' });
 
-const applyBulkPrice = () => {
-    const p = parseMoney(bulkPrice.value);
-    if (p) props.form.variants.forEach(v => { v.price = p; });
-};
-const applyBulkSalePrice = () => {
-    const p = parseMoney(bulkSalePrice.value);
-    if (p) props.form.variants.forEach(v => { v.sale_price = p; });
-};
-const applyBulkCostPrice = () => {
-    const p = parseMoney(bulkCostPrice.value);
-    if (p) props.form.variants.forEach(v => { v.cost_price = p; });
-};
-const applyBulkStock = () => {
-    const s = parseInt(bulkStock.value);
-    if (!isNaN(s)) props.form.variants.forEach(v => { v.stock = s; });
+const applyAllBulk = () => {
+    if (!props.form.variants || props.form.variants.length === 0) {
+        alert('Chưa có biến thể nào để áp dụng!');
+        return;
+    }
+    const p = parseMoney(bulk.value.price);
+    const sp = parseMoney(bulk.value.sale_price);
+    const cp = parseMoney(bulk.value.cost_price);
+    const st = parseInt(bulk.value.stock);
+    let applied = 0;
+    props.form.variants.forEach(v => {
+        if (p)          { v.price = p; applied++; }
+        if (sp)         { v.sale_price = sp; applied++; }
+        if (cp)         { v.cost_price = cp; applied++; }
+        if (!isNaN(st)) { v.stock = st; applied++; }
+    });
+    if (applied === 0) {
+        alert('Vui lòng nhập ít nhất một giá trị để áp dụng!');
+    }
 };
 
 const hasValidAttributes = computed(() => {
@@ -122,51 +123,47 @@ const hasValidAttributes = computed(() => {
         </div>
 
         <!-- Bulk Actions -->
-        <div class="bg-gray-50 dark:bg-slate-700/40 rounded-xl p-4 mb-5 border border-gray-200 dark:border-slate-600">
-            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">⚡ Thiết lập hàng loạt</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <!-- Bulk Price -->
+        <div class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-slate-700/40 dark:to-slate-700/20 rounded-xl p-5 mb-5 border border-gray-200 dark:border-slate-600">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-base">⚡</span>
+                <p class="text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Thiết lập hàng loạt</p>
+                <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-1">Chỉ áp dụng các ô đã điền giá trị</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <!-- Giá niêm yết -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">💰 Giá niêm yết</label>
-                    <div class="flex gap-1">
-                        <div class="relative flex-1">
-                            <input type="text" v-model="bulkPrice" class="w-full py-2 pl-3 pr-10 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition" placeholder="500.000">
-                            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
-                        </div>
-                        <button type="button" @click.prevent="applyBulkPrice" class="px-2.5 py-2 bg-indigo-500 text-white text-[10px] font-bold rounded-lg hover:bg-indigo-600 transition shrink-0" title="Áp dụng giá niêm yết">✓</button>
+                    <div class="relative">
+                        <input type="text" :value="formatMoney(bulk.price)" @input="e => handleMoneyInput(e, bulk, 'price')" @blur="e => handleMoneyBlur(e, bulk, 'price')" class="w-full py-2.5 pl-3 pr-10 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition" placeholder="500.000">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
                     </div>
                 </div>
-                <!-- Bulk Sale Price -->
+                <!-- Giá KM -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">🎁 Giá KM</label>
-                    <div class="flex gap-1">
-                        <div class="relative flex-1">
-                            <input type="text" v-model="bulkSalePrice" class="w-full py-2 pl-3 pr-10 border border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 transition" placeholder="450.000">
-                            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
-                        </div>
-                        <button type="button" @click.prevent="applyBulkSalePrice" class="px-2.5 py-2 bg-emerald-500 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-600 transition shrink-0" title="Áp dụng giá KM">✓</button>
+                    <div class="relative">
+                        <input type="text" :value="formatMoney(bulk.sale_price)" @input="e => handleMoneyInput(e, bulk, 'sale_price')" @blur="e => handleMoneyBlur(e, bulk, 'sale_price')" class="w-full py-2.5 pl-3 pr-10 border border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 transition" placeholder="450.000">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
                     </div>
                 </div>
-                <!-- Bulk Cost Price -->
+                <!-- Giá vốn -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">📊 Giá vốn</label>
-                    <div class="flex gap-1">
-                        <div class="relative flex-1">
-                            <input type="text" v-model="bulkCostPrice" class="w-full py-2 pl-3 pr-10 border border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-amber-500 transition" placeholder="300.000">
-                            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
-                        </div>
-                        <button type="button" @click.prevent="applyBulkCostPrice" class="px-2.5 py-2 bg-amber-500 text-white text-[10px] font-bold rounded-lg hover:bg-amber-600 transition shrink-0" title="Áp dụng giá vốn">✓</button>
+                    <div class="relative">
+                        <input type="text" :value="formatMoney(bulk.cost_price)" @input="e => handleMoneyInput(e, bulk, 'cost_price')" @blur="e => handleMoneyBlur(e, bulk, 'cost_price')" class="w-full py-2.5 pl-3 pr-10 border border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-amber-500 transition" placeholder="300.000">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400">₫</span>
                     </div>
                 </div>
-                <!-- Bulk Stock -->
+                <!-- Tồn kho -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">📦 Tồn kho</label>
-                    <div class="flex gap-1">
-                        <input type="number" v-model="bulkStock" class="w-full py-2 px-3 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition" placeholder="100">
-                        <button type="button" @click.prevent="applyBulkStock" class="px-2.5 py-2 bg-slate-500 text-white text-[10px] font-bold rounded-lg hover:bg-slate-600 transition shrink-0" title="Áp dụng tồn kho">✓</button>
-                    </div>
+                    <input type="number" v-model="bulk.stock" class="w-full py-2.5 px-3 border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 transition" placeholder="100">
                 </div>
             </div>
+            <button type="button" @click.prevent="applyAllBulk" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                Xác nhận thiết lập hàng loạt
+            </button>
         </div>
 
         <!-- Variant Table -->
