@@ -58,7 +58,7 @@ Route::prefix('admin')->group(function () {
         Route::post('flash-sales/{id}/add-products', [\App\Http\Controllers\Admin\FlashSaleController::class, 'addMultipleProducts'])->name('admin.flash-sales.add-product');
         Route::delete('flash-sales/items/{itemId}', [\App\Http\Controllers\Admin\FlashSaleController::class, 'removeProduct'])->name('admin.flash-sales.remove-product');
         Route::resource('flash-sales', \App\Http\Controllers\Admin\FlashSaleController::class)->names('admin.flash-sales');
-        
+
         // Staff Routes
         Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class)->names('admin.staff');
 
@@ -67,12 +67,19 @@ Route::prefix('admin')->group(function () {
         Route::post('banners/reorder', [\App\Http\Controllers\Admin\BannerController::class, 'reorder'])->name('admin.banners.reorder');
         Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class)->names('admin.banners');
 
+        // Posts / News
+        Route::resource('posts', \App\Http\Controllers\Admin\PostController::class)->except(['show'])->names('admin.posts');
+
         // Payment Methods (new - database-driven)
         Route::resource('payment-methods', \App\Http\Controllers\Admin\PaymentMethodController::class)
             ->except(['show'])
             ->names('admin.payment-methods');
         Route::post('payment-methods/{payment_method}/toggle', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'toggle'])
             ->name('admin.payment-methods.toggle');
+
+        // Settings (Contact)
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
     });
 });
 
@@ -81,13 +88,13 @@ Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'ind
 
 // Client Routes
 Route::middleware('guest:customer')->group(function () {
-    Route::get('/login',    [ClientAuthController::class, 'showLogin'])->name('login');
-    Route::get('/login',    [ClientAuthController::class, 'showLogin'])->name('client.login');   // alias for Ziggy
-    Route::post('/login',   [ClientAuthController::class, 'login'])->name('login.submit');
-    Route::post('/login',   [ClientAuthController::class, 'login'])->name('client.login.submit'); // alias
+    Route::get('/login', [ClientAuthController::class, 'showLogin'])->name('login');
+    Route::get('/login', [ClientAuthController::class, 'showLogin'])->name('client.login');   // alias for Ziggy
+    Route::post('/login', [ClientAuthController::class, 'login'])->name('login.submit');
+    Route::post('/login', [ClientAuthController::class, 'login'])->name('client.login.submit'); // alias
     Route::get('/register', [ClientAuthController::class, 'showRegisterForm'])->name('register');
     Route::get('/register', [ClientAuthController::class, 'showRegisterForm'])->name('client.register'); // alias
-    Route::post('/register',[ClientAuthController::class, 'register'])->name('register.submit');
+    Route::post('/register', [ClientAuthController::class, 'register'])->name('register.submit');
 
     // Socialite: redirect to provider
     Route::get('/auth/{provider}/redirect', [ClientAuthController::class, 'redirectToProvider'])->name('social.redirect');
@@ -101,49 +108,58 @@ Route::middleware('auth:customer')->group(function () {
     Route::post('/logout', [ClientAuthController::class, 'logout'])->name('client.logout');
 
     // Cart
-    Route::get('/gio-hang',          [\App\Http\Controllers\Client\CartController::class, 'index'])->name('cart.index');
-    Route::post('/gio-hang/them',    [\App\Http\Controllers\Client\CartController::class, 'add'])->name('cart.add');
-    Route::put('/gio-hang/{id}',     [\App\Http\Controllers\Client\CartController::class, 'update'])->name('cart.update');
-    Route::delete('/gio-hang/{id}',  [\App\Http\Controllers\Client\CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/gio-hang', [\App\Http\Controllers\Client\CartController::class, 'index'])->name('cart.index');
+    Route::post('/gio-hang/them', [\App\Http\Controllers\Client\CartController::class, 'add'])->name('cart.add');
+    Route::put('/gio-hang/{id}', [\App\Http\Controllers\Client\CartController::class, 'update'])->name('cart.update');
+    Route::delete('/gio-hang/{id}', [\App\Http\Controllers\Client\CartController::class, 'remove'])->name('cart.remove');
 
     // ── Checkout ──────────────────────────────────────────────────────────────
-    Route::get('/thanh-toan',  [\App\Http\Controllers\Client\CheckoutController::class, 'checkout'])->name('checkout.index');
-    Route::get('/thanh-toan',  [\App\Http\Controllers\Client\CheckoutController::class, 'checkout'])->name('client.checkout');
+    Route::get('/thanh-toan', [\App\Http\Controllers\Client\CheckoutController::class, 'checkout'])->name('checkout.index');
+    Route::get('/thanh-toan', [\App\Http\Controllers\Client\CheckoutController::class, 'checkout'])->name('client.checkout');
     Route::post('/thanh-toan', [\App\Http\Controllers\Client\CheckoutController::class, 'store'])->name('checkout.store');
-    Route::post('/dat-hang',   [\App\Http\Controllers\Client\CheckoutController::class, 'store'])->name('client.order.store');
+    Route::post('/dat-hang', [\App\Http\Controllers\Client\CheckoutController::class, 'store'])->name('client.order.store');
 
     // Order success page
     Route::get('/dat-hang-thanh-cong/{orderId}', [\App\Http\Controllers\Client\CheckoutController::class, 'success'])->name('order.success');
     Route::get('/dat-hang-thanh-cong/{orderId}', [\App\Http\Controllers\Client\CheckoutController::class, 'success'])->name('client.order.success');
 
     // ── Orders (index / detail / cancel) ─────────────────────────────────────
-    Route::get('/don-hang',          [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('order.index');
-    Route::get('/don-hang',          [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('client.order.index');
-    Route::get('/don-hang/{id}',     [\App\Http\Controllers\Client\OrderController::class, 'show'])->name('client.order.show');
+    Route::get('/don-hang', [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('order.index');
+    Route::get('/don-hang', [\App\Http\Controllers\Client\OrderController::class, 'index'])->name('client.order.index');
+    Route::get('/don-hang/{id}', [\App\Http\Controllers\Client\OrderController::class, 'show'])->name('client.order.show');
     Route::post('/don-hang/{id}/cancel', [\App\Http\Controllers\Client\OrderController::class, 'cancel'])->name('client.order.cancel');
-    Route::post('/don-hang/{id}/rebuy',  [\App\Http\Controllers\Client\OrderController::class, 'rebuy'])->name('client.order.rebuy');
+    Route::post('/don-hang/{id}/rebuy', [\App\Http\Controllers\Client\OrderController::class, 'rebuy'])->name('client.order.rebuy');
 
     // ── Payments ──────────────────────────────────────────────────────────────
-    Route::get('/don-hang/{id}/payment-qr',    [\App\Http\Controllers\Client\PaymentController::class, 'paymentQr'])->name('client.order.payment_qr');
+    Route::get('/don-hang/{id}/payment-qr', [\App\Http\Controllers\Client\PaymentController::class, 'paymentQr'])->name('client.order.payment_qr');
     Route::post('/don-hang/{id}/confirm-paid', [\App\Http\Controllers\Client\PaymentController::class, 'confirmPaid'])->name('client.order.confirm_paid');
-    Route::post('/don-hang/{id}/retry-payment',[\App\Http\Controllers\Client\PaymentController::class, 'retryPayment'])->name('client.order.retry_payment');
+    Route::post('/don-hang/{id}/retry-payment', [\App\Http\Controllers\Client\PaymentController::class, 'retryPayment'])->name('client.order.retry_payment');
 
     // ── Vouchers ──────────────────────────────────────────────────────────────
-    Route::post('/voucher/apply',  [\App\Http\Controllers\Client\VoucherController::class, 'applyVoucher'])->name('client.voucher.apply');
+    Route::post('/voucher/apply', [\App\Http\Controllers\Client\VoucherController::class, 'applyVoucher'])->name('client.voucher.apply');
     Route::post('/voucher/remove', [\App\Http\Controllers\Client\VoucherController::class, 'removeVoucher'])->name('client.voucher.remove');
 
     // Profile
-    Route::get('/tai-khoan',               [\App\Http\Controllers\Client\ProfileController::class, 'index'])->name('client.profile');
-    Route::post('/tai-khoan/cap-nhat',     [\App\Http\Controllers\Client\ProfileController::class, 'updateInfo'])->name('client.profile.update');
-    Route::post('/tai-khoan/dia-chi',      [\App\Http\Controllers\Client\ProfileController::class, 'storeAddress'])->name('client.address.store');
+    Route::get('/tai-khoan', [\App\Http\Controllers\Client\ProfileController::class, 'index'])->name('client.profile');
+    Route::post('/tai-khoan/cap-nhat', [\App\Http\Controllers\Client\ProfileController::class, 'updateInfo'])->name('client.profile.update');
+    Route::post('/tai-khoan/dia-chi', [\App\Http\Controllers\Client\ProfileController::class, 'storeAddress'])->name('client.address.store');
 });
 
 Route::get('/', [\App\Http\Controllers\Client\HomeController::class, 'index'])->name('home');
+Route::get('/api/search-suggestions', [\App\Http\Controllers\Client\HomeController::class, 'searchSuggestions'])->name('client.search.suggestions');
+Route::post('/recently-viewed', [\App\Http\Controllers\Client\HomeController::class, 'getRecentlyViewed'])->name('client.recently-viewed');
 
 // Shop & Products (public)
-Route::get('/shop',                  [\App\Http\Controllers\Client\ProductController::class, 'index'])->name('client.shop');
-Route::get('/san-pham/{slug}',       [\App\Http\Controllers\Client\ProductController::class, 'show'])->name('client.product.detail');
+Route::get('/shop', [\App\Http\Controllers\Client\ProductController::class, 'index'])->name('client.shop');
+Route::get('/san-pham/{slug}', [\App\Http\Controllers\Client\ProductController::class, 'show'])->name('client.product.detail');
 Route::post('/products/{id}/increment-views', [\App\Http\Controllers\Client\ProductController::class, 'incrementViews'])->name('client.product.views');
 
 // VNPay Callback (outside auth middleware — VNPay server hits this directly)
 Route::get('/vnpay/return', [\App\Http\Controllers\Client\PaymentController::class, 'vnpayReturn'])->name('client.vnpay.return');
+
+// News / Blog (public)
+Route::get('/tin-tuc', [\App\Http\Controllers\Client\NewsController::class, 'index'])->name('client.news.index');
+Route::get('/tin-tuc/{slug}', [\App\Http\Controllers\Client\NewsController::class, 'show'])->name('client.news.show');
+
+// Contact (public)
+Route::get('/lien-he', [\App\Http\Controllers\Client\ContactController::class, 'index'])->name('client.contact.index');

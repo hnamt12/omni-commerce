@@ -56,7 +56,7 @@ const getStockText = (stock) => {
 
 <template>
     <Head title="Quản lý Kho hàng" />
-    <div class="max-w-7xl mx-auto py-8 px-4 pb-10">
+    <div class="w-full pb-10">
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -159,7 +159,7 @@ const getStockText = (stock) => {
                         class="hover:bg-indigo-50/30 transition-colors">
                         <!-- Image -->
                         <td class="p-4">
-                            <img :src="prod.image_url || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=?'"
+                            <img :src="prod.thumbnail || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=?'"
                                 class="w-12 h-12 rounded-lg object-cover border border-gray-200"
                                 @error="$event.target.src='https://placehold.co/100x100/e2e8f0/94a3b8?text=?'; $event.target.onerror=null;">
                         </td>

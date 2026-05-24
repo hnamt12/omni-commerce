@@ -68,7 +68,7 @@ const toggleActive = (banner) => {
 
 <template>
     <Head title="Quản lý Banners" />
-    <div class="max-w-7xl mx-auto pb-10">
+    <div class="w-full pb-10">
 
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">

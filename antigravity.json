@@ -1,0 +1,11 @@
+{
+  "agent": {
+    "system_instructions": "./PROJECT_RULES.md",
+    "skills": [
+      "./.antigravity/skills/anti-hallucination-guard.md"
+    ],
+    "blueprints": [
+      "./.antigravity/blueprints/product-module.md"
+    ]
+  }
+}

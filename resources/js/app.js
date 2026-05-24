@@ -13,7 +13,7 @@ router.on('exception', (event) => {
     alert('Hệ thống gặp lỗi nghiêm trọng! Vui lòng mở F12 -> Console để xem chi tiết.');
 });
 
-import AuthenticatedLayout from './Layouts/AuthenticatedLayout.vue';
+import AdminLayout from './Layouts/Admin/AdminLayout.vue';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -21,7 +21,7 @@ createInertiaApp({
         const pagePromise = resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue'));
         return pagePromise.then((page) => {
             if (name.startsWith('Admin/') && name !== 'Admin/Login') {
-                page.default.layout = page.default.layout || AuthenticatedLayout;
+                page.default.layout = page.default.layout || AdminLayout;
             }
             return page;
         });

@@ -12,14 +12,7 @@ const avatarUrl = (c) =>
     c.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=6366f1&color=fff&bold=true`;
 
 const logout = () => router.post(route('client.logout'));
-
-// Simple search state
-const searchQuery = ref('');
-const submitSearch = () => {
-    if (searchQuery.value.trim()) {
-        router.get('/search', { q: searchQuery.value.trim() });
-    }
-};
+import SmartSearch from '@/Components/Client/Header/SmartSearch.vue';
 </script>
 
 <template>
@@ -29,7 +22,6 @@ const submitSearch = () => {
             <div class="max-w-7xl mx-auto px-4 py-1.5 flex items-center justify-between">
                 <span>🚀 Miễn phí vận chuyển cho đơn hàng từ 500.000đ</span>
                 <div class="hidden md:flex items-center gap-4">
-                    <a href="#" class="hover:underline">Tra cứu đơn hàng</a>
                     <a href="#" class="hover:underline">Hỗ trợ 24/7</a>
                 </div>
             </div>
@@ -44,15 +36,7 @@ const submitSearch = () => {
 
             <!-- Search Bar -->
             <div class="flex-1 max-w-2xl mx-auto">
-                <form @submit.prevent="submitSearch" class="flex items-center border-2 border-indigo-500 rounded-xl overflow-hidden bg-white shadow-sm">
-                    <input v-model="searchQuery" type="text" placeholder="Tìm kiếm sản phẩm..."
-                        class="flex-1 px-4 py-2.5 text-sm focus:outline-none text-gray-700 placeholder-gray-400" />
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </button>
-                </form>
+                <SmartSearch />
             </div>
 
             <!-- Right: Cart + Account -->
@@ -131,9 +115,8 @@ const submitSearch = () => {
 
                     <Link href="/" class="hover:text-red-600 transition-colors">TRANG CHỦ</Link>
                     <Link :href="route('client.shop')" class="hover:text-red-600 transition-colors">TẤT CẢ SẢN PHẨM</Link>
-                    <Link href="#" class="hover:text-red-600 transition-colors">TIN TỨC</Link>
-                    <Link href="#" class="hover:text-red-600 transition-colors">LIÊN HỆ</Link>
-                    <Link href="#" class="hover:text-red-600 transition-colors">TRA CỨU ĐƠN HÀNG</Link>
+                    <Link :href="route('client.news.index')" :class="{ 'text-indigo-600 font-black': route().current('client.news.*') }" class="hover:text-red-600 transition-colors">TIN TỨC</Link>
+                    <Link :href="route('client.contact.index')" :class="{ 'text-indigo-600 font-black': route().current('client.contact.*') }" class="hover:text-red-600 transition-colors">LIÊN HỆ</Link>
                 </nav>
             </div>
         </div>

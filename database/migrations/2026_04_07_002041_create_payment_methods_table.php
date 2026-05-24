@@ -10,11 +10,12 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->string('name');                 // VD: Cổng VNPay, Chuyển khoản VietQR
-            $table->string('code')->unique();        // VD: vnpay, vietqr, cod
-            $table->string('type');                  // gateway | manual | cod
-            $table->string('logo_url')->nullable();  // Link ảnh logo
-            $table->json('config')->nullable();       // API keys, secrets (JSON)
+            $table->string('name');                  // VD: Cổng VNPay, Chuyển khoản VietQR
+            $table->string('code')->unique();         // VD: vnpay, vietqr, cod
+            $table->text('description')->nullable();   // Mô tả phương thức
+            $table->string('type');                   // gateway | manual | cod
+            $table->string('logo_url')->nullable();   // Link ảnh logo
+            $table->json('config')->nullable();        // API keys, bank info (JSON)
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);
             $table->timestamps();
@@ -23,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('payment_methods');
+        // STRICTLY DISABLED TO PROTECT PRODUCTION DATA
     }
 };

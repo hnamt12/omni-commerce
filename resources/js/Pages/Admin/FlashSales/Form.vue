@@ -28,7 +28,7 @@ const submit = () => {
 
 <template>
     <Head :title="isEdit ? 'Sửa Flash Sale' : 'Tạo Flash Sale mới'" />
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="w-full py-8">
 
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 mb-6">

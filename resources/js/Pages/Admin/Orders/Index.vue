@@ -148,7 +148,7 @@ const toggleDropdown = (id) => {
 <template>
     <Head title="Quản lý Đơn hàng" />
 
-    <div class="max-w-7xl mx-auto pb-10" @click="openDropdown = null">
+    <div class="w-full pb-10" @click="openDropdown = null">
 
         <!-- Header -->
         <div class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">

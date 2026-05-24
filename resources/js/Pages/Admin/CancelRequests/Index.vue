@@ -66,7 +66,7 @@ const getStatusLabel = (status) => {
 
 <template>
     <Head title="Yêu cầu Hủy đơn" />
-    <div class="max-w-7xl mx-auto pb-10">
+    <div class="w-full pb-10">
         <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
             <h1 class="text-xl font-bold">Yêu cầu Hủy đơn hàng</h1>
             <p class="text-gray-500 text-sm mt-1">Xử lý các yêu cầu hủy đơn từ khách hàng.</p>

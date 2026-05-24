@@ -23,7 +23,7 @@ onMounted(() => {
 // ── Gallery ───────────────────────────────────────────────────────
 const images = computed(() => {
     const list = props.product.images ?? [];
-    const main = props.product.image_url || props.product.image;
+    const main = props.product.thumbnail || props.product.image;
     if (main && !list.find(i => i.image_url === main)) return [{ image_url: main }, ...list];
     return list.length ? list : [{ image_url: 'https://placehold.co/600x600/f8fafc/94a3b8?text=No+Image' }];
 });

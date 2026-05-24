@@ -19,7 +19,7 @@ class OrderController extends Controller
     // ─────────────────────────────────────────────
     public function index()
     {
-        $orders = Order::with('items')
+        $orders = Order::with(['items.product', 'items.variant.attributeValues.value'])
             ->where('customer_id', '=', auth('customer')->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);

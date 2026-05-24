@@ -8,6 +8,15 @@ const props = defineProps({
 });
 
 const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
+
+const resolveItemImage = (item) => {
+    const fallback = 'https://placehold.co/80x80/f8fafc/94a3b8?text=IMG';
+    if (!item) return fallback;
+    if (item.image_url && item.image_url.trim() !== '') return item.image_url;
+    if (item.product?.thumbnail && item.product.thumbnail.trim() !== '') return item.product.thumbnail;
+    if (item.product?.image_url && item.product.image_url.trim() !== '') return item.product.image_url;
+    return fallback;
+};
 </script>
 
 <template>
@@ -15,14 +24,14 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
     <ClientLayout>
         <div class="bg-[#f8f9fa] min-h-[85vh] py-10 px-4 flex items-center justify-center">
 
-            <div class="max-w-6xl w-full mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row">
+            <div class="max-w-5xl w-full mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col lg:flex-row">
 
                 <!-- ── LEFT: Order Confirmation ────────────────────────── -->
                 <div class="lg:w-[60%] p-8 lg:p-12 flex flex-col justify-center">
 
                     <!-- Header -->
                     <div class="flex items-center gap-4 mb-8">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 shrink-0">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 shrink-0 shadow-lg shadow-green-100">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                             </svg>
@@ -42,7 +51,7 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
 
                         <!-- Delivery -->
-                        <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Thông tin nhận hàng</h3>
                             <p class="font-black text-gray-900">{{ order.name }}</p>
                             <p class="text-sm text-gray-600 mt-1">{{ order.phone }}</p>
@@ -50,7 +59,7 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
                         </div>
 
                         <!-- Payment -->
-                        <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
                             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Phương thức thanh toán</h3>
                             <p class="font-bold text-gray-900 mb-2">
                                 <span v-if="order.payment_method === 'COD'">💵 Tiền mặt khi nhận hàng</span>
@@ -71,27 +80,27 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
                     </div>
 
                     <!-- CTA buttons -->
-                    <div class="flex flex-wrap items-center gap-4 mt-auto">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-auto">
                         <Link :href="route('client.shop')"
-                            class="px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition">
+                            class="w-full sm:w-auto px-8 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition text-center">
                             Tiếp tục mua sắm
                         </Link>
                         <Link :href="route('client.order.show', order.id)"
-                            class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md transition">
+                            class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
                             Xem chi tiết đơn
                         </Link>
                     </div>
                 </div>
 
                 <!-- ── RIGHT: Order Summary ─────────────────────────────── -->
-                <div class="lg:w-[40%] bg-gray-50/80 border-t lg:border-t-0 lg:border-l border-gray-100 p-8 lg:p-12 flex flex-col">
+                <div class="lg:w-[40%] bg-gray-50/50 border-t lg:border-t-0 lg:border-l border-gray-100 p-8 lg:p-12 flex flex-col">
                     <h3 class="text-lg font-black text-gray-900 mb-6">Tóm tắt đơn hàng</h3>
 
                     <!-- Items list -->
                     <div class="flex-1 overflow-y-auto max-h-[280px] pr-2 space-y-4 mb-6 scrollbar-thin scrollbar-thumb-gray-200">
                         <div v-for="item in order.items" :key="item.id" class="flex gap-3">
                             <div class="w-16 h-16 bg-white border border-gray-200 rounded-xl overflow-hidden shrink-0 relative">
-                                <img :src="item.image_url || 'https://placehold.co/64x64/f8fafc/94a3b8?text=IMG'"
+                                <img :src="resolveItemImage(item)"
                                     class="w-full h-full object-cover">
                                 <span class="absolute -top-1.5 -right-1.5 bg-gray-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full z-10">
                                     {{ item.quantity }}
@@ -125,7 +134,7 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
                         </div>
                         <div class="flex justify-between items-center pt-4 border-t border-gray-200">
                             <span class="font-bold text-gray-900">Tổng cộng</span>
-                            <span class="text-2xl font-black text-red-600">{{ vnd(order.grand_total) }}</span>
+                            <span class="text-3xl font-black text-red-600">{{ vnd(order.grand_total) }}</span>
                         </div>
                     </div>
                 </div>

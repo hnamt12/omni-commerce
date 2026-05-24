@@ -65,6 +65,17 @@ class CartController extends Controller
             return back()->with('error', "Chỉ còn {$variant->stock} sản phẩm trong kho!");
         }
 
+        // Handle buy_now: Use Session, bypass DB cart completely
+        if ($request->boolean('buy_now')) {
+            session()->put('buy_now_item', [
+                'product_id' => $request->product_id,
+                'variant_id' => $variant->id,
+                'quantity'   => $request->quantity,
+                'price'      => $variant->price,
+            ]);
+            return redirect()->route('client.checkout', ['mode' => 'buy_now']);
+        }
+
         // Upsert logic
         $existing = Cart::where('customer_id', '=', $customerId)
             ->where('product_id', '=', $request->product_id)
@@ -81,11 +92,6 @@ class CartController extends Controller
                 'quantity'    => $request->quantity,
                 'price'       => $variant->price,
             ]);
-        }
-
-        // Handle buy_now: redirect to checkout
-        if ($request->boolean('buy_now')) {
-            return redirect()->route('client.checkout');
         }
 
         // Standard add-to-cart

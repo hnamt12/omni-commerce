@@ -1,7 +1,3 @@
-<script setup>
-// AuthLayout.vue
-</script>
-
 <template>
     <div class="min-h-screen flex items-center justify-center bg-slate-100 p-4 font-sans antialiased text-slate-900">
         <div class="w-full max-w-md">

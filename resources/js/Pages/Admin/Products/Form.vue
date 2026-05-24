@@ -13,7 +13,8 @@ const props = defineProps({
     item_images: Array,
     categories: Array,
     brands: Array,
-    attributes: Array
+    attributes: Array,
+    product_attributes: Array,
 });
 
 const page = usePage();
@@ -40,8 +41,9 @@ const form = useForm({
     base_price: props.product?.base_price || '',
     sale_price: props.product?.sale_price || '',
     cost_price: props.product?.cost_price || '',
-    image: null,
+    thumbnail: null,
     gallery: [],
+    deleted_images: [],
     variants: props.product?.variants || [],
     specifications: props.product?.specifications || [],
     attributes: props.product?.attributes || []
@@ -51,48 +53,23 @@ const selectedAttrIds = ref([]);
 
 onMounted(() => {
     if (props.product && props.product.variants) {
-        const loadedAttrIds = new Set();
+        // Map variant attributes using eager-loaded string values
         form.variants = props.product.variants.map(v => {
             let mappedAttrs = {};
             if (v.attribute_values) {
                 v.attribute_values.forEach(av => {
-                    mappedAttrs[av.attribute_id] = av.attribute_value_id;
-                    loadedAttrIds.add(av.attribute_id);
+                    // Use the string value from the eager-loaded `value` relationship
+                    mappedAttrs[av.attribute_id] = av.value?.value || av.attribute_value_id;
                 });
             }
             return { ...v, attributes: mappedAttrs, _id: v.id || Math.random().toString() };
         });
-        selectedAttrIds.value = Array.from(loadedAttrIds);
-        
-        let customAttrGroups = {};
-        Array.from(loadedAttrIds).forEach(id => {
-            const defaultAttr = props.attributes.find(a => a.id == id);
-            if (defaultAttr) {
-                customAttrGroups[id] = [];
-            }
-        });
 
-        props.product.variants.forEach(v => {
-            if (v.attribute_values) {
-                v.attribute_values.forEach(av => {
-                    if (customAttrGroups[av.attribute_id] !== undefined) {
-                        const valLabel = av.attribute_value?.value || av.attribute_value_id;
-                        if (!customAttrGroups[av.attribute_id].includes(valLabel)) {
-                            customAttrGroups[av.attribute_id].push(valLabel);
-                        }
-                    }
-                });
-            }
-        });
-
-        const selectedAttributesList = [];
-        Object.keys(customAttrGroups).forEach(attrId => {
-            selectedAttributesList.push({
-                attribute_id: attrId,
-                values: customAttrGroups[attrId]
-            });
-        });
-        form.attributes = selectedAttributesList;
+        // Use pre-computed product_attributes from backend (already string values)
+        if (props.product_attributes && props.product_attributes.length > 0) {
+            form.attributes = props.product_attributes;
+            selectedAttrIds.value = props.product_attributes.map(a => a.attribute_id);
+        }
     }
 });
 
@@ -150,7 +127,8 @@ const submitForm = () => {
             cost_price: v.cost_price ? parseMoney(v.cost_price) : null,
         }))),
         specifications: JSON.stringify(data.specifications),
-        selected_attributes: JSON.stringify(selectedAttrIds.value)
+        selected_attributes: JSON.stringify(selectedAttrIds.value),
+        deleted_images: JSON.stringify(data.deleted_images || []),
     })).post(submitUrl, {
         preserveScroll: true,
         forceFormData: true,
@@ -165,7 +143,7 @@ const submitForm = () => {
 <template>
     <Head :title="product ? 'Sửa Sản phẩm' : 'Thêm Sản phẩm'" />
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="w-full py-6">
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 mb-5">
             <div>
@@ -215,58 +193,61 @@ const submitForm = () => {
                 </nav>
             </div>
 
-            <!-- Tab Content (Kept Alive & Rendered dynamically based on reactive activeTab ) -->
-            <keep-alive>
-                <ProductBasicTab 
-                    v-if="activeTab === 'basic'"
-                    :form="form" 
-                    :product="product" 
-                    :categories="categories" 
-                    :brands="brands" 
-                    :item_images="item_images"
-                >
-                    <template #submitBtn>
-                        <button type="submit" :disabled="form.processing" class="w-full bg-emerald-600 text-white rounded-xl py-3.5 font-extrabold hover:bg-emerald-700 transition shadow-lg flex justify-center items-center gap-2 uppercase tracking-wide">
-                            <svg v-if="form.processing" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            🚀 Lưu Sản Phẩm Mới
-                        </button>
-                    </template>
-                </ProductBasicTab>
-            </keep-alive>
+            <!-- Tab Content -->
+            <div class="pb-24">
+                <keep-alive>
+                    <ProductBasicTab 
+                        v-if="activeTab === 'basic'"
+                        :form="form" 
+                        :product="product" 
+                        :categories="categories" 
+                        :brands="brands" 
+                        :item_images="item_images"
+                    />
+                </keep-alive>
 
-            <keep-alive>
-                <ProductSpecTab 
-                    v-if="activeTab === 'specs'"
-                    v-model="form.specifications" 
-                />
-            </keep-alive>
+                <keep-alive>
+                    <ProductSpecTab 
+                        v-if="activeTab === 'specs'"
+                        v-model="form.specifications" 
+                    />
+                </keep-alive>
 
-            <keep-alive>
-                <ProductAttributeTab 
-                    v-if="activeTab === 'attributes'"
-                    ref="attributeTabRef"
-                    :form="form" 
-                    :attributes="attributes"
-                    @add-attribute="addAttribute"
-                    @remove-attribute="removeAttribute"
-                    @add-value="addValue"
-                    @remove-value="removeValue"
-                />
-            </keep-alive>
+                <keep-alive>
+                    <ProductAttributeTab 
+                        v-if="activeTab === 'attributes'"
+                        ref="attributeTabRef"
+                        :form="form" 
+                        :attributes="attributes"
+                    />
+                </keep-alive>
 
-            <keep-alive>
-                <div v-if="activeTab === 'variants'">
+                <keep-alive>
                     <ProductVariantTab 
+                        v-if="activeTab === 'variants'"
                         :form="form" 
                         :activeAttributes="activeAttributes"
                     />
-                    <div class="mt-4 flex justify-end">
-                        <button type="submit" :disabled="form.processing" class="mb-4 px-8 py-3.5 bg-emerald-600 text-white rounded-xl font-extrabold hover:bg-emerald-700 transition shadow-lg flex items-center gap-2 uppercase tracking-wide">
-                            🚀 Lưu Cấu Hình Sản Phẩm
-                        </button>
+                </keep-alive>
+            </div>
+
+            <!-- ═══ Sticky Bottom Action Bar ═══ -->
+            <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-slate-700 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+                <div class="w-full py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-sm">
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">Đang chỉnh sửa:</span>
+                        <span class="font-bold text-gray-800 dark:text-white truncate max-w-xs">{{ form.name || 'Sản phẩm mới' }}</span>
+                        <span v-if="form.isDirty" class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Chưa lưu
+                        </span>
                     </div>
+                    <button type="submit" :disabled="form.processing" class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-extrabold hover:bg-emerald-700 active:scale-[0.97] transition-all shadow-lg hover:shadow-emerald-500/25 flex items-center gap-2 uppercase tracking-wide text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg v-if="form.processing" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        🚀 Lưu Sản Phẩm
+                    </button>
                 </div>
-            </keep-alive>
+            </div>
         </form>
     </div>
 </template>

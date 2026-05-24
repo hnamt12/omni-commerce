@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         // Require role permissions to be seeded first
         $this->call(RolePermissionSeeder::class);
+        $this->call(PaymentMethodSeeder::class);
 
         // Generate Dummy Data
         $brands = Brand::factory(5)->create();

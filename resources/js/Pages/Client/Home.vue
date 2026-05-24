@@ -5,6 +5,7 @@ import ClientLayout    from '@/Layouts/Client/ClientLayout.vue';
 import HeroSection     from '@/Components/Client/Home/HeroSection.vue';
 import FlashSale       from '@/Components/Client/Home/FlashSale.vue';
 import RecentlyViewed  from '@/Components/Client/Home/RecentlyViewed.vue';
+import FeaturedBrands  from '@/Components/Client/Home/FeaturedBrands.vue';
 import ProductCard     from '@/Components/Client/ProductCard.vue';
 import { computed } from 'vue';
 
@@ -14,6 +15,7 @@ const props = defineProps({
     flashSale:        { type: Object, default: null },
     newProducts:      { type: Array,  default: () => [] },
     trendingProducts: { type: Array,  default: () => [] },
+    featuredBrands:   { type: Array,  default: () => [] },
 });
 
 const layoutClass = (type) => {
@@ -125,6 +127,9 @@ const midBanners = computed(() => {
 
                 <!-- ⑧ Recently Viewed (client-side) -->
                 <RecentlyViewed />
+
+                <!-- ⑨ Featured Brands -->
+                <FeaturedBrands :brands="featuredBrands" />
 
             </div>
         </div>

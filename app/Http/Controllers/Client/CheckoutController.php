@@ -23,12 +23,26 @@ class CheckoutController extends Controller
     // ─────────────────────────────────────────────
     //  Checkout page
     // ─────────────────────────────────────────────
-    public function checkout()
+    public function checkout(Request $request)
     {
         $customerId = auth('customer')->id();
-        $cartItems  = Cart::with(['product', 'variant.attributeValues.attribute', 'variant.attributeValues.value'])
-            ->where('customer_id', '=', $customerId)
-            ->get();
+        $mode = $request->query('mode', 'cart');
+        
+        if ($mode === 'buy_now' && session()->has('buy_now_item')) {
+            $buyNowData = session('buy_now_item');
+            $cartItem = new Cart($buyNowData);
+            $cartItem->load(['product', 'variant.attributeValues.attribute', 'variant.attributeValues.value']);
+            $cartItems = collect([$cartItem]);
+        } else {
+            $query = Cart::with(['product', 'variant.attributeValues.attribute', 'variant.attributeValues.value'])
+                ->where('customer_id', '=', $customerId);
+                
+            if ($request->has('cart_ids') && is_array($request->cart_ids)) {
+                $query->whereIn('id', $request->cart_ids);
+            }
+
+            $cartItems = $query->get();
+        }
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống!');
@@ -48,9 +62,11 @@ class CheckoutController extends Controller
                 $query->whereNull('end_date')->orWhere('end_date', '>=', now());
             })->get();
 
-        $paymentMethods = PaymentMethod::where('is_active', true)->orderBy('sort_order')->get();
+        $paymentMethods = PaymentMethod::where('is_active', true)->orderBy('id', 'asc')->get();
 
         return Inertia::render('Client/Checkout/Index', [
+            'checkout_mode'     => $mode,
+            'cart_ids'          => $request->cart_ids ?? [],
             'cartItems'         => $cartItems,
             'subtotal'          => $subtotal,
             'shippingFee'       => $shippingFee,
@@ -109,7 +125,21 @@ class CheckoutController extends Controller
         $request->validate(['payment_method' => 'required|in:COD,VietQR,VNPay']);
 
         // ── 2. Load cart ────────────────────────────
-        $cartItems = Cart::with(['product', 'variant'])->where('customer_id', '=', $customerId)->get();
+        $mode = $request->input('mode', 'cart');
+        if ($mode === 'buy_now' && session()->has('buy_now_item')) {
+            $buyNowData = session('buy_now_item');
+            $cartItem = new Cart($buyNowData);
+            $cartItem->load(['product', 'variant']);
+            $cartItems = collect([$cartItem]);
+        } else {
+            $query = Cart::with(['product', 'variant'])->where('customer_id', '=', $customerId);
+            
+            if ($request->has('cart_ids') && is_array($request->cart_ids)) {
+                $query->whereIn('id', $request->cart_ids);
+            }
+            
+            $cartItems = $query->get();
+        }
         if ($cartItems->isEmpty()) {
             return back()->with('error', 'Giỏ hàng trống, không thể đặt hàng!');
         }
@@ -150,7 +180,7 @@ class CheckoutController extends Controller
                     'variant_id'  => $variant->id,
                     'name'        => $item->product->name ?? 'Sản phẩm',
                     'sku_code'    => $variant->sku ?? '',
-                    'image_url'   => $item->product->image_url ?? '',
+                    'image_url'   => $item->variant->image ?? $item->product->thumbnail ?? '',
                     'quantity'    => $item->quantity,
                     'price'       => $item->price,
                     'total_price' => $item->price * $item->quantity,
@@ -167,8 +197,16 @@ class CheckoutController extends Controller
                 'note'       => 'Khách hàng đặt hàng trực tuyến.',
             ]);
 
-            // ── 6. Clear cart ─────────────────────────────
-            Cart::where('customer_id', '=', $customerId)->delete();
+            // ── 6. Clear session or cart ─────────────────────────────
+            if ($mode === 'buy_now') {
+                session()->forget('buy_now_item');
+            } else {
+                if ($request->has('cart_ids') && is_array($request->cart_ids)) {
+                    Cart::where('customer_id', '=', $customerId)->whereIn('id', $request->cart_ids)->delete();
+                } else {
+                    Cart::where('customer_id', '=', $customerId)->delete();
+                }
+            }
 
             DB::commit();
 

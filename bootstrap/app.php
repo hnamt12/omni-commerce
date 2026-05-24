@@ -25,6 +25,20 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        // Handle Production Errors gracefully for Inertia
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if (!config('app.debug')) {
+                \Illuminate\Support\Facades\Log::error("PRODUCTION ERROR CAUGHT: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                
+                if ($request->header('X-Inertia') || $request->wantsJson()) {
+                    return inertia('Errors/Index', [
+                        'status' => 500,
+                        'message' => 'Hệ thống đang gặp sự cố, vui lòng thử lại sau.'
+                    ])->toResponse($request)->setStatusCode(500);
+                }
+            }
+        });
+
         // Handle 419 CSRF / session timeout
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, Request $request) {
             $loginUrl = $request->is('admin/*') ? route('admin.login') : route('login');

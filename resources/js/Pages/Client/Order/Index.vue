@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
 import ClientLayout from '@/Layouts/Client/ClientLayout.vue';
@@ -9,6 +9,25 @@ const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
 const formatDate = (d) => new Date(d).toLocaleDateString('vi-VN', {
     hour: '2-digit', minute: '2-digit',
 });
+
+// Senior Standardized Image Resolver - Prioritizes product.thumbnail absolute first
+const resolveItemImage = (item) => {
+    const fallback = 'https://placehold.co/80x80/f8fafc/94a3b8?text=IMG';
+    if (!item) return fallback;
+
+    const isValid = (url) => url && typeof url === 'string' && url.trim() !== '' && url.trim() !== 'null';
+
+    // Priority 1: Product Thumbnail (New Standard)
+    if (item.product && isValid(item.product.thumbnail)) return item.product.thumbnail;
+
+    // Priority 2: Product Image URL (Legacy Standard)
+    if (item.product && isValid(item.product.image_url)) return item.product.image_url;
+
+    // Priority 3: Order Item Snapshot url
+    if (isValid(item.image_url)) return item.image_url;
+
+    return fallback;
+};
 
 const cancelOrder = (id) => {
     Swal.fire({
@@ -105,7 +124,6 @@ const statusColor = (status) => {
                                 <span class="text-gray-300">|</span>
                                 <span class="font-black text-red-600 uppercase">#{{ order.order_code }}</span>
                             </div>
-                            <!-- Smart status badge: unpaid takes priority -->
                             <div class="text-right">
                                 <p v-if="order.payment_status === 'unpaid' && order.payment_method !== 'COD' && order.status !== 'Đã hủy'"
                                     class="text-orange-500 font-bold flex items-center gap-1.5 uppercase text-sm">
@@ -123,7 +141,7 @@ const statusColor = (status) => {
                         <div class="px-5 py-4">
                             <div v-for="(item, index) in order.items" :key="item.id">
                                 <div v-if="index === 0" class="flex gap-4">
-                                    <img :src="item.image_url" class="w-20 h-20 object-contain border border-gray-100 rounded bg-gray-50 p-1">
+                                    <img :src="resolveItemImage(item)" class="w-20 h-20 object-contain border border-gray-100 rounded bg-gray-50 p-1">
                                     <div class="flex-1">
                                         <p class="font-bold text-gray-900 text-sm line-clamp-2">{{ item.name }}</p>
                                         <p class="text-xs text-gray-500 mt-1 bg-gray-100 inline-block px-2 py-0.5 rounded">{{ item.variant?.attribute_values?.map(p => p.value?.value).join(' / ') || 'Mặc định' }}</p>
@@ -158,7 +176,7 @@ const statusColor = (status) => {
                                     <Link :href="route('client.order.show', order.id)"
                                         class="px-5 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-bold rounded-xl transition shadow-sm">
                                         Xem chi tiết
-                                    </Link>
+                                    </Link> 
                                 </div>
                             </div>
                         </div>

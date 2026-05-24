@@ -170,7 +170,7 @@ const fmtDate = (d) => d ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short'
 
 <template>
     <Head title="Dashboard" />
-    <div class="max-w-7xl mx-auto space-y-6 pb-10">
+    <div class="w-full space-y-6 pb-10">
 
         <!-- ─── Page Header ─── -->
         <div class="flex flex-col md:flex-row md:items-end gap-4 md:justify-between">
@@ -309,7 +309,7 @@ const fmtDate = (d) => d ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short'
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-slate-700 overflow-hidden shrink-0 border border-gray-200 dark:border-slate-600">
-                                                <img v-if="p.image_url" :src="p.image_url" class="w-full h-full object-cover" @error="$event.target.src='https://placehold.co/40x40/e2e8f0/94a3b8?text=P'; $event.target.onerror=null;">
+                                                <img v-if="p.thumbnail" :src="p.thumbnail" class="w-full h-full object-cover" @error="$event.target.src='https://placehold.co/40x40/e2e8f0/94a3b8?text=P'; $event.target.onerror=null;">
                                                 <div v-else class="w-full h-full flex items-center justify-center text-gray-300 text-xs">📦</div>
                                             </div>
                                             <span class="font-medium text-gray-800 dark:text-gray-200 line-clamp-2 text-xs leading-5">{{ p.name }}</span>
@@ -356,7 +356,7 @@ const fmtDate = (d) => d ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short'
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded bg-gray-100 dark:bg-slate-700 overflow-hidden shrink-0">
-                                                <img v-if="item.image_url" :src="item.image_url" class="w-full h-full object-cover" @error="$event.target.src='https://placehold.co/40x40/e2e8f0/94a3b8?text=P'; $event.target.onerror=null;">
+                                                <img v-if="item.thumbnail" :src="item.thumbnail" class="w-full h-full object-cover" @error="$event.target.src='https://placehold.co/40x40/e2e8f0/94a3b8?text=P'; $event.target.onerror=null;">
                                                 <div v-else class="w-full h-full flex items-center justify-center text-gray-300 text-[10px]">📦</div>
                                             </div>
                                             <span class="text-xs font-medium text-gray-800 dark:text-gray-300 line-clamp-2 leading-5">{{ item.product_name }}</span>

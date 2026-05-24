@@ -80,7 +80,7 @@ const toggleActive = (location) => {
 
 <template>
     <Head title="Cấu hình Vị trí Banner" />
-    <div class="max-w-7xl mx-auto pb-10">
+    <div class="w-full pb-10">
 
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">

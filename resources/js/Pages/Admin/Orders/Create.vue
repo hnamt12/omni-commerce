@@ -192,7 +192,7 @@ const submitOrder = async () => {
                                         <td class="px-5 py-4">
                                             <div class="flex items-center">
                                                 <div class="w-12 h-12 shrink-0 rounded bg-gray-100 dark:bg-slate-700 overflow-hidden border border-slate-200 dark:border-slate-600 mr-3">
-                                                    <img v-if="item.product?.image_url" :src="item.product.image_url" class="w-full h-full object-cover">
+                                                    <img v-if="item.product?.thumbnail" :src="item.product.thumbnail" class="w-full h-full object-cover">
                                                 </div>
                                                 <div>
                                                     <div class="font-medium text-slate-800 dark:text-slate-200 line-clamp-2">{{ getCartVariantName(item) }}</div>

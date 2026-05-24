@@ -6,6 +6,8 @@ import { useLocation } from '@/Composables/useLocation';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
+    checkout_mode:   { type: String, default: 'cart' },
+    cart_ids:        { type: Array,  default: () => [] },
     cartItems:       { type: Array,  default: () => [] },
     subtotal:        { type: Number, default: 0 },
     shippingFee:     { type: Number, default: 35000 },
@@ -58,6 +60,8 @@ const finalTotal = computed(() => Math.max(0, props.subtotal + effectiveShipping
 
 // ── Order Form ────────────────────────────────────
 const form = useForm({
+    mode:            props.checkout_mode,
+    cart_ids:        props.cart_ids,
     address_mode:    addressMode,
     address_id:      selectedAddress.value?.id ?? null,
     new_name:        props.customer?.name    ?? '',
@@ -294,7 +298,7 @@ const variantLabel = (item) => {
                                 </h3>
                                 <div class="space-y-3 max-h-52 overflow-y-auto pr-1">
                                     <div v-for="item in cartItems" :key="item.id" class="flex gap-2.5">
-                                        <img :src="item.product?.image_url ?? 'https://placehold.co/56x56/f8fafc/94a3b8?text=IMG'"
+                                        <img :src="item.product?.thumbnail ?? 'https://placehold.co/56x56/f8fafc/94a3b8?text=IMG'"
                                             class="w-14 h-14 rounded-lg object-contain border border-gray-100 bg-gray-50 p-0.5 shrink-0">
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs font-bold text-gray-800 line-clamp-1">{{ item.product?.name }}</p>

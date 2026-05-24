@@ -59,212 +59,277 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('Product submission data:', $request->all());
+        Log::info('Product store payload:', $request->all());
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'brand_id' => 'nullable|exists:brands,id',
-            'variants' => 'required|string', 
-            'image' => 'nullable|image|max:2048',
+            'brand_id'    => 'nullable|exists:brands,id',
+            'variants'    => 'required|string',
+            'thumbnail'   => 'nullable|image|max:2048',
         ]);
 
         try {
-            DB::beginTransaction();
+            $product = DB::transaction(function () use ($request) {
 
-            $imageUrl = null;
-            if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('products', 'public');
-                $imageUrl = Storage::url($path);
-            }
+                // ── 1. Upload thumbnail ──
+                $thumbnailUrl = null;
+                if ($request->hasFile('thumbnail')) {
+                    $path         = $request->file('thumbnail')->store('products/thumbnails', 'public');
+                    $thumbnailUrl = Storage::url($path);
+                }
 
-            $product = Product::create([
-                'name' => $request->name,
-                'slug' => Str::slug($request->name),
-                'category_id' => $request->category_id,
-                'brand_id' => $request->brand_id ?: null,
-                'description' => $request->description,
-                'weight' => $request->weight ? (float)$request->weight : 0,
-                'length' => $request->length ? (float)$request->length : 0,
-                'width' => $request->width ? (float)$request->width : 0,
-                'height' => $request->height ? (float)$request->height : 0,
-                'is_active' => filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN),
-                'is_featured' => filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN),
-                'image_url' => $imageUrl,
-                'base_price' => $request->base_price ?? 0,
-                'sale_price' => $request->sale_price ?: null,
-                'cost_price' => $request->cost_price ?: null,
-                'sku' => $request->sku ?? strtoupper(Str::random(8)),
-                'specifications' => json_decode($request->specifications, true) ?: null,
-            ]);
+                // ── 2. Create base Product ──
+                $product = Product::create([
+                    'name'           => $request->name,
+                    'slug'           => Str::slug($request->name),
+                    'sku'            => $request->sku ?: strtoupper(Str::random(8)),
+                    'category_id'    => $request->category_id,
+                    'brand_id'       => $request->brand_id ?: null,
+                    'description'    => $request->description,
+                    'base_price'     => $request->base_price ?? 0,
+                    'sale_price'     => $request->sale_price ?: null,
+                    'cost_price'     => $request->cost_price ?: null,
+                    'weight'         => $request->weight ? (float) $request->weight : 0,
+                    'length'         => $request->length ? (float) $request->length : 0,
+                    'width'          => $request->width  ? (float) $request->width  : 0,
+                    'height'         => $request->height ? (float) $request->height : 0,
+                    'is_active'      => $request->boolean('is_active'),
+                    'is_featured'    => $request->boolean('is_featured'),
+                    'thumbnail'      => $thumbnailUrl,
+                    'image_url'      => $thumbnailUrl,
+                    'specifications' => json_decode($request->specifications, true) ?: null,
+                ]);
 
-            $variantsData = json_decode($request->variants, true);
-            
-            if (is_array($variantsData)) {
+                // ── 3. Save Variants + sync attribute values ──
+                $variantsData = json_decode($request->variants, true) ?: [];
+
                 foreach ($variantsData as $v) {
                     $variant = $product->variants()->create([
-                        'sku' => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
-                        'price' => $v['price'] ?? 0,
-                        'original_price' => $v['original_price'] ?? null,
-                        'sale_price' => $v['sale_price'] ?? null,
-                        'cost_price' => $v['cost_price'] ?? null,
-                        'stock' => $v['stock'] ?? 0,
-                        'options' => $v['options'] ?? null,
+                        'sku'            => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
+                        'price'          => $v['price'] ?? 0,
+                        'sale_price'     => $v['sale_price'] ?? null,
+                        'cost_price'     => $v['cost_price'] ?? null,
+                        'stock'          => $v['stock'] ?? 0,
                     ]);
 
-                    if (!empty($v['attributes']) && is_array($v['attributes'])) {
-                        foreach ($v['attributes'] as $attrId => $attrValueId) {
-                            
-                            if (!is_numeric($attrValueId)) {
-                                $newVal = AttributeValue::firstOrCreate([
-                                    'attribute_id' => $attrId,
-                                    'value' => $attrValueId
-                                ]);
-                                $attrValueId = $newVal->id;
-                            }
+                    $this->syncVariantAttributes($variant, $v['attributes'] ?? []);
+                }
 
-                            $variant->attributeValues()->create([
-                                'attribute_id' => $attrId,
-                                'attribute_value_id' => $attrValueId,
-                            ]);
-                        }
+                // ── 4. Gallery images ──
+                if ($request->hasFile('gallery')) {
+                    foreach ($request->file('gallery') as $file) {
+                        $path = Storage::disk('public')->putFile('product_gallery', $file);
+                        ProductImage::create([
+                            'product_id' => $product->id,
+                            'image_url'  => Storage::url($path),
+                        ]);
                     }
                 }
-            }
 
-            if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $file) {
-                    $path = Storage::disk('public')->putFile('product_gallery', $file);
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'image_url' => Storage::url($path),
-                    ]);
-                }
-            }
-
-            DB::commit();
+                return $product;
+            });
 
             return redirect()->route('admin.products.index')->with('success', 'Tạo sản phẩm thành công.');
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("PRODUCT CREATE ERROR: " . $e->getMessage());
+            Log::error("PRODUCT CREATE ERROR: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => 'Lỗi khi lưu sản phẩm: ' . $e->getMessage()]);
         }
     }
 
     public function show($id)
     {
-        $product = Product::with(['category', 'brand', 'variants.attributeValues.attribute', 'variants.attributeValues.value'])->findOrFail($id);
-        $item_images = ProductImage::where('product_id', $id)->get();
+        $product = Product::with(['category', 'brand', 'images', 'variants.attributeValues.attribute', 'variants.attributeValues.value'])->findOrFail($id);
         
         return Inertia::render('Admin/Products/Show', [
             'product' => $product,
-            'item_images' => $item_images
+            'item_images' => $product->images,
         ]);
     }
 
     public function edit($id)
     {
-        $product = Product::with('variants.attributeValues')->findOrFail($id);
+        $product = Product::with(['images', 'category', 'brand', 'variants.attributeValues.value'])->findOrFail($id);
         $categories = Category::all(); 
         $brands = Brand::all();
-        $item_images = ProductImage::where('product_id', $id)->get();
+
+        // Pre-compute attributes with string values for the frontend Tag Input
+        // Output: [{ attribute_id: 1, values: ['Đỏ', 'Xanh'] }, ...]
+        $attrGroups = [];
+        foreach ($product->variants as $variant) {
+            foreach ($variant->attributeValues as $pva) {
+                $attrId = $pva->attribute_id;
+                $stringValue = $pva->value->value ?? (string) $pva->attribute_value_id;
+
+                if (!isset($attrGroups[$attrId])) {
+                    $attrGroups[$attrId] = [];
+                }
+                if (!in_array($stringValue, $attrGroups[$attrId])) {
+                    $attrGroups[$attrId][] = $stringValue;
+                }
+            }
+        }
+        $productAttributes = [];
+        foreach ($attrGroups as $attrId => $values) {
+            $productAttributes[] = ['attribute_id' => $attrId, 'values' => $values];
+        }
 
         return Inertia::render('Admin/Products/Form', [
             'product' => $product,
             'categories' => $categories,
             'brands' => $brands,
             'attributes' => \App\Models\Attribute::with('values')->get(),
-            'item_images' => $item_images
+            'item_images' => $product->images,
+            'product_attributes' => $productAttributes,
         ]);
     }
 
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'        => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'variants' => 'required|string',
+            'brand_id'    => 'nullable|exists:brands,id',
+            'variants'    => 'required|string',
+            'thumbnail'   => 'nullable|image|max:2048',
         ]);
 
         try {
-            DB::beginTransaction();
-            $product->update([
-                'name' => $request->name,
-                'slug' => Str::slug($request->name),
-                'sku' => $request->sku ?? $product->sku,
-                'category_id' => $request->category_id,
-                'brand_id' => $request->brand_id ?: null,
-                'description' => $request->description,
-                'weight' => $request->weight ? (float)$request->weight : 0,
-                'length' => $request->length ? (float)$request->length : 0,
-                'width' => $request->width ? (float)$request->width : 0,
-                'height' => $request->height ? (float)$request->height : 0,
-                'is_active' => filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN),
-                'is_featured' => filter_var($request->is_featured, FILTER_VALIDATE_BOOLEAN),
-                'base_price' => $request->base_price ?? $product->base_price,
-                'sale_price' => $request->sale_price ?: null,
-                'cost_price' => $request->cost_price ?: null,
-                'specifications' => json_decode($request->specifications, true) ?: null,
-            ]);
+            DB::transaction(function () use ($request, $product) {
 
-            if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('products', 'public');
-                $product->update(['image_url' => Storage::url($path)]);
-            }
+                // ── 1. Update base Product ──
+                $product->update([
+                    'name'           => $request->name,
+                    'slug'           => Str::slug($request->name),
+                    'sku'            => $request->sku ?: $product->sku,
+                    'category_id'    => $request->category_id,
+                    'brand_id'       => $request->brand_id ?: null,
+                    'description'    => $request->description,
+                    'base_price'     => $request->base_price ?? $product->base_price,
+                    'sale_price'     => $request->sale_price ?: null,
+                    'cost_price'     => $request->cost_price ?: null,
+                    'weight'         => $request->weight ? (float) $request->weight : 0,
+                    'length'         => $request->length ? (float) $request->length : 0,
+                    'width'          => $request->width  ? (float) $request->width  : 0,
+                    'height'         => $request->height ? (float) $request->height : 0,
+                    'is_active'      => $request->boolean('is_active'),
+                    'is_featured'    => $request->boolean('is_featured'),
+                    'specifications' => json_decode($request->specifications, true) ?: null,
+                ]);
 
-            $variantsData = json_decode($request->variants, true);
-            $keptVariantIds = [];
+                // ── 2. Upload thumbnail (if new one provided) ──
+                if ($request->hasFile('thumbnail')) {
+                    $path = $request->file('thumbnail')->store('products/thumbnails', 'public');
+                    $url = Storage::url($path);
+                    $product->update([
+                        'thumbnail' => $url,
+                        'image_url' => $url,
+                    ]);
+                }
 
-            if (is_array($variantsData)) {
-                foreach ($variantsData as $v) {
-                    $variantId = $v['id'] ?? null;
-                    if ($variantId) {
-                        $variant = \App\Models\ProductVariant::find($variantId);
-                        if ($variant && $variant->product_id == $product->id) {
-                            $variant->update([
-                            'sku' => $v['sku'], 'price' => $v['price'],
-                            'original_price' => $v['original_price'] ?? null,
-                            'sale_price' => $v['sale_price'] ?? null,
-                            'cost_price' => $v['cost_price'] ?? null,
-                            'stock' => $v['stock'],
-                        ]);
-                            $keptVariantIds[] = $variant->id;
-                        }
-                    } else {
-                        $variant = $product->variants()->create([
-                            'sku' => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
-                            'price' => $v['price'] ?? 0,
-                            'original_price' => $v['original_price'] ?? null,
-                            'sale_price' => $v['sale_price'] ?? null,
-                            'cost_price' => $v['cost_price'] ?? null,
-                            'stock' => $v['stock'] ?? 0,
-                        ]);
-                        $keptVariantIds[] = $variant->id;
-                    }
+                // ── 3a. Delete removed gallery images ──
+                if ($request->has('deleted_images')) {
+                    $deletedIds = json_decode($request->deleted_images, true) ?: [];
+                    if (!empty($deletedIds)) {
+                        $imagesToDelete = ProductImage::where('product_id', $product->id)
+                            ->whereIn('id', $deletedIds)
+                            ->get();
 
-                    if (isset($variant)) {
-                        $variant->attributeValues()->delete(); // Reset map
-                        if (!empty($v['attributes']) && is_array($v['attributes'])) {
-                            foreach ($v['attributes'] as $attrId => $attrValueId) {
-                                if (!is_numeric($attrValueId)) {
-                                    $newVal = \App\Models\AttributeValue::firstOrCreate(['attribute_id' => $attrId, 'value' => $attrValueId]);
-                                    $attrValueId = $newVal->id;
-                                }
-                                $variant->attributeValues()->create(['attribute_id' => $attrId, 'attribute_value_id' => $attrValueId]);
-                            }
+                        foreach ($imagesToDelete as $img) {
+                            // Convert stored URL back to relative path for deletion
+                            $relativePath = str_replace('/storage/', '', $img->image_url);
+                            Storage::disk('public')->delete($relativePath);
+                            $img->delete();
                         }
                     }
                 }
-            }
-            $product->variants()->whereNotIn('id', $keptVariantIds)->delete(); // Chỉ xóa biến thể bị gỡ bỏ
-            DB::commit();
+
+                // ── 3b. Upload new gallery images ──
+                if ($request->hasFile('gallery')) {
+                    foreach ($request->file('gallery') as $file) {
+                        $path = Storage::disk('public')->putFile('product_gallery', $file);
+                        ProductImage::create([
+                            'product_id' => $product->id,
+                            'image_url'  => Storage::url($path),
+                        ]);
+                    }
+                }
+
+                // ── 4. Upsert Variants + sync attribute values ──
+                $variantsData  = json_decode($request->variants, true) ?: [];
+                $keptVariantIds = [];
+
+                foreach ($variantsData as $v) {
+                    $variantPayload = [
+                        'sku'            => $v['sku'] ?? ($product->sku . '-' . strtoupper(Str::random(4))),
+                        'price'          => $v['price'] ?? 0,
+                        'sale_price'     => $v['sale_price'] ?? null,
+                        'cost_price'     => $v['cost_price'] ?? null,
+                        'stock'          => $v['stock'] ?? 0,
+                    ];
+
+                    $existingId = $v['id'] ?? null;
+
+                    if ($existingId) {
+                        // Update existing variant (only if it truly belongs to this product)
+                        $variant = $product->variants()->where('id', $existingId)->first();
+                        if ($variant) {
+                            $variant->update($variantPayload);
+                        } else {
+                            // ID provided but doesn't belong to this product → create new
+                            $variant = $product->variants()->create($variantPayload);
+                        }
+                    } else {
+                        $variant = $product->variants()->create($variantPayload);
+                    }
+
+                    $keptVariantIds[] = $variant->id;
+
+                    // Sync attribute values for this variant
+                    $this->syncVariantAttributes($variant, $v['attributes'] ?? []);
+                }
+
+                // ── 4. Delete orphaned variants ──
+                $product->variants()->whereNotIn('id', $keptVariantIds)->each(function ($orphan) {
+                    $orphan->attributeValues()->delete();
+                    $orphan->delete();
+                });
+            });
+
             return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công.');
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("PRODUCT UPDATE ERROR: " . $e->getMessage());
+            Log::error("PRODUCT UPDATE ERROR: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Sync attribute values for a single variant.
+     * Deletes existing rows then re-creates from the attributes map.
+     *
+     * @param  \App\Models\ProductVariant  $variant
+     * @param  array  $attributes  e.g. { "1": "3", "2": "Red" }
+     */
+    private function syncVariantAttributes($variant, array $attributes): void
+    {
+        // Wipe existing attribute rows for this variant
+        $variant->attributeValues()->delete();
+
+        foreach ($attributes as $attrId => $attrValueId) {
+            // If value is a string name (not numeric id), resolve or create it
+            if (!is_numeric($attrValueId)) {
+                $resolved = AttributeValue::firstOrCreate(
+                    ['attribute_id' => $attrId, 'value' => $attrValueId]
+                );
+                $attrValueId = $resolved->id;
+            }
+
+            $variant->attributeValues()->create([
+                'attribute_id'       => $attrId,
+                'attribute_value_id' => $attrValueId,
+            ]);
         }
     }
 

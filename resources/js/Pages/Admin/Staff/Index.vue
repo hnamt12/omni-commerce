@@ -26,7 +26,7 @@ const deleteStaff = async (id) => {
 <template>
         <Head title="Quản lý Nhân sự" />
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="w-full py-6">
             <div class="flex items-center justify-between gap-4 mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white transition-all duration-300">Quản lý
@@ -96,9 +96,20 @@ const deleteStaff = async (id) => {
                                 </td>
                             </tr>
                             <tr v-if="staff.data.length === 0">
-                                <td colspan="4"
-                                    class="px-6 py-8 text-center text-gray-500 italic bg-gray-50/50 dark:bg-slate-800/50">
-                                    Không có nhân sự nào được tìm thấy.
+                                <td colspan="4" class="px-6 py-12 text-center bg-gray-50/50 dark:bg-slate-800/30">
+                                    <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
+                                        <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100 dark:border-indigo-800">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Chưa có nhân sự</h3>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Hệ thống hiện chưa có tài khoản nhân viên nào. Hãy tạo tài khoản đầu tiên để bắt đầu phân quyền quản trị.</p>
+                                        <Link :href="route('admin.staff.create')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-500/20 transition-all duration-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            Thêm nhân sự đầu tiên
+                                        </Link>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ClientLayout from '@/Layouts/Client/ClientLayout.vue';
 
@@ -11,11 +11,28 @@ const props = defineProps({
 const loading = ref({});
 const errMsg  = ref('');
 
+const selectedIds = ref([]);
+
+onMounted(() => {
+    selectedIds.value = props.cartItems.map(i => i.id);
+});
+
+const selectAll = computed({
+    get: () => props.cartItems.length > 0 && selectedIds.value.length === props.cartItems.length,
+    set: (val) => { selectedIds.value = val ? props.cartItems.map(i => i.id) : []; }
+});
+
+const selectedSubtotal = computed(() => {
+    return props.cartItems
+        .filter(item => selectedIds.value.includes(item.id))
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
+});
+
 const FREESHIP_THRESHOLD = 5_000_000;
 
 // Dùng trực tiếp props.subtotal thay vì local computed
-const freeshipGap = computed(() => Math.max(0, FREESHIP_THRESHOLD - props.subtotal));
-const freeshipPct = computed(() => Math.min(100, Math.round((props.subtotal / FREESHIP_THRESHOLD) * 100)));
+const freeshipGap = computed(() => Math.max(0, FREESHIP_THRESHOLD - selectedSubtotal.value));
+const freeshipPct = computed(() => Math.min(100, Math.round((selectedSubtotal.value / FREESHIP_THRESHOLD) * 100)));
 
 const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n) + 'đ';
 
@@ -58,6 +75,15 @@ const removeItem = (item) => {
         onFinish: () => { loading.value[item.id] = false; },
         onError: () => { errMsg.value = 'Không thể xóa sản phẩm. Thử lại!'; },
     });
+};
+
+// ── Go To Checkout ────────────────────────────────────────────────
+const goToCheckout = () => {
+    if (selectedIds.value.length === 0) {
+        errMsg.value = 'Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!';
+        return;
+    }
+    router.get(route('client.checkout'), { cart_ids: selectedIds.value });
 };
 </script>
 
@@ -110,16 +136,27 @@ const removeItem = (item) => {
                             </div>
                         </div>
 
+                        <!-- Select All Header -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 flex items-center justify-between">
+                            <label class="flex items-center gap-3 cursor-pointer font-bold text-gray-800 text-sm">
+                                <input type="checkbox" v-model="selectAll" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                                Chọn tất cả ({{ cartItems.length }} sản phẩm)
+                            </label>
+                        </div>
+
                         <!-- Cart items -->
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
                             <div v-for="item in cartItems" :key="item.id"
                                 class="flex gap-4 p-4 transition"
                                 :class="loading[item.id] ? 'opacity-50 pointer-events-none' : ''">
 
+                                <!-- Checkbox -->
+                                <input type="checkbox" v-model="selectedIds" :value="item.id" class="w-5 h-5 mt-2 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 cursor-pointer shrink-0">
+
                                 <!-- Product Image -->
                                 <Link :href="route('client.product.detail', item.product?.slug ?? '#')"
                                     class="shrink-0">
-                                    <img :src="item.product?.thumbnail ?? item.product?.image_url ?? 'https://placehold.co/80x80/f8fafc/94a3b8?text=No+Image'"
+                                    <img :src="item.product?.thumbnail ?? 'https://placehold.co/80x80/f8fafc/94a3b8?text=No+Image'"
                                         :alt="item.product?.name"
                                         class="w-20 h-20 object-contain rounded-xl border border-gray-100 bg-gray-50 p-1">
                                 </Link>
@@ -171,8 +208,8 @@ const removeItem = (item) => {
                             </h2>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between text-gray-600">
-                                    <span>Tạm tính ({{ cartItems.length }} sản phẩm)</span>
-                                    <span class="font-semibold text-gray-800">{{ vnd(subtotal) }}</span>
+                                    <span>Tạm tính ({{ selectedIds.length }} sản phẩm)</span>
+                                    <span class="font-semibold text-gray-800">{{ vnd(selectedSubtotal) }}</span>
                                 </div>
                                 <div class="flex justify-between text-gray-600">
                                     <span>Phí vận chuyển</span>
@@ -184,7 +221,7 @@ const removeItem = (item) => {
                                 </div>
                                 <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
                                     <span class="font-black text-gray-900 text-base">Tổng cộng</span>
-                                    <span class="font-black text-red-600 text-xl">{{ vnd(subtotal) }}</span>
+                                    <span class="font-black text-red-600 text-xl">{{ vnd(selectedSubtotal) }}</span>
                                 </div>
                             </div>
 
@@ -198,10 +235,7 @@ const removeItem = (item) => {
                             </div>
 
                             <!-- Checkout button -->
-                            <Link :href="route('client.checkout')"
-                                class="mt-5 flex items-center justify-center gap-2 w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-sm uppercase tracking-wide shadow-md hover:shadow-red-200 transition-all">
-                                ⚡ Tiến hành thanh toán
-                            </Link>
+                            <button @click="goToCheckout" class="mt-5 flex items-center justify-center gap-2 w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-sm uppercase tracking-wide shadow-md hover:shadow-red-200 transition-all">⚡ Tiến hành thanh toán</button>
 
                             <!-- Trust badges -->
                             <div class="mt-4 flex justify-around text-xs text-gray-400 text-center">

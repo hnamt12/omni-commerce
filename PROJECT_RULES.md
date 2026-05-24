@@ -21,3 +21,8 @@
 # 5. KNOWLEDGE BASE & DOCUMENTATION
 - Mỗi khi hoàn thành một cụm tính năng lớn, Agent BẮT BUỘC tự động mở/tạo file `SYSTEM_ARCHITECTURE.md` ở thư mục gốc.
 - Trong file này, Agent phải giải thích bằng tiếng Việt: Luồng dữ liệu chạy thế nào? Các file cốt lõi nằm ở đâu? Tại sao lại code như vậy? (Mục đích để developer con người đọc và học hỏi).
+
+# 6. CODING STANDARDS (PHP 8.2+)
+- MỌI Model: BẮT BUỘC phải khai báo đầy đủ `$fillable` và `$casts` (dùng `->casts([...])` hoặc method `casts()` trả về array).KHÔNG để trống hoặc comment.
+- MỌI Model quan hệ: Khi định nghĩa relationship (hasMany, belongsTo), BẮT BUỘC dùng Type Hinting cho tham số của method (VD: `function orders(): HasMany` thay vì `function orders()`).
+- Model quan hệ: Khi định nghĩa relationship (hasMany, belongsTo), BẮT BUỘC dùng Type Hinting cho tham số của method (VD: `function orders(): HasMany` thay vì `function orders()`).

@@ -23,6 +23,7 @@ class Product extends Model
         'sale_price',
         'cost_price',
         'description',
+        'thumbnail',
         'weight',
         'length',
         'width',
@@ -45,6 +46,8 @@ class Product extends Model
             'sale_price' => 'decimal:2',
             'cost_price' => 'decimal:2',
             'specifications' => 'array',
+            'is_active' => 'boolean',
+            'is_featured' => 'boolean',
         ];
     }
 

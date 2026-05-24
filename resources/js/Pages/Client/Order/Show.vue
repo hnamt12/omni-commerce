@@ -8,6 +8,15 @@ const props = defineProps({ order: Object });
 const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
 const formatDate = (d) => new Date(d).toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
+const resolveItemImage = (item) => {
+    const fallback = 'https://placehold.co/80x80/f8fafc/94a3b8?text=IMG';
+    if (!item) return fallback;
+    if (item.image_url && item.image_url.trim() !== '') return item.image_url;
+    if (item.product?.thumbnail && item.product.thumbnail.trim() !== '') return item.product.thumbnail;
+    if (item.product?.image_url && item.product.image_url.trim() !== '') return item.product.image_url;
+    return fallback;
+};
+
 const cancelOrder = (id) => {
     Swal.fire({
         title: 'Hủy đơn hàng?',
@@ -132,7 +141,7 @@ const cancelOrder = (id) => {
                     <div class="flex-1 overflow-y-auto max-h-[360px] p-4 space-y-3 bg-gray-50/30">
                         <div v-for="item in order.items" :key="item.id"
                             class="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                            <img :src="item.image_url || 'https://placehold.co/64x64/f8fafc/94a3b8?text=IMG'"
+                            <img :src="resolveItemImage(item)"
                                 class="w-16 h-16 object-cover rounded-lg border border-gray-100 shrink-0">
                             <div class="flex-1 min-w-0">
                                 <h4 class="text-sm font-bold text-gray-900 line-clamp-2">{{ item.name }}</h4>

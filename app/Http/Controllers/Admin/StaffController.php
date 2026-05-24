@@ -16,12 +16,32 @@ class StaffController extends Controller
 {
     public function index()
     {
+        // Self-healing: Ensure 'staff' role exists
+        Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+        
         $staff = User::role('staff')->with(['permissions', 'roles'])->latest()->paginate(10);
         return Inertia::render('Admin/Staff/Index', ['staff' => $staff]);
     }
 
+    private function ensurePermissionsExist()
+    {
+        $permissions = [
+            'view_orders', 'update_orders', 'manage_cancel_requests',
+            'manage_banners', 'manage_vouchers', 'manage_flash_sales', 'manage_posts',
+            'view_inventory', 'update_stock',
+            'view_analytics', 'export_reports',
+            'manage_products', 'manage_categories',
+            'manage_users', 'manage_settings'
+        ];
+
+        foreach ($permissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+        }
+    }
+
     public function create()
     {
+        $this->ensurePermissionsExist();
         return Inertia::render('Admin/Staff/Form');
     }
 
@@ -62,6 +82,7 @@ class StaffController extends Controller
 
     public function edit(User $staff)
     {
+        $this->ensurePermissionsExist();
         $staffData = $staff->toArray();
         $staffData['permissions'] = $staff->getAllPermissions()->pluck('name');
         return Inertia::render('Admin/Staff/Form', ['staff' => $staffData]);

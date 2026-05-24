@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ClientLayout from '@/Layouts/Client/ClientLayout.vue';
 import Swal from 'sweetalert2';
@@ -6,11 +7,13 @@ import Swal from 'sweetalert2';
 const props = defineProps({ order: Object, vietqr: Object });
 const vnd = (n) => new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ';
 
+const transferContent = computed(() => `OMNI ${props.order.order_code}`);
+
 const generateVietQrUrl = () => {
     if (!props.vietqr?.bank_id || !props.vietqr?.bank_account) return null;
     return `https://img.vietqr.io/image/${props.vietqr.bank_id}-${props.vietqr.bank_account}-compact2.png`
          + `?amount=${props.order.grand_total}`
-         + `&addInfo=${encodeURIComponent(props.order.order_code)}`
+         + `&addInfo=${encodeURIComponent(transferContent.value)}`
          + `&accountName=${encodeURIComponent(props.vietqr.bank_owner || '')}`;
 };
 
@@ -35,13 +38,31 @@ const confirmPayment = () => {
         }
     });
 };
+const downloadQR = async () => {
+    const url = generateVietQrUrl();
+    if (!url) return;
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `QR_OMNI_${props.order.order_code}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+        window.open(url, '_blank');
+    }
+};
 </script>
 
 <template>
     <Head title="Thanh toán đơn hàng" />
     <ClientLayout>
         <div class="bg-[#f5f5fa] min-h-[80vh] py-10 px-4 flex items-center justify-center">
-            <div class="max-w-4xl w-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="max-w-5xl w-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
 
                 <!-- ── Header Bar ── -->
                 <div class="bg-indigo-600 px-8 py-5 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -56,7 +77,7 @@ const confirmPayment = () => {
                 </div>
 
                 <!-- ── Body: 2-column layout ── -->
-                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10">
+                <div class="p-10 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10">
 
                     <!-- LEFT: QR Code -->
                     <div class="flex flex-col items-center justify-center pb-8 md:pb-0 border-b md:border-b-0 md:border-r border-dashed border-gray-200 md:pr-10">
@@ -65,11 +86,19 @@ const confirmPayment = () => {
                             <img v-if="generateVietQrUrl()"
                                  :src="generateVietQrUrl()"
                                  alt="VietQR Payment"
-                                 class="w-56 h-56 object-contain">
-                            <div v-else class="w-56 h-56 flex items-center justify-center bg-gray-50 rounded-xl">
+                                 class="w-64 h-64 sm:w-72 sm:h-72 object-contain">
+                            <div v-else class="w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center bg-gray-50 rounded-xl">
                                 <p class="text-xs text-gray-400 text-center px-4">Chưa cấu hình tài khoản ngân hàng</p>
                             </div>
                         </div>
+                        <!-- Download Button -->
+                        <button v-if="generateVietQrUrl()" @click="downloadQR"
+                            class="mt-4 mb-2 flex items-center justify-center gap-2 w-full max-w-[288px] mx-auto py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl transition border border-indigo-200 shadow-sm">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Tải mã QR về máy
+                        </button>
                         <!-- Badge -->
                         <div class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full font-bold text-sm">
                             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +136,7 @@ const confirmPayment = () => {
                                 </div>
                                 <div class="flex justify-between items-center bg-amber-50 border border-amber-100 px-4 py-3 rounded-xl">
                                     <span class="text-amber-800 font-medium text-xs uppercase tracking-wide">Nội dung CK:</span>
-                                    <span class="font-black text-gray-900 uppercase tracking-widest text-sm font-mono">{{ order.order_code }}</span>
+                                    <span class="font-black text-gray-900 uppercase tracking-widest text-sm font-mono">{{ transferContent }}</span>
                                 </div>
                             </div>
 

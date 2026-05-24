@@ -213,7 +213,7 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
 
 <template>
     <Head :title="'⚡ ' + flashSale.name" />
-    <div class="max-w-7xl mx-auto pb-10">
+    <div class="w-full pb-10">
 
         <!-- ─ HEADER ─ -->
         <div class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -264,7 +264,7 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                         <p v-else-if="searchQuery && !isSearching && !searchResults.length" class="text-center text-sm text-gray-400 py-6">Không tìm thấy sản phẩm phù hợp.</p>
                         <button v-for="prod in searchResults" :key="prod.id" @click="openModal(prod)"
                             class="w-full text-left px-3.5 py-3 rounded-lg border border-gray-100 bg-gray-50 hover:border-orange-400 hover:bg-orange-50 transition flex items-center gap-3">
-                            <img v-if="prod.image_url" :src="prod.image_url"
+                            <img v-if="prod.thumbnail" :src="prod.thumbnail"
                                 class="w-9 h-9 rounded object-cover border border-gray-200 shrink-0"
                                 @error="$event.target.src='https://placehold.co/40x40/e2e8f0/64748b?text=?'; $event.target.onerror=null;">
                             <div v-else class="w-9 h-9 rounded bg-gray-100 flex items-center justify-center shrink-0">
@@ -315,7 +315,7 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                                     <td class="px-4 py-3.5 text-center text-gray-400 font-medium">{{ idx + 1 }}</td>
                                     <td class="px-4 py-3.5">
                                         <div class="flex items-center gap-2.5">
-                                            <img v-if="group.product.image_url" :src="group.product.image_url"
+                                            <img v-if="group.product.thumbnail" :src="group.product.thumbnail"
                                                 class="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0"
                                                 @error="$event.target.src='https://placehold.co/40x40/e2e8f0/64748b?text=?'; $event.target.onerror=null;">
                                             <div v-else class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">

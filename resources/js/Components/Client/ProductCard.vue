@@ -57,7 +57,7 @@ const detailHref = computed(() => {
         <!-- Product Image -->
         <Link :href="detailHref" class="block p-4 h-44 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img
-                :src="product.image_url || product.image || 'https://placehold.co/300x300/f8fafc/94a3b8?text=No+Image'"
+                :src="product.thumbnail || product.image || 'https://placehold.co/300x300/f8fafc/94a3b8?text=No+Image'"
                 :alt="product.name"
                 class="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm">
         </Link>

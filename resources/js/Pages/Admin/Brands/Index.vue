@@ -42,7 +42,7 @@ const deleteBrand = async (id) => {
 <template>
     <Head title="Quản lý Thương hiệu" />
 
-            <div class="max-w-7xl mx-auto">
+            <div class="w-full">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>

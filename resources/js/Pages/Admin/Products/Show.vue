@@ -33,7 +33,7 @@ const priceDisplay = computed(() => {
 <template>
     <Head :title="`Chi tiết ${product.name}`" />
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="w-full py-6">
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 mb-6">
             <div>
@@ -62,7 +62,7 @@ const priceDisplay = computed(() => {
                 <div class="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-gray-100 dark:border-slate-700 p-5">
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase mb-4 border-b border-gray-100 dark:border-slate-700 pb-2">Hình ảnh chính</h3>
                     <div class="w-full aspect-square bg-gray-50 dark:bg-slate-900 rounded-md border border-gray-200 dark:border-slate-700 flex items-center justify-center overflow-hidden mb-4 relative group">
-                        <img v-if="product.image_url" :src="product.image_url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img v-if="product.thumbnail || product.image_url" :src="product.thumbnail || product.image_url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <svg v-else class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     </div>
                     

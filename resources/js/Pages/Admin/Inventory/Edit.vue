@@ -64,7 +64,7 @@ const fmt = (n) => new Intl.NumberFormat('vi-VN').format(n || 0);
 
 <template>
     <Head :title="'📦 Kiểm kho: ' + product.name" />
-    <div class="max-w-7xl mx-auto pb-10">
+    <div class="w-full pb-10">
 
         <!-- Header -->
         <div class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
