@@ -36,45 +36,14 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    public function share(Request $request): array
+   public function share(Request $request): array
     {
-        // Cart count & Favorites:
-        $cartCount = 0;
-        $favoriteProductIds = [];
-        if ($customerId = auth('customer')->id()) {
-            $cartCount = Cart::where('customer_id', '=', $customerId)->count();
-            $favoriteProductIds = Favorite::where('customer_id', $customerId)->pluck('product_id')->toArray();
-        }
-
-        // BẮT BUỘC PHẢI DÙNG array_merge VỚI parent::share
         return array_merge(parent::share($request), [
             'auth' => [
-                // Admin (guard: web)
-                'user' => function () use ($request) {
-                    $user = $request->user(); // web guard only
-                    if (! $user) {
-                        return null;
-                    }
-
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'avatar' => $user->avatar ?? null,
-                        'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
-                        'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
-
-                        // Đếm số lượng thông báo chưa đọc cho Badge đỏ (loại trừ thông báo chat)
-                        'unread_notifications_count' => $user->unreadNotifications()->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')->count(),
-                        'unread_chat_count' => Conversation::whereHas('messages', function ($query) {
-                            $query->where('sender_type', 'customer')->where('status', 'unread');
-                        })->count(),
-
-                        // Lấy 5 thông báo mới nhất (đã đọc và chưa đọc) để hiển thị trong Dropdown cái chuông (loại trừ thông báo chat)
-                        'notifications' => $user->notifications()->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')->take(5)->get(),
-                    ];
-                },
-                // Client (guard: customer)
+                // Tách logic Admin phức tạp ra phương thức chuyên biệt
+                'user' => fn () => $this->shareAdminData($request),
+                
+                // Giữ lại Client động
                 'customer' => fn () => auth('customer')->user()
                     ? auth('customer')->user()->only(['id', 'name', 'email', 'avatar'])
                     : null,
@@ -83,8 +52,50 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            'cartCount' => $cartCount,
-            'favoriteProductIds' => $favoriteProductIds,
+            // CLEAN & OPTIMIZED: Ép dữ liệu Cart & Favorites chạy Lazy qua Closure
+            'cartCount' => fn () => auth('customer')->check() 
+                ? Cart::where('customer_id', auth('customer')->id())->count() 
+                : 0,
+                
+            'favoriteProductIds' => fn () => auth('customer')->check()
+                ? Favorite::where('customer_id', auth('customer')->id())->pluck('product_id')->toArray()
+                : [],
         ]);
+    }
+
+    /**
+     * Định dạng dữ liệu và xử lý logic riêng cho Admin Guard
+     */
+    protected function shareAdminData(Request $request): ?array
+    {
+        $user = $request->user(); // web guard mặc định
+        
+        if (! $user) {
+            return null;
+        }
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $user->avatar ?? null,
+            'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
+            'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
+            
+            // Xử lý thông báo chưa đọc
+            'unread_notifications_count' => $user->unreadNotifications()
+                ->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')
+                ->count(),
+                
+            'unread_chat_count' => Conversation::whereHas('messages', function ($query) {
+                $query->where('sender_type', 'customer')->where('status', 'unread');
+            })->count(),
+
+            // Nạp top 5 thông báo mới nhất
+            'notifications' => $user->notifications()
+                ->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')
+                ->take(5)
+                ->get(),
+        ];
     }
 }
