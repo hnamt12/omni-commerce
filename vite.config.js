@@ -8,6 +8,11 @@ export default defineConfig({
         host: '127.0.0.1',
         port: 5173,
     },
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
+        manifest: true,
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
