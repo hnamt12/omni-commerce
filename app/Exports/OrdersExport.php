@@ -4,12 +4,12 @@ namespace App\Exports;
 
 use App\Models\Order;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class OrdersExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithTitle
+class OrdersExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithTitle
 {
     public function title(): string
     {

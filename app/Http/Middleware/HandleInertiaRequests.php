@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Cart;
+use App\Models\Conversation;
+use App\Models\Favorite;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use App\Models\Cart;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -34,14 +36,14 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-   public function share(Request $request): array
+    public function share(Request $request): array
     {
         // Cart count & Favorites:
         $cartCount = 0;
         $favoriteProductIds = [];
         if ($customerId = auth('customer')->id()) {
             $cartCount = Cart::where('customer_id', '=', $customerId)->count();
-            $favoriteProductIds = \App\Models\Favorite::where('customer_id', $customerId)->pluck('product_id')->toArray();
+            $favoriteProductIds = Favorite::where('customer_id', $customerId)->pluck('product_id')->toArray();
         }
 
         // BẮT BUỘC PHẢI DÙNG array_merge VỚI parent::share
@@ -50,21 +52,24 @@ class HandleInertiaRequests extends Middleware
                 // Admin (guard: web)
                 'user' => function () use ($request) {
                     $user = $request->user(); // web guard only
-                    if (!$user) return null;
+                    if (! $user) {
+                        return null;
+                    }
+
                     return [
-                        'id'          => $user->id,
-                        'name'        => $user->name,
-                        'email'       => $user->email,
-                        'avatar'      => $user->avatar ?? null,
-                        'roles'       => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'avatar' => $user->avatar ?? null,
+                        'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
                         'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
-                        
+
                         // Đếm số lượng thông báo chưa đọc cho Badge đỏ (loại trừ thông báo chat)
                         'unread_notifications_count' => $user->unreadNotifications()->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')->count(),
-                        'unread_chat_count' => \App\Models\Conversation::whereHas('messages', function ($query) {
+                        'unread_chat_count' => Conversation::whereHas('messages', function ($query) {
                             $query->where('sender_type', 'customer')->where('status', 'unread');
                         })->count(),
-                        
+
                         // Lấy 5 thông báo mới nhất (đã đọc và chưa đọc) để hiển thị trong Dropdown cái chuông (loại trừ thông báo chat)
                         'notifications' => $user->notifications()->where('type', '!=', 'App\\Notifications\\NewChatMessageNotification')->take(5)->get(),
                     ];
@@ -76,7 +81,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
-                'error'   => fn () => $request->session()->get('error'),
+                'error' => fn () => $request->session()->get('error'),
             ],
             'cartCount' => $cartCount,
             'favoriteProductIds' => $favoriteProductIds,

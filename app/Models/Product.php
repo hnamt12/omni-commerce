@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use SoftDeletes;
-    use HasFactory;
     use Auditable;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'category_id',
@@ -84,7 +85,7 @@ class Product extends Model
         return $this->hasMany(Review::class, 'product_id');
     }
 
-    public function favoritedBy(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function favoritedBy(): BelongsToMany
     {
         return $this->belongsToMany(Customer::class, 'favorites', 'product_id', 'customer_id');
     }

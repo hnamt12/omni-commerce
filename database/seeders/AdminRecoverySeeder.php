@@ -15,7 +15,7 @@ class AdminRecoverySeeder extends Seeder
     public function run(): void
     {
         $admin = User::firstOrCreate([
-            'email' => 'admin@gmail.com'
+            'email' => 'admin@gmail.com',
         ], [
             'name' => 'Super Admin',
             'password' => Hash::make('123456'),

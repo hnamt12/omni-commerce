@@ -2,14 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
-use App\Models\Customer;
 use App\Models\ProductVariant;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class OrderSeeder extends Seeder
 {
@@ -25,7 +28,7 @@ class OrderSeeder extends Seeder
         }
 
         // Lấy staff user đầu tiên để gán vào đơn
-        $staffId = \App\Models\User::first()?->id;
+        $staffId = User::first()?->id;
 
         $scenarios = [
             ['status' => 'Chờ xác nhận',       'history' => ['Chờ xác nhận']],
@@ -49,57 +52,70 @@ class OrderSeeder extends Seeder
         $paymentMethods = ['cod', 'banking', 'vnpay', 'momo'];
 
         foreach ($scenarios as $i => $scenario) {
-            $customer   = $customers[$i % count($customers)];
-            $addr       = $addresses[$i % count($addresses)];
+            $customer = $customers[$i % count($customers)];
+            $addr = $addresses[$i % count($addresses)];
             $pickedVars = $variants->random(min(max(1, rand(1, 3)), $variants->count()));
-            if (!$pickedVars instanceof \Illuminate\Support\Collection) {
+            if (! $pickedVars instanceof Collection) {
                 $pickedVars = collect([$pickedVars]);
             }
 
             $items = $pickedVars->map(function ($v) {
                 $qty = rand(1, 3);
+
                 return [
-                    'variant'     => $v,
-                    'qty'         => $qty,
-                    'unit_price'  => (float)($v->price ?? 99000),
-                    'total_price' => (float)($v->price ?? 99000) * $qty,
+                    'variant' => $v,
+                    'qty' => $qty,
+                    'unit_price' => (float) ($v->price ?? 99000),
+                    'total_price' => (float) ($v->price ?? 99000) * $qty,
                 ];
             });
 
-            $subtotal       = $items->sum('total_price');
-            $shippingFee    = [0, 25000, 30000, 35000][rand(0, 3)];
+            $subtotal = $items->sum('total_price');
+            $shippingFee = [0, 25000, 30000, 35000][rand(0, 3)];
             $discountAmount = 0;
-            $grandTotal     = $subtotal + $shippingFee - $discountAmount;
-            $isCompleted    = in_array($scenario['status'], ['Đã hoàn thành']);
-            $isCanceled     = in_array($scenario['status'], ['Đã hủy', 'Trả hàng/Hoàn tiền']);
+            $grandTotal = $subtotal + $shippingFee - $discountAmount;
+            $isCompleted = in_array($scenario['status'], ['Đã hoàn thành']);
+            $isCanceled = in_array($scenario['status'], ['Đã hủy', 'Trả hàng/Hoàn tiền']);
 
             // Chỉ dùng các cột chắc chắn tồn tại trong DB
             $baseData = [
-                'order_code'     => 'ORD-' . strtoupper(Str::random(7)),
-                'customer_id'    => $customer->id,
-                'name'           => $customer->name,
-                'phone'          => $customer->phone ?? '09' . rand(10000000, 99999999),
-                'address'        => $addr['address'],
-                'subtotal'       => $subtotal,
-                'shipping_fee'   => $shippingFee,
+                'order_code' => 'ORD-'.strtoupper(Str::random(7)),
+                'customer_id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone ?? '09'.rand(10000000, 99999999),
+                'address' => $addr['address'],
+                'subtotal' => $subtotal,
+                'shipping_fee' => $shippingFee,
                 'discount_amount' => $discountAmount,
-                'grand_total'    => $grandTotal,
+                'grand_total' => $grandTotal,
                 'payment_method' => $paymentMethods[rand(0, 3)],
                 'payment_status' => $isCompleted ? 'paid' : 'unpaid',
-                'status'         => $scenario['status'],
-                'cancel_reason'  => $isCanceled ? 'Khách hàng yêu cầu hủy / trả hàng' : null,
-                'created_at'     => now()->subDays(rand(1, 60))->subHours(rand(0, 12)),
-                'updated_at'     => now()->subDays(rand(0, 5)),
+                'status' => $scenario['status'],
+                'cancel_reason' => $isCanceled ? 'Khách hàng yêu cầu hủy / trả hàng' : null,
+                'created_at' => now()->subDays(rand(1, 60))->subHours(rand(0, 12)),
+                'updated_at' => now()->subDays(rand(0, 5)),
             ];
 
             // Thêm cột tuỳ chọn nếu DB có
-            $hasColumn = fn($col) => \Illuminate\Support\Facades\Schema::hasColumn('orders', $col);
-            if ($hasColumn('email'))              $baseData['email']              = $customer->email;
-            if ($hasColumn('staff_id'))           $baseData['staff_id']           = $staffId;
-            if ($hasColumn('shipping_province_id')) $baseData['shipping_province_id'] = $addr['province_id'];
-            if ($hasColumn('shipping_district_id')) $baseData['shipping_district_id'] = $addr['district_id'];
-            if ($hasColumn('shipping_ward_id'))   $baseData['shipping_ward_id']   = $addr['ward_id'];
-            if ($hasColumn('payment_date') && $isCompleted) $baseData['payment_date'] = now()->subDays(rand(1, 30));
+            $hasColumn = fn ($col) => Schema::hasColumn('orders', $col);
+            if ($hasColumn('email')) {
+                $baseData['email'] = $customer->email;
+            }
+            if ($hasColumn('staff_id')) {
+                $baseData['staff_id'] = $staffId;
+            }
+            if ($hasColumn('shipping_province_id')) {
+                $baseData['shipping_province_id'] = $addr['province_id'];
+            }
+            if ($hasColumn('shipping_district_id')) {
+                $baseData['shipping_district_id'] = $addr['district_id'];
+            }
+            if ($hasColumn('shipping_ward_id')) {
+                $baseData['shipping_ward_id'] = $addr['ward_id'];
+            }
+            if ($hasColumn('payment_date') && $isCompleted) {
+                $baseData['payment_date'] = now()->subDays(rand(1, 30));
+            }
 
             $order = Order::create($baseData);
 
@@ -114,31 +130,31 @@ class OrderSeeder extends Seeder
                 }
 
                 OrderItem::create([
-                    'order_id'       => $order->id,
-                    'product_id'     => $v->product_id,
-                    'variant_id'     => $v->id,
-                    'name'           => $v->product?->name ?? 'Sản phẩm mẫu ' . $v->id,
-                    'sku_code'       => $v->sku,
-                    'image_url'      => $v->image ?? null,
+                    'order_id' => $order->id,
+                    'product_id' => $v->product_id,
+                    'variant_id' => $v->id,
+                    'name' => $v->product?->name ?? 'Sản phẩm mẫu '.$v->id,
+                    'sku_code' => $v->sku,
+                    'image_url' => $v->image ?? null,
                     'variant_options' => $variantOptions ?: null,
-                    'quantity'       => $item['qty'],
-                    'price'          => $item['unit_price'],
-                    'total_price'    => $item['total_price'],
+                    'quantity' => $item['qty'],
+                    'price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
                 ]);
             }
 
             // Tạo lịch sử trạng thái
             $historyStatuses = $scenario['history'];
-            $prevStatus      = null;
-            $baseTime        = $order->created_at;
+            $prevStatus = null;
+            $baseTime = $order->created_at;
 
             foreach ($historyStatuses as $j => $histStatus) {
                 OrderStatusHistory::create([
-                    'order_id'           => $order->id,
-                    'old_status'         => $prevStatus,
-                    'new_status'         => $histStatus,
+                    'order_id' => $order->id,
+                    'old_status' => $prevStatus,
+                    'new_status' => $histStatus,
                     'changed_by_user_id' => $staffId,
-                    'note'               => $j === 0
+                    'note' => $j === 0
                         ? 'Đơn hàng được tạo'
                         : ($j === count($historyStatuses) - 1 && $isCanceled
                             ? 'Khách hàng yêu cầu hủy'

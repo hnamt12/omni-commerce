@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use App\Models\ActionLog;
+use App\Models\Customer;
+use App\Models\User;
 
 trait Auditable
 {
@@ -59,11 +61,11 @@ trait Auditable
     {
         try {
             $actor = auth()->user();
-            $userId = ($actor instanceof \App\Models\User) ? $actor->id : null;
-            $customerId = ($actor instanceof \App\Models\Customer) ? $actor->id : null;
+            $userId = ($actor instanceof User) ? $actor->id : null;
+            $customerId = ($actor instanceof Customer) ? $actor->id : null;
 
             // If the model itself is a Customer, log that customer_id
-            if ($model instanceof \App\Models\Customer) {
+            if ($model instanceof Customer) {
                 $customerId = $model->id;
             } elseif (isset($model->customer_id)) {
                 // If model has a customer_id (like Order), log it
@@ -71,19 +73,19 @@ trait Auditable
             }
 
             ActionLog::create([
-                'user_id'      => $userId,
-                'customer_id'  => $customerId,
-                'action'       => $action,
+                'user_id' => $userId,
+                'customer_id' => $customerId,
+                'action' => $action,
                 'loggable_type' => get_class($model),
-                'loggable_id'  => $model->getKey(),
-                'old_values'   => $oldValues,
-                'new_values'   => $newValues,
-                'ip_address'   => request()->ip(),
-                'user_agent'   => request()->userAgent(),
+                'loggable_id' => $model->getKey(),
+                'old_values' => $oldValues,
+                'new_values' => $newValues,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
             ]);
         } catch (\Throwable $e) {
             // Silent fail – không làm hỏng request gốc nếu log thất bại
-            logger()->error('[Auditable] Failed to write action log: ' . $e->getMessage());
+            logger()->error('[Auditable] Failed to write action log: '.$e->getMessage());
         }
     }
 

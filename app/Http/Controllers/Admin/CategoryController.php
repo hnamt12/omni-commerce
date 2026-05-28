@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\User;
+use App\Notifications\SystemAlertNotification;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function show(Category $category)
     {
         return Inertia::render('Admin/Categories/Show', [
-            'category' => $category->load('parent')
+            'category' => $category->load('parent'),
         ]);
     }
 
@@ -22,7 +25,7 @@ class CategoryController extends Controller
         $query = Category::with('parent');
 
         if ($request->has('search') && $request->search != '') {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $sortField = $request->input('sort', 'id');
@@ -33,15 +36,16 @@ class CategoryController extends Controller
 
         return Inertia::render('Admin/Categories/Index', [
             'categories' => $categories,
-            'filters' => $request->only(['search', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
 
     public function create()
     {
         $parentCategories = Category::whereNull('parent_id')->orWhere('parent_id', 0)->get();
+
         return Inertia::render('Admin/Categories/Form', [
-            'parentCategories' => $parentCategories
+            'parentCategories' => $parentCategories,
         ]);
     }
 
@@ -50,9 +54,9 @@ class CategoryController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
-        
+
         $data['slug'] = Str::slug($data['name']);
         if (empty($data['parent_id'])) {
             $data['parent_id'] = null;
@@ -66,9 +70,10 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         $parentCategories = Category::whereNull('parent_id')->orWhere('parent_id', 0)->get();
+
         return Inertia::render('Admin/Categories/Form', [
             'category' => $category,
-            'parentCategories' => $parentCategories
+            'parentCategories' => $parentCategories,
         ]);
     }
 
@@ -77,9 +82,9 @@ class CategoryController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
-        
+
         $data['slug'] = Str::slug($data['name']);
         if (empty($data['parent_id'])) {
             $data['parent_id'] = null;
@@ -96,19 +101,19 @@ class CategoryController extends Controller
 
         try {
             // Lấy những user có role là admin hoặc super admin bằng cách join bảng trực tiếp (Xuyên Guard)
-            $receivers = \App\Models\User::whereHas('roles', function($q) {
+            $receivers = User::whereHas('roles', function ($q) {
                 $q->whereIn('name', ['admin', 'super admin', 'Super Admin']);
             })->orWhere('id', 1)->get(); // Luôn luôn fallback về ID 1 để đảm bảo không bao giờ trượt
 
             if ($receivers->isNotEmpty()) {
-                \Illuminate\Support\Facades\Notification::send($receivers, new \App\Notifications\SystemAlertNotification(
+                Notification::send($receivers, new SystemAlertNotification(
                     'Cảnh báo xóa dữ liệu',
                     'Một danh mục/thương hiệu vừa bị xóa khỏi hệ thống bởi nhân viên.',
                     'danger'
                 ));
             }
         } catch (\Throwable $e) {
-            logger()->error('[Notification] Failed to send SystemAlertNotification for category deletion: ' . $e->getMessage());
+            logger()->error('[Notification] Failed to send SystemAlertNotification for category deletion: '.$e->getMessage());
         }
 
         return redirect()->back()->with('success', 'Xóa danh mục thành công.');
@@ -127,7 +132,7 @@ class CategoryController extends Controller
 
         return Inertia::render('Admin/Categories/Trashed', [
             'categories' => $categories,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -135,6 +140,7 @@ class CategoryController extends Controller
     {
         $category = Category::withTrashed()->findOrFail($id);
         $category->restore();
+
         return redirect()->back()->with('success', 'Khôi phục danh mục thành công.');
     }
 
@@ -142,6 +148,7 @@ class CategoryController extends Controller
     {
         $category = Category::withTrashed()->findOrFail($id);
         $category->forceDelete();
+
         return redirect()->back()->with('success', 'Đã xóa vĩnh viễn danh mục.');
     }
 }

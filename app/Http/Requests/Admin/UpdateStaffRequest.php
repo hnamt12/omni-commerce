@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class UpdateStaffRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -33,7 +34,7 @@ class UpdateStaffRequest extends FormRequest
             ],
             'password' => 'nullable|string|min:8',
             'permissions' => 'nullable|array',
-            'permissions.*' => 'string'
+            'permissions.*' => 'string',
         ];
     }
 
@@ -54,7 +55,7 @@ class UpdateStaffRequest extends FormRequest
             'password.string' => 'Mật khẩu phải là chuỗi ký tự hợp lệ.',
             'password.min' => 'Mật khẩu bảo mật phải chứa ít nhất 8 ký tự.',
             'permissions.array' => 'Danh sách quyền phải ở dạng mảng dữ liệu.',
-            'permissions.*.string' => 'Tên quyền hạn phải là chuỗi ký tự hợp lệ.'
+            'permissions.*.string' => 'Tên quyền hạn phải là chuỗi ký tự hợp lệ.',
         ];
     }
 }

@@ -19,8 +19,8 @@ class CustomerController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -52,7 +52,7 @@ class CustomerController extends Controller
     public function toggleStatus($id)
     {
         $customer = Customer::findOrFail($id);
-        $customer->is_active = !$customer->is_active;
+        $customer->is_active = ! $customer->is_active;
         $customer->save();
 
         return redirect()->back()->with('success', 'Đã cập nhật trạng thái khách hàng.');

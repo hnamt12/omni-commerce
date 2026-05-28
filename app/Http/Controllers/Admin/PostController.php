@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class PostController extends Controller
@@ -15,7 +15,7 @@ class PostController extends Controller
     {
         $search = $request->input('search');
         $posts = Post::query()
-            ->when($search, fn($q) => $q->where('title', 'like', "%{$search}%"))
+            ->when($search, fn ($q) => $q->where('title', 'like', "%{$search}%"))
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
@@ -34,18 +34,18 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'            => 'required|string|max:255',
-            'content'          => 'required|string',
-            'thumbnail'        => 'nullable|image|max:2048',
-            'summary'          => 'nullable|string',
-            'status'           => 'required|in:draft,ai_generated,published',
-            'published_at'     => 'nullable|date',
-            'meta_title'       => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'thumbnail' => 'nullable|image|max:2048',
+            'summary' => 'nullable|string',
+            'status' => 'required|in:draft,ai_generated,published',
+            'published_at' => 'nullable|date',
+            'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
         ]);
 
         $data = $request->only(['title', 'summary', 'content', 'status', 'meta_title', 'meta_description']);
-        $data['slug']         = Str::slug($request->title) . '-' . time();
+        $data['slug'] = Str::slug($request->title).'-'.time();
         $data['published_at'] = $request->filled('published_at') ? $request->published_at : now();
 
         if ($request->hasFile('thumbnail')) {
@@ -68,19 +68,19 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $request->validate([
-            'title'            => 'required|string|max:255',
-            'content'          => 'required|string',
-            'thumbnail'        => 'nullable',
-            'summary'          => 'nullable|string',
-            'status'           => 'required|in:draft,ai_generated,published',
-            'published_at'     => 'nullable|date',
-            'meta_title'       => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'thumbnail' => 'nullable',
+            'summary' => 'nullable|string',
+            'status' => 'required|in:draft,ai_generated,published',
+            'published_at' => 'nullable|date',
+            'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
         ]);
 
         $data = $request->only(['title', 'summary', 'content', 'status', 'meta_title', 'meta_description']);
         if ($post->title !== $request->title) {
-            $data['slug'] = Str::slug($request->title) . '-' . time();
+            $data['slug'] = Str::slug($request->title).'-'.time();
         }
         $data['published_at'] = $request->filled('published_at') ? $request->published_at : $post->published_at;
 

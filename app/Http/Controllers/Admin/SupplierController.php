@@ -18,9 +18,9 @@ class SupplierController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -28,20 +28,20 @@ class SupplierController extends Controller
 
         return Inertia::render('Admin/Suppliers/Index', [
             'suppliers' => $suppliers,
-            'filters'   => $request->only(['search']),
+            'filters' => $request->only(['search']),
         ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'code'        => 'required|string|max:50|unique:suppliers,code',
-            'name'        => 'required|string|max:255',
-            'phone'       => 'nullable|string|max:20',
-            'email'       => 'nullable|email|max:255',
-            'address'     => 'nullable|string|max:255',
+            'code' => 'required|string|max:50|unique:suppliers,code',
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'is_active'   => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
         Supplier::create($data);
@@ -54,13 +54,13 @@ class SupplierController extends Controller
         $supplier = Supplier::findOrFail($id);
 
         $data = $request->validate([
-            'code'        => 'required|string|max:50|unique:suppliers,code,' . $supplier->id,
-            'name'        => 'required|string|max:255',
-            'phone'       => 'nullable|string|max:20',
-            'email'       => 'nullable|email|max:255',
-            'address'     => 'nullable|string|max:255',
+            'code' => 'required|string|max:50|unique:suppliers,code,'.$supplier->id,
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'is_active'   => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
         $supplier->update($data);

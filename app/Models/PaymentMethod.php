@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Auditable;
 
 class PaymentMethod extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'name',
@@ -22,7 +22,7 @@ class PaymentMethod extends Model
     ];
 
     protected $casts = [
-        'config'    => 'encrypted:json',   // Tự động mã hóa JSON khi lưu vào DB (CRITICAL-3)
+        'config' => 'encrypted:json',   // Tự động mã hóa JSON khi lưu vào DB (CRITICAL-3)
         'is_active' => 'boolean',
     ];
 }

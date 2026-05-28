@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Notifications\SystemAlertNotification;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Notification;
 
 class ProductVariant extends Model
 {
-    use SoftDeletes, Auditable;
+    use Auditable, SoftDeletes;
 
     protected static function booted()
     {
@@ -23,7 +25,9 @@ class ProductVariant extends Model
                     $qtyToDeduct = $oldStock - $newStock;
                     $lots = $variant->lots()->where('quantity', '>', 0)->orderBy('id', 'asc')->get();
                     foreach ($lots as $lot) {
-                        if ($qtyToDeduct <= 0) break;
+                        if ($qtyToDeduct <= 0) {
+                            break;
+                        }
                         if ($lot->quantity >= $qtyToDeduct) {
                             $lot->decrement('quantity', $qtyToDeduct);
                             $qtyToDeduct = 0;
@@ -46,7 +50,7 @@ class ProductVariant extends Model
                     try {
                         $receivers = User::whereHas('roles', function ($q) {
                             $q->whereIn('name', ['admin', 'superadmin', 'super admin', 'Super Admin']);
-                        })->orWhereHas('permissions', function($q) {
+                        })->orWhereHas('permissions', function ($q) {
                             $q->where('name', 'view_inventory');
                         })->orWhere('id', 1)->get();
 
@@ -55,9 +59,9 @@ class ProductVariant extends Model
                             $options = $variant->options;
                             $variantLabel = $options ? implode(' - ', array_values($options)) : 'Mặc định';
 
-                            \Illuminate\Support\Facades\Notification::send(
+                            Notification::send(
                                 $receivers,
-                                new \App\Notifications\SystemAlertNotification(
+                                new SystemAlertNotification(
                                     'Cảnh báo tồn kho thấp ⚠️',
                                     "Biến thể [{$variant->sku}] {$productName} ({$variantLabel}) đã giảm xuống {$newStock} sản phẩm (dưới ngưỡng tối thiểu {$threshold}). Vui lòng bổ sung kho hàng!",
                                     route('admin.inventory.edit', $variant->product_id),
@@ -66,7 +70,7 @@ class ProductVariant extends Model
                             );
                         }
                     } catch (\Throwable $e) {
-                        logger()->error('[Notification] Failed to send SystemAlertNotification for low stock: ' . $e->getMessage());
+                        logger()->error('[Notification] Failed to send SystemAlertNotification for low stock: '.$e->getMessage());
                     }
                 }
             }

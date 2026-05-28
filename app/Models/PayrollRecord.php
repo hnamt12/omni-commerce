@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Auditable;
 
 class PayrollRecord extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $table = 'payroll_records';
 

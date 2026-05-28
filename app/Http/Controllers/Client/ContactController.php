@@ -12,9 +12,9 @@ class ContactController extends Controller
     {
         $keys = ['contact_phone', 'contact_email', 'contact_address', 'google_maps_iframe'];
         $settings = Setting::whereIn('key', $keys)->pluck('value', 'key');
-        
+
         return Inertia::render('Client/Contact/Index', [
-            'settings' => $settings
+            'settings' => $settings,
         ]);
     }
 }

@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('customers', function (Blueprint $table) {
-            if (!Schema::hasColumn('customers', 'gender')) {
+            if (! Schema::hasColumn('customers', 'gender')) {
                 $table->enum('gender', ['male', 'female', 'other'])->nullable()->after('phone');
             }
-            if (!Schema::hasColumn('customers', 'avatar')) {
+            if (! Schema::hasColumn('customers', 'avatar')) {
                 $table->string('avatar')->nullable()->after('gender');
             }
         });
@@ -22,9 +22,13 @@ return new class extends Migration
     {
         Schema::table('customers', function (Blueprint $table) {
             $columns = [];
-            if (Schema::hasColumn('customers', 'gender')) $columns[] = 'gender';
-            if (Schema::hasColumn('customers', 'avatar')) $columns[] = 'avatar';
-            if (!empty($columns)) {
+            if (Schema::hasColumn('customers', 'gender')) {
+                $columns[] = 'gender';
+            }
+            if (Schema::hasColumn('customers', 'avatar')) {
+                $columns[] = 'avatar';
+            }
+            if (! empty($columns)) {
                 $table->dropColumn($columns);
             }
         });

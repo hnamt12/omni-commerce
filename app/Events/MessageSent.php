@@ -5,10 +5,8 @@ namespace App\Events;
 use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -30,16 +28,16 @@ class MessageSent implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('chat.' . $this->message->conversation_id),
+            new PrivateChannel('chat.'.$this->message->conversation_id),
             new PrivateChannel('admin-notifications'),
         ];
     }
-    
+
     public function broadcastAs(): string
     {
         return 'MessageSent';
@@ -52,13 +50,13 @@ class MessageSent implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        $customerName = $this->message->conversation->customer->name 
-            ?? 'Khách hàng #' . $this->message->conversation->customer_id;
+        $customerName = $this->message->conversation->customer->name
+            ?? 'Khách hàng #'.$this->message->conversation->customer_id;
 
         return [
             'message' => array_merge($this->message->toArray(), [
-                'customer_name' => $customerName
-            ])
+                'customer_name' => $customerName,
+            ]),
         ];
     }
 }

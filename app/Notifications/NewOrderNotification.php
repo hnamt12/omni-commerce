@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -41,12 +40,12 @@ class NewOrderNotification extends Notification
             ?? 'Khách vãng lai';
 
         return [
-            'title'   => 'Đơn hàng mới nhận!',
+            'title' => 'Đơn hàng mới nhận!',
             'message' => "Khách hàng {$customerName} vừa đặt đơn hàng #{$this->order->id} (Mã: {$this->order->order_code}).",
-            'url'     => '/admin/orders/' . $this->order->id,
-            'icon'    => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', // Shopping bag SVG path
-            'color'   => 'bg-emerald-500 text-white',
-            'type'    => 'new_order',
+            'url' => '/admin/orders/'.$this->order->id,
+            'icon' => 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', // Shopping bag SVG path
+            'color' => 'bg-emerald-500 text-white',
+            'type' => 'new_order',
         ];
     }
 }

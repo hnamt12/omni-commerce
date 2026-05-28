@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use Illuminate\Support\Facades\DB;
@@ -71,16 +72,18 @@ class OrderController extends Controller
             $order->update(['status' => 'Đã hủy']);
 
             OrderStatusHistory::create([
-                'order_id'   => $order->id,
+                'order_id' => $order->id,
                 'old_status' => 'Chờ xác nhận',
                 'new_status' => 'Đã hủy',
-                'note'       => 'Khách hàng tự hủy đơn trên hệ thống.',
+                'note' => 'Khách hàng tự hủy đơn trên hệ thống.',
             ]);
 
             DB::commit();
+
             return back()->with('success', 'Đã hủy đơn hàng thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Có lỗi xảy ra khi hủy đơn hàng.');
         }
     }
@@ -99,7 +102,7 @@ class OrderController extends Controller
         // 1. Validate stock & active status first (all-or-nothing feedback)
         foreach ($order->items as $item) {
             $variant = $item->variant;
-            if (!$variant || !$variant->product || !$variant->product->is_active) {
+            if (! $variant || ! $variant->product || ! $variant->product->is_active) {
                 return back()->with('error', "Sản phẩm «{$item->name}» đã ngừng kinh doanh.");
             }
             if ($variant->stock < $item->quantity) {
@@ -109,19 +112,19 @@ class OrderController extends Controller
 
         // 2. Add to cart (merge if already exists)
         foreach ($order->items as $item) {
-            $cartItem = \App\Models\Cart::where('customer_id', '=', $customerId)
+            $cartItem = Cart::where('customer_id', '=', $customerId)
                 ->where('variant_id', '=', $item->variant_id)
                 ->first();
 
             if ($cartItem) {
                 $cartItem->increment('quantity', $item->quantity);
             } else {
-                \App\Models\Cart::create([
+                Cart::create([
                     'customer_id' => $customerId,
-                    'product_id'  => $item->product_id,
-                    'variant_id'  => $item->variant_id,
-                    'quantity'    => $item->quantity,
-                    'price'       => $item->variant->price,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->variant->price,
                 ]);
             }
         }

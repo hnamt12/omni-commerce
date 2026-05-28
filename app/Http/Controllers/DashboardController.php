@@ -2,25 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use App\Models\Customer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Inertia\Inertia;
+use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
         // ─── Date Filter ──────────────────────────────────────────────────────
-        $endDate   = $request->input('end_date')   ? Carbon::parse($request->input('end_date'))->endOfDay()   : Carbon::now()->endOfDay();
+        $endDate = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfDay();
         $startDate = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->subDays(29)->startOfDay();
 
         // Previous period (same duration) для comparison
-        $diff      = $startDate->diffInDays($endDate);
-        $prevEnd   = $startDate->copy()->subDay()->endOfDay();
+        $diff = $startDate->diffInDays($endDate);
+        $prevEnd = $startDate->copy()->subDay()->endOfDay();
         $prevStart = $prevEnd->copy()->subDays($diff)->startOfDay();
 
         // Lấy dữ liệu trực tiếp không qua cache để đảm bảo tính thời gian thực (Real-time)
@@ -40,14 +40,14 @@ class DashboardController extends Controller
             : ($revenueThis > 0 ? 100 : 0);
 
         // ─── 2. Orders ──────────────────────────────────────────────────
-        $ordersThis    = Order::whereBetween('created_at', [$startDate, $endDate])->count();
-        $ordersPrev    = Order::whereBetween('created_at', [$prevStart, $prevEnd])->count();
-        $ordersGrowth  = $ordersPrev > 0 ? round((($ordersThis - $ordersPrev) / $ordersPrev) * 100, 1) : ($ordersThis > 0 ? 100 : 0);
+        $ordersThis = Order::whereBetween('created_at', [$startDate, $endDate])->count();
+        $ordersPrev = Order::whereBetween('created_at', [$prevStart, $prevEnd])->count();
+        $ordersGrowth = $ordersPrev > 0 ? round((($ordersThis - $ordersPrev) / $ordersPrev) * 100, 1) : ($ordersThis > 0 ? 100 : 0);
         $ordersPending = Order::where('status', 'Chờ xác nhận')->count();
 
         // ─── 3. Customers ────────────────────────────────────────────────
-        $customersThis   = Customer::whereBetween('created_at', [$startDate, $endDate])->count();
-        $customersPrev   = Customer::whereBetween('created_at', [$prevStart, $prevEnd])->count();
+        $customersThis = Customer::whereBetween('created_at', [$startDate, $endDate])->count();
+        $customersPrev = Customer::whereBetween('created_at', [$prevStart, $prevEnd])->count();
         $customersGrowth = $customersPrev > 0 ? round((($customersThis - $customersPrev) / $customersPrev) * 100, 1) : ($customersThis > 0 ? 100 : 0);
 
         // ─── 4. Inventory ────────────────────────────────────────────────
@@ -76,9 +76,9 @@ class DashboardController extends Controller
 
         // ─── 5. Revenue Chart (by day) ───────────────────────────────────
         $revenueByDay = Order::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(grand_total) as total')
-            )
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(grand_total) as total')
+        )
             ->whereIn('status', $completedStatuses)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
@@ -153,27 +153,27 @@ class DashboardController extends Controller
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
-                'revenueThis'     => $data['revenueThis'],
-                'revenueGrowth'   => $data['revenueGrowth'],
-                'ordersThis'      => $data['ordersThis'],
-                'ordersGrowth'    => $data['ordersGrowth'],
-                'ordersPending'   => $data['ordersPending'],
-                'customersThis'   => $data['customersThis'],
+                'revenueThis' => $data['revenueThis'],
+                'revenueGrowth' => $data['revenueGrowth'],
+                'ordersThis' => $data['ordersThis'],
+                'ordersGrowth' => $data['ordersGrowth'],
+                'ordersPending' => $data['ordersPending'],
+                'customersThis' => $data['customersThis'],
                 'customersGrowth' => $data['customersGrowth'],
-                'inventoryValue'  => $data['inventoryValue'],
+                'inventoryValue' => $data['inventoryValue'],
             ],
             'chart' => [
                 'labels' => $data['chartLabels'],
                 'series' => $data['chartSeries'],
             ],
             'statusDistribution' => $data['statusDistribution'],
-            'topProducts'        => $data['topProducts'],
-            'topStaff'           => $data['topStaff'],
-            'lowStockItems'      => $data['lowStockItems'],
-            'recentOrders'       => $data['recentOrders'],
+            'topProducts' => $data['topProducts'],
+            'topStaff' => $data['topStaff'],
+            'lowStockItems' => $data['lowStockItems'],
+            'recentOrders' => $data['recentOrders'],
             'filters' => [
                 'start_date' => request('start_date', Carbon::now()->subDays(29)->format('Y-m-d')),
-                'end_date'   => request('end_date', Carbon::now()->format('Y-m-d')),
+                'end_date' => request('end_date', Carbon::now()->format('Y-m-d')),
             ],
         ]);
     }

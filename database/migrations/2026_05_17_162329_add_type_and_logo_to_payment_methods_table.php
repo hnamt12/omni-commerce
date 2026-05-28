@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('payment_methods', function (Blueprint $table) {
-            if (!Schema::hasColumn('payment_methods', 'type')) {
+            if (! Schema::hasColumn('payment_methods', 'type')) {
                 $table->string('type')->default('manual')->after('code');
             }
-            if (!Schema::hasColumn('payment_methods', 'logo_url')) {
+            if (! Schema::hasColumn('payment_methods', 'logo_url')) {
                 $table->string('logo_url')->nullable()->after('type');
             }
         });

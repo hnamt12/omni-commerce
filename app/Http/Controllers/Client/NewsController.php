@@ -50,14 +50,15 @@ class NewsController extends Controller
         // Append reading_time accessor to each paginated result and featured
         $postsWithMeta = $posts->through(function (Post $post) {
             $post->append('reading_time');
+
             return $post;
         });
 
         return Inertia::render('Client/News/Index', [
             'featured' => $featured?->append('reading_time'),
-            'posts'    => $postsWithMeta,
+            'posts' => $postsWithMeta,
             'trending' => $trending,
-            'filters'  => $request->only(['sort']),
+            'filters' => $request->only(['sort']),
         ]);
     }
 
@@ -83,7 +84,7 @@ class NewsController extends Controller
             ->each->append('reading_time');
 
         return Inertia::render('Client/News/Show', [
-            'post'    => $post->append('reading_time'),
+            'post' => $post->append('reading_time'),
             'related' => $related,
         ]);
     }

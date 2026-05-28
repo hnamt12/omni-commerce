@@ -7,14 +7,15 @@ use App\Models\Customer;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -33,6 +34,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             $banner = self::DEFAULT_AUTH_BANNER;
         }
+
         return Inertia::render('Client/Auth/Login', ['authBanner' => $banner]);
     }
 
@@ -43,6 +45,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             $banner = self::DEFAULT_AUTH_BANNER;
         }
+
         return Inertia::render('Client/Auth/Register', ['authBanner' => $banner]);
     }
 
@@ -53,17 +56,18 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ], [
             'email.required' => 'Vui lòng nhập địa chỉ email.',
-            'email.email'    => 'Định dạng email không hợp lệ.',
+            'email.email' => 'Định dạng email không hợp lệ.',
             'password.required' => 'Vui lòng nhập mật khẩu.',
         ]);
 
         if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             $redirectUrl = $request->query('intended', route('client.home'));
+
             return redirect()->to($redirectUrl)->with('success', 'Đăng nhập thành công!');
         }
 
@@ -77,29 +81,30 @@ class AuthController extends Controller
         Auth::guard('customer')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:customers',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:customers',
             'password' => 'required|string|min:6|confirmed',
         ], [
-            'name.required'      => 'Vui lòng nhập họ và tên.',
-            'email.required'     => 'Vui lòng nhập địa chỉ email.',
-            'email.email'        => 'Định dạng email không hợp lệ.',
-            'email.unique'       => 'Email này đã được sử dụng. Vui lòng đăng nhập hoặc dùng email khác.',
-            'password.required'  => 'Vui lòng nhập mật khẩu.',
+            'name.required' => 'Vui lòng nhập họ và tên.',
+            'email.required' => 'Vui lòng nhập địa chỉ email.',
+            'email.email' => 'Định dạng email không hợp lệ.',
+            'email.unique' => 'Email này đã được sử dụng. Vui lòng đăng nhập hoặc dùng email khác.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
             'password.confirmed' => 'Mật khẩu nhập lại không khớp.',
-            'password.min'       => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
         ]);
 
         $customer = Customer::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
 
@@ -142,12 +147,12 @@ class AuthController extends Controller
             } else {
                 // Auto-register a brand new customer
                 $customer = Customer::create([
-                    'name'             => $socialUser->getName() ?? 'Khách hàng',
-                    'email'            => $socialUser->getEmail(),
-                    'password'         => Hash::make(Str::random(24)),
-                    "{$provider}_id"   => $socialUser->getId(),
-                    'avatar'           => $socialUser->getAvatar(),
-                    'is_active'        => true,
+                    'name' => $socialUser->getName() ?? 'Khách hàng',
+                    'email' => $socialUser->getEmail(),
+                    'password' => Hash::make(Str::random(24)),
+                    "{$provider}_id" => $socialUser->getId(),
+                    'avatar' => $socialUser->getAvatar(),
+                    'is_active' => true,
                 ]);
             }
 
@@ -158,7 +163,8 @@ class AuthController extends Controller
             return redirect()->route('client.home')->with('success', 'Đăng nhập thành công! 🎉');
 
         } catch (\Exception $e) {
-            Log::error("Social Login Error [{$provider}]: " . $e->getMessage());
+            Log::error("Social Login Error [{$provider}]: ".$e->getMessage());
+
             return redirect()->route('login')
                 ->with('error', 'Đăng nhập bằng mạng xã hội thất bại. Vui lòng thử lại!');
         }
@@ -175,6 +181,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             $banner = self::DEFAULT_AUTH_BANNER;
         }
+
         return Inertia::render('Client/Auth/ForgotPassword', ['authBanner' => $banner]);
     }
 
@@ -196,7 +203,7 @@ class AuthController extends Controller
             [
                 'email' => $request->email,
                 'token' => Hash::make($token),
-                'created_at' => now()
+                'created_at' => now(),
             ]
         );
 
@@ -205,13 +212,13 @@ class AuthController extends Controller
 
         // Send Email
         try {
-            \Illuminate\Support\Facades\Mail::raw("Chào bạn,\n\nVui lòng click vào đường dẫn sau để đặt lại mật khẩu cho tài khoản OmniCommerce của bạn:\n{$resetUrl}\n\nĐường dẫn này sẽ hết hạn sau 60 phút.\n\nTrân trọng,\nOmniCommerce Team", function ($message) use ($request) {
+            Mail::raw("Chào bạn,\n\nVui lòng click vào đường dẫn sau để đặt lại mật khẩu cho tài khoản OmniCommerce của bạn:\n{$resetUrl}\n\nĐường dẫn này sẽ hết hạn sau 60 phút.\n\nTrân trọng,\nOmniCommerce Team", function ($message) use ($request) {
                 $message->to($request->email)
                     ->subject('Khôi phục mật khẩu tài khoản OmniCommerce');
             });
         } catch (\Exception $e) {
-            Log::error("Failed to send reset link email: " . $e->getMessage());
-            Log::info("Password Reset Link (Logged for Dev): " . $resetUrl);
+            Log::error('Failed to send reset link email: '.$e->getMessage());
+            Log::info('Password Reset Link (Logged for Dev): '.$resetUrl);
         }
 
         return back()->with('success', 'Đã gửi email khôi phục mật khẩu. Vui lòng kiểm tra hộp thư!');
@@ -224,10 +231,11 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             $banner = self::DEFAULT_AUTH_BANNER;
         }
+
         return Inertia::render('Client/Auth/ResetPassword', [
             'authBanner' => $banner,
             'token' => $token,
-            'email' => $request->query('email')
+            'email' => $request->query('email'),
         ]);
     }
 
@@ -248,7 +256,7 @@ class AuthController extends Controller
 
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (! $record || ! Hash::check($request->token, $record->token)) {
             throw ValidationException::withMessages([
                 'email' => 'Mã khôi phục mật khẩu không hợp lệ hoặc đã hết hạn.',
             ]);
@@ -256,7 +264,7 @@ class AuthController extends Controller
 
         // Update password
         Customer::where('email', $request->email)->update([
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
         ]);
 
         // Delete the token

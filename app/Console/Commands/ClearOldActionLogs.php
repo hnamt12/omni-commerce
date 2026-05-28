@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\ActionLog;
+use Illuminate\Console\Command;
 
 class ClearOldActionLogs extends Command
 {
