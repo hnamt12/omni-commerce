@@ -48,14 +48,6 @@ use Inertia\Inertia;
 // ═══════════════════════════════════════════════════════════════════════
 Route::prefix('admin')->group(function () {
 
-    // ─── Root /admin — redirect theo trạng thái đăng nhập ────────────
-    Route::get('/', function () {
-        if (auth('web')->check()) {
-            return redirect()->route('dashboard');
-        }
-        return redirect()->route('admin.login');
-    })->name('admin.home');
-
     // ─── Guest-only (Login) ───────────────────────────────────────────
     Route::middleware('guest:web')->group(function () {
         Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
