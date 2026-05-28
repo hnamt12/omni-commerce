@@ -33,7 +33,7 @@ jobs:
           rm -rf node_modules # Xóa node_modules đi cho nhẹ, server không cần cái này
 
       # BƯỚC ĐỘT PHÁ: Nén toàn bộ code thành 1 file ZIP duy nhất và tạo file giải nén tự động
-      # BƯỚC 1: TÁCH BIỆT FILE ZIP VÀ FILE GIẢI NÉN
+     # BƯỚC 1: TÁCH BIỆT FILE ZIP VÀ FILE GIẢI NÉN (Bổ sung chmod 644)
       - name: Prepare Zip and Extract Script
         run: |
           mkdir -p deploy_dist/public
@@ -53,7 +53,7 @@ jobs:
               $zip->extractTo($targetDir);
               $zip->close();
               unlink($zipFile);     // Giải nén xong tự xóa file zip gốc ở thư mục cha
-              unlink(__FILE__);      // Tự sát (xóa luôn file unzip.php này trong thư mục public) để bảo mật
+              unlink(__FILE__);      // Tự sát để bảo mật
               echo "Deploy & Unzip Success!";
           } else {
               http_response_code(500);
@@ -62,7 +62,10 @@ jobs:
           ?>
           EOF
 
-      # BƯỚC 2: ĐẨY LÊN SERVER (FTP tự động đồng bộ đúng cấu trúc thư mục lồng nhau)
+          # QUAN TRỌNG: Ép quyền file về 644 để Shared Hosting Tenten cho phép thực thi qua URL công cộng
+          chmod 644 deploy_dist/public/unzip.php
+
+      # BƯỚC 2: ĐẨY LÊN SERVER (Giữ nguyên bước FTP của bạn)
       - name: Deploy to Tenten via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -70,10 +73,11 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_dist/
-          server-dir: /hainam.id.vn/ # Tùy thuộc vào tài khoản FTP của bạn (nếu dùng FTP phụ trỏ thẳng thì để /)
+          server-dir: /hainam.id.vn/
 
-      # BƯỚC 3: KÍCH HOẠT LỆNH GIẢI NÉN TỪ XA
+      # BƯỚC 3: KÍCH HOẠT LỆNH GIẢI NÉN TỪ XA (Sửa lại cấu hình curl an toàn)
       - name: Extract on Server
         run: |
           echo "Dang kích hoat giai nén..."
-          curl -s -f https://hainam.id.vn/unzip.php
+          # Thêm cờ -v để nếu lỗi, curl sẽ in toàn bộ chi tiết Header phản hồi (403 hay 500) ra log để debug
+          curl -v -k -s -f https://hainam.id.vn/unzip.php
