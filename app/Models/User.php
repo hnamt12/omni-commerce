@@ -7,11 +7,13 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+use App\Traits\Auditable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles, Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +24,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
+        'is_active',
+        'department',
+        'position',
+        'hire_date',
+        'base_salary',
+        'commission_rate',
     ];
 
     /**
@@ -44,6 +53,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'base_salary' => 'decimal:2',
+            'commission_rate' => 'decimal:2',
+            'hire_date' => 'date',
         ];
+    }
+
+    /**
+     * Get the payroll records for the user.
+     */
+    public function payrollRecords()
+    {
+        return $this->hasMany(PayrollRecord::class);
+    }
+
+    /**
+     * Get the orders processed by the staff.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'staff_id');
     }
 }
