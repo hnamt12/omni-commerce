@@ -32,27 +32,36 @@ jobs:
           rm -rf node_modules # Xóa node_modules đi cho nhẹ, server không cần cái này
 
       # BƯỚC ĐỘT PHÁ: Nén toàn bộ code thành 1 file ZIP duy nhất và tạo file giải nén tự động
+      # BƯỚC 1: TÁCH BIỆT FILE ZIP VÀ FILE GIẢI NÉN
       - name: Prepare Zip and Extract Script
         run: |
-          mkdir deploy_dist
-          zip -q -r deploy_dist/archive.zip . -x "*.git*" "tests/*" ".env.example"
-          cat << 'EOF' > deploy_dist/unzip.php
+          mkdir -p deploy_dist/public
+          
+          # Nén toàn bộ project thành file archive.zip nằm ở thư mục gốc deploy_dist
+          zip -q -r deploy_dist/archive.zip . -x "*.git*" "tests/*" ".env.example" "deploy_dist/*"
+          
+          # Tạo file giải nén unzip.php nằm ĐÚNG trong thư mục public/
+          cat << 'EOF' > deploy_dist/public/unzip.php
           <?php
+          // Vì file này nằm trong public/, ta cần nhảy ra thư mục cha (..) để giải nén file archive.zip
+          $targetDir = dirname(__DIR__); 
+          $zipFile = $targetDir . '/archive.zip';
+
           $zip = new ZipArchive;
-          if ($zip->open('archive.zip') === TRUE) {
-              $zip->extractTo(__DIR__);
+          if ($zip->open($zipFile) === TRUE) {
+              $zip->extractTo($targetDir);
               $zip->close();
-              unlink('archive.zip'); // Giải nén xong tự xóa file zip
-              unlink(__FILE__);      // Tự sát (xóa luôn file unzip.php) để bảo mật
-              echo "Deploy Success!";
+              unlink($zipFile);     // Giải nén xong tự xóa file zip gốc ở thư mục cha
+              unlink(__FILE__);      // Tự sát (xóa luôn file unzip.php này trong thư mục public) để bảo mật
+              echo "Deploy & Unzip Success!";
           } else {
               http_response_code(500);
-              echo "Deploy Failed!";
+              echo "Unzip Failed! File zip khoong ton tai hoac bi loi.";
           }
           ?>
           EOF
 
-      # Upload đúng 2 file (archive.zip và unzip.php) qua FTP -> Mất 10 giây
+      # BƯỚC 2: ĐẨY LÊN SERVER (FTP tự động đồng bộ đúng cấu trúc thư mục lồng nhau)
       - name: Deploy to Tenten via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -60,8 +69,10 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_dist/
-          server-dir: /hainam.id.vn/
+          server-dir: /hainam.id.vn/ # Tùy thuộc vào tài khoản FTP của bạn (nếu dùng FTP phụ trỏ thẳng thì để /)
 
-      # Kích hoạt script giải nén trên server
+      # BƯỚC 3: KÍCH HOẠT LỆNH GIẢI NÉN TỪ XA
       - name: Extract on Server
-        run: curl -s https://hainam.id.vn/unzip.php
+        run: |
+          echo "Dang kích hoat giai nén..."
+          curl -s -f https://hainam.id.vn/unzip.php
