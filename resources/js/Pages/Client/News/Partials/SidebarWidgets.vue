@@ -23,20 +23,20 @@ const formatDate = (str) => {
     <div class="space-y-5 sticky top-4">
 
         <!-- ── Trending Posts Widget ──────────────────────────── -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
                 <span class="text-lg">🔥</span>
-                <h3 class="text-sm font-black text-gray-800 uppercase tracking-wide">Xu hướng đọc nhiều</h3>
+                <h3 class="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-wide">Xu hướng đọc nhiều</h3>
             </div>
 
             <div class="p-4 space-y-3">
                 <!-- Skeleton -->
                 <template v-if="trending.length === 0">
                     <div v-for="n in 5" :key="n" class="flex items-start gap-3 animate-pulse">
-                        <div class="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0"></div>
+                        <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0"></div>
                         <div class="flex-1 space-y-1.5">
-                            <div class="h-3.5 bg-gray-200 rounded w-full"></div>
-                            <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+                            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
                         </div>
                     </div>
                 </template>
@@ -46,7 +46,7 @@ const formatDate = (str) => {
                     v-for="(post, index) in trending"
                     :key="post.id"
                     :href="route('client.news.show', post.slug)"
-                    class="group flex items-start gap-3 hover:bg-gray-50 rounded-xl p-2 -mx-2 transition-colors duration-200"
+                    class="group flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl p-2 -mx-2 transition-colors duration-200"
                 >
                     <!-- Rank badge -->
                     <span
@@ -54,13 +54,13 @@ const formatDate = (str) => {
                         :class="index === 0 ? 'bg-red-500 text-white' :
                                 index === 1 ? 'bg-orange-400 text-white' :
                                 index === 2 ? 'bg-yellow-400 text-gray-900' :
-                                'bg-gray-100 text-gray-500'"
+                                'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
                     >
                         {{ index + 1 }}
                     </span>
 
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
                             {{ post.title }}
                         </p>
                         <div class="flex items-center gap-2 mt-1 text-xs text-gray-400">
@@ -79,10 +79,10 @@ const formatDate = (str) => {
         </div>
 
         <!-- ── Chuyên mục nhanh Widget ────────────────────────── -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2">
                 <span class="text-lg">📂</span>
-                <h3 class="text-sm font-black text-gray-800 uppercase tracking-wide">Chuyên mục</h3>
+                <h3 class="text-sm font-black text-gray-800 dark:text-gray-200 uppercase tracking-wide">Chuyên mục</h3>
             </div>
 
             <div class="p-4 space-y-2">
@@ -96,9 +96,9 @@ const formatDate = (str) => {
                     ]"
                     :key="cat.label"
                     :href="cat.href"
-                    class="group flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200"
+                    class="group flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-400 transition-all duration-200"
                 >
-                    <span class="flex items-center gap-2.5 text-sm font-medium text-gray-700 group-hover:text-indigo-700">
+                    <span class="flex items-center gap-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-700 dark:group-hover:text-indigo-400">
                         {{ cat.icon }} {{ cat.label }}
                     </span>
                     <svg class="w-3.5 h-3.5 text-gray-300 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@ const formatDate = (str) => {
         </div>
 
         <!-- ── Newsletter CTA Widget ──────────────────────────── -->
-        <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg shadow-indigo-200">
+        <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30">
             <div class="text-2xl mb-2">📬</div>
             <h3 class="font-black text-base leading-tight mb-1">Nhận tin tức mới nhất</h3>
             <p class="text-indigo-200 text-xs leading-relaxed mb-4">

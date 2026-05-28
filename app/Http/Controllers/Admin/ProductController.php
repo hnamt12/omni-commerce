@@ -338,4 +338,57 @@ class ProductController extends Controller
         $product->delete();
         return redirect()->back()->with('success', 'Đã xóa sản phẩm vào thùng rác.');
     }
+
+    public function trashed(Request $request)
+    {
+        $search = $request->input('search');
+
+        $products = Product::onlyTrashed()
+            ->with(['category', 'brand', 'variants'])
+            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%"))
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Products/Trashed', [
+            'products' => $products,
+            'filters'  => $request->only(['search']),
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        $product->restore();
+
+        return redirect()->back()->with('success', 'Đã khôi phục sản phẩm thành công.');
+    }
+
+    public function forceDelete($id)
+    {
+        $product = Product::onlyTrashed()->findOrFail($id);
+        
+        // Delete gallery images
+        foreach ($product->images as $img) {
+            $relativePath = str_replace('/storage/', '', $img->image_url);
+            Storage::disk('public')->delete($relativePath);
+        }
+        
+        // Delete thumbnail
+        if ($product->thumbnail) {
+            $relativePath = str_replace('/storage/', '', $product->thumbnail);
+            Storage::disk('public')->delete($relativePath);
+        }
+
+        // Delete variants and attributes
+        $product->variants()->each(function ($variant) {
+            $variant->attributeValues()->delete();
+            $variant->delete();
+        });
+
+        $product->forceDelete();
+
+        return redirect()->back()->with('success', 'Đã xóa vĩnh viễn sản phẩm.');
+    }
 }
+

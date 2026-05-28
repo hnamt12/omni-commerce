@@ -17,6 +17,14 @@ const form = useForm({
     contact_email: props.settings?.contact_email || '',
     contact_address: props.settings?.contact_address || '',
     map_embed_code: props.settings?.map_embed_code || '',
+    min_stock_threshold: props.settings?.min_stock_threshold || '10',
+    company_name: props.settings?.company_name || 'Công ty TNHH OmniCommerce',
+    company_address: props.settings?.company_address || '123 Nguyễn Huệ, Q.1, TP. Hồ Chí Minh',
+    company_phone: props.settings?.company_phone || '1800 9999',
+    company_email: props.settings?.company_email || 'hi@omnicommerce.vn',
+    company_mst: props.settings?.company_mst || '0312345678',
+    invoice_serial_prefix: props.settings?.invoice_serial_prefix || 'AA/22E',
+    invoice_template_code: props.settings?.invoice_template_code || '01GTKT0/001',
 });
 
 const submit = () => {
@@ -31,15 +39,15 @@ const hasValidMap = computed(() => {
 </script>
 
 <template>
-    <Head title="Cấu hình liên hệ" />
+    <Head title="Cấu hình hệ thống" />
 
     <div class="w-full">
         <!-- Page Header -->
         <div class="mb-8 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Cấu hình Liên hệ</h1>
+                <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Cấu hình Hệ thống</h1>
                 <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm font-medium">
-                    Quản lý thông tin liên lạc và hiển thị bản đồ cửa hàng
+                    Quản lý thông tin liên lạc, bản đồ cửa hàng và các cấu hình nghiệp vụ kho bãi
                 </p>
             </div>
             <div class="flex items-center gap-3">
@@ -52,7 +60,7 @@ const hasValidMap = computed(() => {
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <span>{{ form.processing ? 'Đang lưu...' : 'Lưu cấu hình' }}</span>
@@ -109,6 +117,61 @@ const hasValidMap = computed(() => {
                         </div>
                     </div>
 
+                    <!-- Company Info & VAT Configuration Card -->
+                    <div class="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-7">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                            <span class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">🧾</span>
+                            Thông tin Doanh nghiệp & Hóa đơn VAT
+                        </h2>
+
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Tên pháp lý Công ty</label>
+                                    <input v-model="form.company_name" type="text"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Mã số thuế (MST)</label>
+                                    <input v-model="form.company_mst" type="text"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono font-bold">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Địa chỉ đăng ký kinh doanh</label>
+                                <input v-model="form.company_address" type="text"
+                                    class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Hotline xuất hóa đơn</label>
+                                    <input v-model="form.company_phone" type="text"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email nhận hóa đơn</label>
+                                    <input v-model="form.company_email" type="email"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Ký hiệu HĐ (Serial)</label>
+                                    <input v-model="form.invoice_serial_prefix" type="text" placeholder="VD: AA/22E"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Mẫu số HĐ (Template Code)</label>
+                                    <input v-model="form.invoice_template_code" type="text" placeholder="VD: 01GTKT0/001"
+                                        class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Location & Address Card -->
                     <div class="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-7">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
@@ -125,6 +188,27 @@ const hasValidMap = computed(() => {
                                 placeholder="VD: 123 Đường Công Nghệ, Phường Bến Nghé, Quận 1, TP. HCM"
                             ></textarea>
                             <div v-if="form.errors.contact_address" class="text-red-500 text-sm mt-2 font-medium">{{ form.errors.contact_address }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Alert Configuration Card -->
+                    <div class="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-7">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                            <span class="p-2 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg">📦</span>
+                            Cấu hình Cảnh báo Tồn kho
+                        </h2>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Ngưỡng tồn kho tối thiểu cảnh báo (SKU)</label>
+                            <input 
+                                v-model="form.min_stock_threshold" 
+                                type="number" 
+                                min="0"
+                                class="w-full rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-bold"
+                                placeholder="VD: 10"
+                            >
+                            <div v-if="form.errors.min_stock_threshold" class="text-red-500 text-sm mt-2 font-medium">{{ form.errors.min_stock_threshold }}</div>
+                            <p class="text-xs text-gray-400 mt-2 leading-relaxed">Hệ thống sẽ tự động gửi thông báo cảnh báo kho (Database Notification) tới các quản trị viên và thủ kho có quyền xem tồn kho ngay khi số lượng của bất kỳ biến thể nào giảm xuống dưới ngưỡng này.</p>
                         </div>
                     </div>
                 </div>

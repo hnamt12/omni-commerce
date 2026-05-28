@@ -14,6 +14,13 @@ class InventoryHistory extends Model
         'stock_before',
         'stock_after',
         'note',
+        'supplier_id',
+        'lot_number',
+        'expiry_date',
+    ];
+
+    protected $casts = [
+        'expiry_date' => 'date',
     ];
 
     public function productVariant()
@@ -24,5 +31,10 @@ class InventoryHistory extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

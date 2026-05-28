@@ -1,10 +1,23 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import Sidebar from './Sidebar.vue';
 import Header  from './Header.vue';
+import { useChatNotifications } from '@/Composables/useChatNotifications';
 
 const isSidebarExpanded = ref(true);
 const toggleSidebar = () => { isSidebarExpanded.value = !isSidebarExpanded.value; };
+
+const page = usePage();
+const { loadUnreadNotifications } = useChatNotifications();
+
+onMounted(() => {
+    // Tải thông báo chat chưa đọc (dùng bởi Header dropdown chuông)
+    if (page.props.auth?.user) {
+        loadUnreadNotifications();
+    }
+    // Echo listener đã được chuyển sang Sidebar.vue (kênh admin-notifications)
+});
 </script>
 
 <template>

@@ -6,9 +6,9 @@ import Swal from 'sweetalert2';
 const props = defineProps({ requests: Object, filters: Object });
 
 const tabs = [
-    { slug: 'pending', label: 'Chờ xử lý', color: 'bg-amber-100 text-amber-700' },
-    { slug: 'approved', label: 'Đã duyệt', color: 'bg-emerald-100 text-emerald-700' },
-    { slug: 'rejected', label: 'Đã từ chối', color: 'bg-red-100 text-red-700' }
+    { slug: 'pending', label: 'Chờ xử lý', color: 'bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400' },
+    { slug: 'approved', label: 'Đã duyệt', color: 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' },
+    { slug: 'rejected', label: 'Đã từ chối', color: 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400' }
 ];
 
 const filterStatus = (slug) => {
@@ -58,18 +58,18 @@ const rejectRequest = (id, orderCode) => {
 };
 
 const getStatusLabel = (status) => {
-    if (status === 'pending') return { t: 'Chờ xử lý', c: 'bg-amber-100 text-amber-700' };
-    if (status === 'approved') return { t: 'Đã duyệt', c: 'bg-emerald-100 text-emerald-700' };
-    return { t: 'Đã từ chối', c: 'bg-red-100 text-red-700' };
+    if (status === 'pending') return { t: 'Chờ xử lý', c: 'bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400' };
+    if (status === 'approved') return { t: 'Đã duyệt', c: 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' };
+    return { t: 'Đã từ chối', c: 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400' };
 };
 </script>
 
 <template>
     <Head title="Yêu cầu Hủy đơn" />
     <div class="w-full pb-10">
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-            <h1 class="text-xl font-bold">Yêu cầu Hủy đơn hàng</h1>
-            <p class="text-gray-500 text-sm mt-1">Xử lý các yêu cầu hủy đơn từ khách hàng.</p>
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 mb-6">
+            <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100">Yêu cầu Hủy đơn hàng</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Xử lý các yêu cầu hủy đơn từ khách hàng.</p>
         </div>
 
         <!-- Tabs -->
@@ -77,17 +77,17 @@ const getStatusLabel = (status) => {
             <button v-for="tab in tabs" :key="tab.slug"
                 @click="filterStatus(tab.slug)"
                 class="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap"
-                :class="(filters.status ?? 'pending') === tab.slug ? tab.color + ' border-current' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'">
+                :class="(filters.status ?? 'pending') === tab.slug ? tab.color + ' border-current' : 'bg-white dark:bg-slate-850 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800'">
                 {{ tab.label }}
             </button>
         </div>
 
         <div class="space-y-4">
-            <div v-for="req in requests.data" :key="req.id" class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row justify-between gap-4 transition hover:shadow-md">
+            <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 p-5 flex flex-col md:flex-row justify-between gap-4 transition hover:shadow-md">
                 
                 <div class="flex-grow">
                     <div class="flex items-center gap-3 mb-2">
-                        <Link :href="route('admin.orders.show', req.order_id)" class="text-lg font-bold text-indigo-600 hover:underline">
+                        <Link :href="route('admin.orders.show', req.order_id)" class="text-lg font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
                             #{{ req.order?.order_code || 'N/A' }}
                         </Link>
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatusLabel(req.status).c">
@@ -95,10 +95,10 @@ const getStatusLabel = (status) => {
                         </span>
                     </div>
 
-                    <div class="space-y-1 text-sm text-gray-600">
-                        <p><span class="font-semibold text-gray-700">Khách hàng:</span> {{ req.customer?.name || req.order?.name || 'Khách vãng lai' }}</p>
-                        <p><span class="font-semibold text-gray-700">Lý do:</span> <span class="italic text-gray-500">"{{ req.reason }}"</span></p>
-                        <p class="text-xs text-gray-400 mt-2">Ngày yêu cầu: {{ new Date(req.created_at).toLocaleString('vi-VN') }}</p>
+                    <div class="space-y-1 text-sm text-gray-600 dark:text-slate-300">
+                        <p><span class="font-semibold text-gray-700 dark:text-slate-200">Khách hàng:</span> {{ req.customer?.name || req.order?.name || 'Khách vãng lai' }}</p>
+                        <p><span class="font-semibold text-gray-700 dark:text-slate-200">Lý do:</span> <span class="italic text-gray-500 dark:text-slate-400">"{{ req.reason }}"</span></p>
+                        <p class="text-xs text-gray-400 dark:text-slate-500 mt-2">Ngày yêu cầu: {{ new Date(req.created_at).toLocaleString('vi-VN') }}</p>
                     </div>
                 </div>
 
@@ -112,18 +112,18 @@ const getStatusLabel = (status) => {
                 </div>
             </div>
 
-            <div v-if="requests.data.length === 0" class="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-                <p class="text-gray-500">Chưa có yêu cầu hủy nào ở trạng thái này.</p>
+            <div v-if="requests.data.length === 0" class="bg-white dark:bg-slate-800 rounded-xl p-12 text-center shadow-sm border border-gray-100 dark:border-slate-700">
+                <p class="text-gray-500 dark:text-gray-400">Chưa có yêu cầu hủy nào ở trạng thái này.</p>
             </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="requests.last_page > 1" class="mt-6 flex flex-wrap gap-1 bg-white p-4 rounded-xl shadow-sm border border-gray-100 justify-center">
+        <div v-if="requests.last_page > 1" class="mt-6 flex flex-wrap gap-1 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 justify-center">
             <template v-for="(link, i) in requests.links" :key="i">
                 <Link v-if="link.url" :href="link.url" v-html="link.label" preserve-scroll
                     class="px-3 py-1.5 rounded-lg text-sm border transition"
-                    :class="link.active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'" />
-                <span v-else v-html="link.label" class="px-3 py-1.5 rounded-lg text-sm text-gray-400 border border-gray-100 bg-gray-50 cursor-not-allowed" />
+                    :class="link.active ? 'bg-indigo-600 text-white border-indigo-600 dark:border-indigo-500' : 'bg-white dark:bg-slate-750 text-gray-700 dark:text-slate-200 border-gray-200 dark:border-slate-650 hover:bg-gray-50 dark:hover:bg-slate-700'" />
+                <span v-else v-html="link.label" class="px-3 py-1.5 rounded-lg text-sm text-gray-400 dark:text-slate-500 border border-gray-100 dark:border-slate-750 bg-gray-50 dark:bg-slate-900 cursor-not-allowed" />
             </template>
         </div>
     </div>

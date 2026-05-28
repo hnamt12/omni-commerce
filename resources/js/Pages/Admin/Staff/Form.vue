@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { permissionGroups } from './Data/permissionGroups';
 
 const props = defineProps({
     staff: Object,
@@ -9,7 +10,7 @@ const props = defineProps({
     errors: Object
 });
 
-const isEdit = !!props.staff;
+const isEdit = !!props.staff?.id; // Chỉ an toàn khi staff thực sự có ID
 
 const form = useForm({
     name: props.staff?.name || '',
@@ -17,78 +18,6 @@ const form = useForm({
     password: '',
     permissions: props.staff?.permissions || []
 });
-
-const permissionGroups = [
-    {
-        name: 'Sale & CSKH',
-        icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
-        color: 'text-emerald-600 dark:text-emerald-400',
-        bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-        border: 'border-emerald-100 dark:border-emerald-800',
-        permissions: [
-            { id: 'view_orders', label: 'Xem đơn hàng' },
-            { id: 'update_orders', label: 'Cập nhật trạng thái đơn' },
-            { id: 'manage_cancel_requests', label: 'Xử lý yêu cầu hủy' }
-        ]
-    },
-    {
-        name: 'Marketing & Content',
-        icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
-        color: 'text-pink-600 dark:text-pink-400',
-        bg: 'bg-pink-50 dark:bg-pink-900/20',
-        border: 'border-pink-100 dark:border-pink-800',
-        permissions: [
-            { id: 'manage_banners', label: 'Quản lý Banners' },
-            { id: 'manage_vouchers', label: 'Quản lý Mã giảm giá (Voucher)' },
-            { id: 'manage_flash_sales', label: 'Quản lý Flash Sale' },
-            { id: 'manage_posts', label: 'Quản lý Bài viết (Blog)' }
-        ]
-    },
-    {
-        name: 'Kho hàng',
-        icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-        color: 'text-amber-600 dark:text-amber-400',
-        bg: 'bg-amber-50 dark:bg-amber-900/20',
-        border: 'border-amber-100 dark:border-amber-800',
-        permissions: [
-            { id: 'view_inventory', label: 'Xem Tồn kho' },
-            { id: 'update_stock', label: 'Cập nhật số lượng tồn' }
-        ]
-    },
-    {
-        name: 'Kế toán',
-        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-        color: 'text-blue-600 dark:text-blue-400',
-        bg: 'bg-blue-50 dark:bg-blue-900/20',
-        border: 'border-blue-100 dark:border-blue-800',
-        permissions: [
-            { id: 'view_analytics', label: 'Xem Báo cáo Doanh thu' },
-            { id: 'export_reports', label: 'Xuất dữ liệu Excel/CSV' }
-        ]
-    },
-    {
-        name: 'Quản lý Danh mục',
-        icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
-        color: 'text-fuchsia-600 dark:text-fuchsia-400',
-        bg: 'bg-fuchsia-50 dark:bg-fuchsia-900/20',
-        border: 'border-fuchsia-100 dark:border-fuchsia-800',
-        permissions: [
-            { id: 'manage_products', label: 'Thêm/Sửa/Xóa Sản phẩm' },
-            { id: 'manage_categories', label: 'Quản lý Danh mục & Phân loại' }
-        ]
-    },
-    {
-        name: 'Hệ thống (Quản trị viên)',
-        icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
-        color: 'text-indigo-600 dark:text-indigo-400',
-        bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-        border: 'border-indigo-100 dark:border-indigo-800',
-        permissions: [
-            { id: 'manage_users', label: 'Quản lý Tài khoản (Staff/Khách)' },
-            { id: 'manage_settings', label: 'Cài đặt Cấu hình & Thanh toán' }
-        ]
-    }
-];
 
 const toggleGroup = (group) => {
     const groupPerms = group.permissions.map(p => p.id);
@@ -107,10 +36,22 @@ const isGroupSelected = (group) => {
 };
 
 const submit = () => {
+    form.clearErrors();
+
+    let cleanPermissions = [];
+    if (form.permissions) {
+        cleanPermissions = Array.isArray(form.permissions) ? [...form.permissions] : Object.values(form.permissions);
+    }
+    form.permissions = cleanPermissions.filter(p => typeof p === 'string');
+
     const options = {
         preserveScroll: true,
-        onError: (err) => console.error("❌ [INERTIA] GỬI FORM THẤT BẠI:", err)
+        preserveState: true, // GIỮ TRẠNG THÁI VUE, KHÔNG RE-LOAD TRANG CỨNG
+        onError: (errors) => {
+            console.log("🚨 [INERTIA VALIDATION FAILED] Lỗi trả về từ Laravel:", errors);
+        }
     };
+
     if (isEdit) {
         form.put(route('admin.staff.update', props.staff.id), options);
     } else {
@@ -144,7 +85,7 @@ const submit = () => {
             </Link>
         </div>
 
-        <form @submit.prevent="submit" class="space-y-6">
+        <form @submit.prevent="submit" novalidate class="space-y-6">
             
             <!-- Global Error Banner -->
             <Transition

@@ -90,13 +90,13 @@ const goToCheckout = () => {
 <template>
     <Head title="Giỏ hàng – OmniCommerce" />
     <ClientLayout>
-        <div class="bg-gray-100 min-h-screen py-8">
+        <div class="bg-gray-100 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-300">
             <div class="max-w-[1200px] mx-auto px-4">
 
                 <!-- Page title -->
-                <h1 class="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                <h1 class="text-2xl font-black text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                     🛒 Giỏ hàng của bạn
-                    <span class="text-base font-semibold text-gray-400">({{ cartItems.length }} sản phẩm)</span>
+                    <span class="text-base font-semibold text-gray-400 dark:text-gray-500">({{ cartItems.length }} sản phẩm)</span>
                 </h1>
 
                 <!-- Error banner -->
@@ -106,10 +106,10 @@ const goToCheckout = () => {
                 </div>
 
                 <!-- Empty state -->
-                <div v-if="cartItems.length === 0" class="bg-white rounded-2xl shadow-sm p-16 text-center">
+                <div v-if="cartItems.length === 0" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-16 text-center">
                     <div class="text-8xl mb-4">🛒</div>
-                    <p class="text-xl font-bold text-gray-700 mb-2">Giỏ hàng trống</p>
-                    <p class="text-gray-500 text-sm mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm.</p>
+                    <p class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Giỏ hàng trống</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm.</p>
                     <Link :href="route('client.shop')"
                         class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">
                         Tiếp tục mua sắm →
@@ -123,29 +123,29 @@ const goToCheckout = () => {
                     <div class="lg:col-span-8 space-y-4">
 
                         <!-- Free-ship progress -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                            <div v-if="freeshipGap > 0" class="text-sm text-gray-700 mb-2 font-medium">
-                                🚚 Mua thêm <span class="text-red-600 font-bold">{{ vnd(freeshipGap) }}</span> để được <span class="font-bold text-green-600">Miễn phí vận chuyển</span>!
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4">
+                            <div v-if="freeshipGap > 0" class="text-sm text-gray-700 dark:text-gray-300 mb-2 font-medium">
+                                🚚 Mua thêm <span class="text-red-600 dark:text-red-400 font-bold">{{ vnd(freeshipGap) }}</span> để được <span class="font-bold text-green-600 dark:text-green-400">Miễn phí vận chuyển</span>!
                             </div>
                             <div v-else class="text-sm font-bold text-green-600 mb-2">
                                 🎉 Bạn đã đủ điều kiện Miễn phí vận chuyển!
                             </div>
-                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                 <div class="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full transition-all duration-500"
                                     :style="{ width: freeshipPct + '%' }"></div>
                             </div>
                         </div>
 
                         <!-- Select All Header -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 flex items-center justify-between">
-                            <label class="flex items-center gap-3 cursor-pointer font-bold text-gray-800 text-sm">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 mb-4 flex items-center justify-between">
+                            <label class="flex items-center gap-3 cursor-pointer font-bold text-gray-800 dark:text-gray-200 text-sm">
                                 <input type="checkbox" v-model="selectAll" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
                                 Chọn tất cả ({{ cartItems.length }} sản phẩm)
                             </label>
                         </div>
 
                         <!-- Cart items -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 divide-y divide-gray-50 dark:divide-slate-800">
                             <div v-for="item in cartItems" :key="item.id"
                                 class="flex gap-4 p-4 transition"
                                 :class="loading[item.id] ? 'opacity-50 pointer-events-none' : ''">
@@ -158,31 +158,31 @@ const goToCheckout = () => {
                                     class="shrink-0">
                                     <img :src="item.product?.thumbnail ?? 'https://placehold.co/80x80/f8fafc/94a3b8?text=No+Image'"
                                         :alt="item.product?.name"
-                                        class="w-20 h-20 object-contain rounded-xl border border-gray-100 bg-gray-50 p-1">
+                                        class="w-20 h-20 object-contain rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-1">
                                 </Link>
 
                                 <!-- Info -->
                                 <div class="flex-1 min-w-0">
                                     <Link :href="route('client.product.detail', item.product?.slug ?? '#')"
-                                        class="font-bold text-gray-900 text-sm hover:text-indigo-600 transition line-clamp-2">
+                                        class="font-bold text-gray-900 dark:text-gray-100 text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition line-clamp-2">
                                         {{ item.product?.name }}
                                     </Link>
                                     <p v-if="variantLabel(item)" class="text-xs text-gray-500 mt-0.5">{{ variantLabel(item) }}</p>
-                                    <p class="text-red-600 font-black text-base mt-1">{{ vnd(item.price) }}</p>
+                                    <p class="text-red-600 dark:text-red-400 font-black text-base mt-1">{{ vnd(item.price) }}</p>
                                 </div>
 
                                 <!-- Qty stepper + price + remove -->
                                 <div class="flex flex-col items-end justify-between gap-2 shrink-0">
                                     <!-- Stepper -->
-                                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden h-8">
+                                    <div class="flex items-center border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden h-8">
                                         <button @click="changeQty(item, -1)"
-                                            class="w-8 h-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition font-bold text-base">−</button>
-                                        <span class="w-8 text-center text-sm font-bold text-gray-800 border-x border-gray-200 h-full flex items-center justify-center">{{ item.quantity }}</span>
+                                            class="w-8 h-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition font-bold text-base">−</button>
+                                        <span class="w-8 text-center text-sm font-bold text-gray-800 dark:text-gray-200 border-x border-gray-200 dark:border-slate-700 h-full flex items-center justify-center">{{ item.quantity }}</span>
                                         <button @click="changeQty(item, +1)"
-                                            class="w-8 h-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition font-bold text-base">+</button>
+                                            class="w-8 h-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition font-bold text-base">+</button>
                                     </div>
                                     <!-- Item total -->
-                                    <p class="text-gray-900 font-black text-sm">{{ vnd(item.price * item.quantity) }}</p>
+                                    <p class="text-gray-900 dark:text-gray-100 font-black text-sm">{{ vnd(item.price * item.quantity) }}</p>
                                     <!-- Remove -->
                                     <button @click="removeItem(item)"
                                         class="text-xs text-gray-400 hover:text-red-500 transition flex items-center gap-1">
@@ -202,34 +202,34 @@ const goToCheckout = () => {
 
                     <!-- ── RIGHT: Summary (sticky) ── -->
                     <div class="lg:col-span-4 lg:sticky lg:top-24 space-y-4">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 class="text-base font-black text-gray-900 mb-4 pb-3 border-b border-gray-100">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+                            <h2 class="text-base font-black text-gray-900 dark:text-gray-100 mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
                                 Tóm tắt đơn hàng
                             </h2>
                             <div class="space-y-3 text-sm">
-                                <div class="flex justify-between text-gray-600">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Tạm tính ({{ selectedIds.length }} sản phẩm)</span>
-                                    <span class="font-semibold text-gray-800">{{ vnd(selectedSubtotal) }}</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">{{ vnd(selectedSubtotal) }}</span>
                                 </div>
-                                <div class="flex justify-between text-gray-600">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Phí vận chuyển</span>
                                     <span class="font-semibold text-green-600">{{ freeshipGap === 0 ? 'Miễn phí' : 'Tính lúc checkout' }}</span>
                                 </div>
-                                <div class="flex justify-between text-gray-600">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Giảm giá</span>
                                     <span class="font-semibold text-red-500">-0đ</span>
                                 </div>
-                                <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
-                                    <span class="font-black text-gray-900 text-base">Tổng cộng</span>
-                                    <span class="font-black text-red-600 text-xl">{{ vnd(selectedSubtotal) }}</span>
+                                <div class="border-t border-gray-100 dark:border-slate-800 pt-3 flex justify-between items-center">
+                                    <span class="font-black text-gray-900 dark:text-gray-100 text-base">Tổng cộng</span>
+                                    <span class="font-black text-red-600 dark:text-red-400 text-xl">{{ vnd(selectedSubtotal) }}</span>
                                 </div>
                             </div>
 
                             <!-- Voucher placeholder -->
                             <div class="mt-4 flex gap-2">
                                 <input type="text" placeholder="Nhập mã giảm giá..."
-                                    class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                                <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-lg transition">
+                                    class="flex-1 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white dark:bg-slate-800 dark:text-gray-200">
+                                <button class="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 text-sm font-bold rounded-lg transition">
                                     Áp dụng
                                 </button>
                             </div>

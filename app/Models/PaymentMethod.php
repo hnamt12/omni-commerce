@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Auditable;
 
 class PaymentMethod extends Model
 {
-    use HasFactory;
+    use HasFactory, Auditable;
 
     protected $fillable = [
         'name',
@@ -21,7 +22,7 @@ class PaymentMethod extends Model
     ];
 
     protected $casts = [
-        'config'    => 'array',   // JSON → PHP array automatically
+        'config'    => 'encrypted:json',   // Tự động mã hóa JSON khi lưu vào DB (CRITICAL-3)
         'is_active' => 'boolean',
     ];
 }

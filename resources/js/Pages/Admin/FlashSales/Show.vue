@@ -216,27 +216,35 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
     <div class="w-full pb-10">
 
         <!-- ─ HEADER ─ -->
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-3">
-                <Link :href="route('admin.flash-sales.index')" class="text-gray-400 hover:text-gray-600 transition">
+                <Link :href="route('admin.flash-sales.index')" class="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-350 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </Link>
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+                    <h1 class="text-xl font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2 flex-wrap">
                         ⚡ {{ flashSale.name }}
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="getStatus(flashSale).cls">{{ getStatus(flashSale).label }}</span>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold" 
+                            :class="getStatus(flashSale).cls.includes('bg-emerald-100') ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400' :
+                                    getStatus(flashSale).cls.includes('bg-red-100') ? 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400' :
+                                    getStatus(flashSale).cls.includes('bg-amber-100') ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400' :
+                                    'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'">
+                            {{ getStatus(flashSale).label }}
+                        </span>
                     </h1>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ formatDt(flashSale.start_time) }} → {{ formatDt(flashSale.end_time) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{{ formatDt(flashSale.start_time) }} → {{ formatDt(flashSale.end_time) }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
                 <Link :href="route('admin.flash-sales.edit', flashSale.id)"
-                    class="border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5">
+                    class="border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     Sửa
                 </Link>
                 <button @click="toggleActive"
-                    :class="flashSale.is_active ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'"
+                    :class="flashSale.is_active 
+                        ? 'bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/40 hover:bg-red-100 dark:hover:bg-red-950/40' 
+                        : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/40'"
                     class="border px-4 py-2 rounded-lg text-sm font-bold transition">
                     {{ flashSale.is_active ? '⏸ Tạm dừng' : '▶ Kích hoạt' }}
                 </button>
@@ -248,33 +256,33 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
 
             <!-- ═══ LEFT col-2: AJAX Search ═══ -->
             <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-6">
-                    <h3 class="font-bold text-gray-800 mb-4 pb-2 border-b flex items-center gap-2">
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 p-5 sticky top-6">
+                    <h3 class="font-bold text-gray-800 dark:text-slate-100 mb-4 pb-2 border-b border-gray-200 dark:border-slate-800 flex items-center gap-2">
                         <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         Tìm & Thêm Sản phẩm
                     </h3>
                     <div class="relative mb-4">
                         <input v-model="searchQuery" type="text" placeholder="Gõ tên sản phẩm để tìm kiếm..."
-                            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-orange-400 transition">
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-gray-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 text-gray-800 dark:text-slate-100 focus:ring-2 focus:ring-orange-400 transition">
                         <svg v-if="!isSearching" class="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <svg v-else class="absolute left-3 top-3 w-4 h-4 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     </div>
                     <div class="space-y-1.5 max-h-[60vh] overflow-y-auto">
-                        <p v-if="!searchQuery && !searchResults.length" class="text-center text-sm text-gray-400 py-6">Nhập tên sản phẩm để tìm kiếm.</p>
-                        <p v-else-if="searchQuery && !isSearching && !searchResults.length" class="text-center text-sm text-gray-400 py-6">Không tìm thấy sản phẩm phù hợp.</p>
+                        <p v-if="!searchQuery && !searchResults.length" class="text-center text-sm text-gray-400 dark:text-slate-500 py-6">Nhập tên sản phẩm để tìm kiếm.</p>
+                        <p v-else-if="searchQuery && !isSearching && !searchResults.length" class="text-center text-sm text-gray-400 dark:text-slate-500 py-6">Không tìm thấy sản phẩm phù hợp.</p>
                         <button v-for="prod in searchResults" :key="prod.id" @click="openModal(prod)"
-                            class="w-full text-left px-3.5 py-3 rounded-lg border border-gray-100 bg-gray-50 hover:border-orange-400 hover:bg-orange-50 transition flex items-center gap-3">
+                            class="w-full text-left px-3.5 py-3 rounded-lg border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-850 hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 transition flex items-center gap-3">
                             <img v-if="prod.thumbnail" :src="prod.thumbnail"
-                                class="w-9 h-9 rounded object-cover border border-gray-200 shrink-0"
+                                class="w-9 h-9 rounded object-cover border border-gray-200 dark:border-slate-700 shrink-0"
                                 @error="$event.target.src='https://placehold.co/40x40/e2e8f0/64748b?text=?'; $event.target.onerror=null;">
-                            <div v-else class="w-9 h-9 rounded bg-gray-100 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div v-else class="w-9 h-9 rounded bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
                             <div class="flex-grow min-w-0">
-                                <p class="font-semibold text-gray-800 text-sm truncate">{{ prod.name }}</p>
-                                <p class="text-xs text-gray-400">{{ prod.variants?.length || 0 }} biến thể có sẵn</p>
+                                <p class="font-semibold text-gray-800 dark:text-slate-100 text-sm truncate">{{ prod.name }}</p>
+                                <p class="text-xs text-gray-400 dark:text-slate-500">{{ prod.variants?.length || 0 }} biến thể có sẵn</p>
                             </div>
-                            <span class="shrink-0 text-orange-500 text-xs font-bold bg-orange-50 border border-orange-200 rounded px-2 py-0.5">Cấu hình</span>
+                            <span class="shrink-0 text-orange-500 text-xs font-bold bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded px-2 py-0.5">Cấu hình</span>
                         </button>
                     </div>
                 </div>
@@ -282,24 +290,24 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
 
             <!-- ═══ RIGHT col-3: Grouped Products Table ═══ -->
             <div class="lg:col-span-3">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                             <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             Sản phẩm đang Sale
                         </h3>
-                        <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">{{ groupedFlashSaleItems.length }} Sản phẩm</span>
+                        <span class="bg-orange-100 dark:bg-orange-950/30 text-orange-800 dark:text-orange-400 text-xs font-bold px-3 py-1 rounded-full">{{ groupedFlashSaleItems.length }} Sản phẩm</span>
                     </div>
 
-                    <div v-if="!groupedFlashSaleItems.length" class="p-12 text-center text-gray-400">
-                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <div v-if="!groupedFlashSaleItems.length" class="p-12 text-center text-gray-400 dark:text-slate-500">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-200 dark:text-slate-650" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <p class="font-medium">Chưa có sản phẩm nào.</p>
-                        <p class="text-sm mt-1">Tìm và thêm sản phẩm từ cột bên trái!</p>
+                        <p class="text-sm mt-1 text-gray-400 dark:text-slate-500">Tìm và thêm sản phẩm từ cột bên trái!</p>
                     </div>
 
                     <div v-else class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-500 text-[11px] uppercase tracking-wider border-b border-gray-100">
+                            <thead class="bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 text-[11px] uppercase tracking-wider border-b border-gray-200 dark:border-slate-800">
                                 <tr>
                                     <th class="px-4 py-3 w-8 text-center">#</th>
                                     <th class="px-4 py-3">Sản phẩm</th>
@@ -309,40 +317,40 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                                     <th class="px-4 py-3 text-center">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
                                 <tr v-for="(group, idx) in groupedFlashSaleItems" :key="group.product.id"
-                                    class="hover:bg-orange-50/30 transition-colors">
-                                    <td class="px-4 py-3.5 text-center text-gray-400 font-medium">{{ idx + 1 }}</td>
+                                    class="hover:bg-orange-50/30 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td class="px-4 py-3.5 text-center text-gray-400 dark:text-slate-500 font-medium">{{ idx + 1 }}</td>
                                     <td class="px-4 py-3.5">
-                                        <div class="flex items-center gap-2.5">
+                                        <div class="flex items-center gap.5">
                                             <img v-if="group.product.thumbnail" :src="group.product.thumbnail"
-                                                class="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0"
+                                                class="w-9 h-9 rounded-lg object-cover border border-gray-100 dark:border-slate-800 shrink-0"
                                                 @error="$event.target.src='https://placehold.co/40x40/e2e8f0/64748b?text=?'; $event.target.onerror=null;">
-                                            <div v-else class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <div v-else class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                <svg class="w-4 h-4 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             </div>
-                                            <span class="font-bold text-gray-800 text-sm">{{ group.product.name }}</span>
+                                            <span class="font-bold text-gray-800 dark:text-slate-100 text-sm ml-2.5">{{ group.product.name }}</span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3.5 text-center">
-                                        <span class="bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full text-xs font-bold">{{ group.variants_count }}</span>
+                                        <span class="bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 px-2.5 py-0.5 rounded-full text-xs font-bold">{{ group.variants_count }}</span>
                                     </td>
                                     <td class="px-4 py-3.5 text-right">
-                                        <p class="text-gray-400 line-through text-[11px]">{{ formatPriceRange(group.min_original, group.max_original) }}</p>
-                                        <p class="font-bold text-red-600 text-sm">{{ formatPriceRange(group.min_sale, group.max_sale) }}</p>
+                                        <p class="text-gray-400 dark:text-slate-500 line-through text-[11px]">{{ formatPriceRange(group.min_original, group.max_original) }}</p>
+                                        <p class="font-bold text-red-600 dark:text-red-400 text-sm">{{ formatPriceRange(group.min_sale, group.max_sale) }}</p>
                                     </td>
                                     <td class="px-4 py-3.5 text-center">
-                                        <p class="font-bold text-orange-600">{{ group.total_quantity }}</p>
-                                        <p class="text-gray-400 text-xs">/ {{ group.total_stock }}</p>
+                                        <p class="font-bold text-orange-600 dark:text-orange-400">{{ group.total_quantity }}</p>
+                                        <p class="text-gray-400 dark:text-slate-500 text-xs">/ {{ group.total_stock }}</p>
                                     </td>
-                                    <td class="px-4 py-3.5">
+                                    <td class="px-4 py-3.5 text-center">
                                         <div class="flex items-center justify-center gap-1.5">
                                             <button @click="editGroup(group)"
-                                                class="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 hover:text-blue-700 transition" title="Chỉnh sửa">
+                                                class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition" title="Chỉnh sửa">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                             </button>
                                             <button @click="removeGroup(group)"
-                                                class="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition" title="Xóa cả nhóm">
+                                                class="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-400 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition" title="Xóa cả nhóm">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </div>
@@ -360,15 +368,15 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
     <Teleport to="body">
         <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeModal"></div>
-            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl z-10 flex flex-col max-h-[88vh]">
+            <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl border border-gray-100 dark:border-slate-800 z-10 flex flex-col max-h-[88vh]">
 
                 <!-- Header -->
-                <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 rounded-t-2xl shrink-0">
+                <div class="flex justify-between items-center p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-850 rounded-t-2xl shrink-0">
                     <div>
-                        <h2 class="text-lg font-bold text-gray-800">⚡ Cấu hình Flash Sale</h2>
-                        <p class="text-sm text-orange-600 font-semibold mt-0.5">{{ selectedProduct?.name }}</p>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-slate-100">⚡ Cấu hình Flash Sale</h2>
+                        <p class="text-sm text-orange-600 dark:text-orange-400 font-semibold mt-0.5">{{ selectedProduct?.name }}</p>
                     </div>
-                    <button @click="closeModal" class="text-gray-400 hover:text-gray-600 p-1 transition">
+                    <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-350 p-1 transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -376,7 +384,7 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                 <!-- Body -->
                 <div class="overflow-y-auto flex-grow p-5">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-100 text-gray-600 text-xs uppercase rounded-lg">
+                        <thead class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 text-xs uppercase rounded-lg">
                             <tr>
                                 <th class="p-3 text-center w-10">✓</th>
                                 <th class="p-3 text-left">Biến thể</th>
@@ -385,19 +393,19 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                                 <th class="p-3 w-24">SL cấp</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50">
+                        <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
                             <tr v-for="item in modalItems" :key="item.variant_id"
-                                class="hover:bg-orange-50/40 transition"
+                                class="hover:bg-orange-50/40 dark:hover:bg-slate-850/40 transition"
                                 :class="{ 'opacity-50': !item.selected }">
                                 <td class="p-3 text-center">
                                     <input type="checkbox" v-model="item.selected"
-                                        class="w-4 h-4 rounded text-orange-500 focus:ring-orange-400 cursor-pointer">
+                                        class="w-4 h-4 rounded text-orange-500 focus:ring-orange-400 cursor-pointer bg-white dark:bg-slate-800">
                                 </td>
                                 <td class="p-3">
-                                    <p class="font-semibold text-gray-800">{{ item.name }}</p>
-                                    <p class="text-xs text-gray-400 mt-0.5">Kho: {{ item.stock }}</p>
+                                    <p class="font-semibold text-gray-800 dark:text-slate-100">{{ item.name }}</p>
+                                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Kho: {{ item.stock }}</p>
                                 </td>
-                                <td class="p-3 text-right text-gray-500 text-sm">{{ formatCurrency(item.price) }}</td>
+                                <td class="p-3 text-right text-gray-500 dark:text-slate-400 text-sm">{{ formatCurrency(item.price) }}</td>
                                 <td class="p-3">
                                     <div class="relative">
                                         <input type="text"
@@ -405,27 +413,27 @@ const formatDt = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day: '2-dig
                                             :value="formatNumber(item.discount_price)"
                                             @input="item.discount_price = $event.target.value"
                                             placeholder="Nhập giá"
-                                            class="w-full border border-gray-200 rounded-lg px-2.5 py-2 pr-7 text-right text-red-600 font-bold text-sm focus:ring-2 focus:ring-orange-400 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                        <span class="absolute right-2 top-2 text-gray-400 text-xs pointer-events-none">đ</span>
+                                            class="w-full border border-gray-200 dark:border-slate-700 rounded-lg px-2.5 py-2 pr-7 text-right text-red-600 dark:text-red-400 font-bold text-sm focus:ring-2 focus:ring-orange-400 bg-white dark:bg-slate-800 disabled:bg-gray-50 dark:disabled:bg-slate-900 disabled:text-gray-400 dark:disabled:text-slate-650 disabled:cursor-not-allowed">
+                                        <span class="absolute right-2 top-2 text-gray-400 dark:text-slate-500 text-xs pointer-events-none">đ</span>
                                     </div>
                                 </td>
                                 <td class="p-3">
                                     <input type="number" min="1" :max="item.stock"
                                         :disabled="!item.selected"
                                         v-model="item.quantity"
-                                        class="w-full border border-gray-200 rounded-lg px-2 py-2 text-center font-bold text-sm focus:ring-2 focus:ring-orange-400 disabled:bg-gray-50 disabled:cursor-not-allowed">
+                                        class="w-full border border-gray-200 dark:border-slate-700 rounded-lg px-2 py-2 text-center font-bold text-sm focus:ring-2 focus:ring-orange-400 bg-white dark:bg-slate-800 text-gray-950 dark:text-slate-100 disabled:bg-gray-50 dark:disabled:bg-slate-900 disabled:cursor-not-allowed">
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <p v-if="!modalItems.length" class="text-center text-gray-400 py-8">Sản phẩm này không có biến thể hợp lệ (tồn kho = 0).</p>
+                    <p v-if="!modalItems.length" class="text-center text-gray-400 dark:text-slate-500 py-8">Sản phẩm này không có biến thể hợp lệ (tồn kho = 0).</p>
                 </div>
 
                 <!-- Footer -->
-                <div class="p-5 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex gap-3 shrink-0">
-                    <button @click="closeModal" class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl font-bold hover:bg-gray-100 transition">Hủy</button>
+                <div class="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-850 rounded-b-2xl flex gap-3 shrink-0">
+                    <button @click="closeModal" class="flex-1 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 py-2.5 rounded-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Hủy</button>
                     <button @click="saveConfig" :disabled="isSaving"
-                        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl font-bold shadow shadow-orange-200 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                        class="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl font-bold shadow dark:shadow-none transition disabled:opacity-50 flex items-center justify-center gap-2">
                         <svg v-if="isSaving" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                         {{ isSaving ? 'Đang lưu...' : '💾 Lưu Thiết Lập' }}
                     </button>

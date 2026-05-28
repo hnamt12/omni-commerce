@@ -151,10 +151,10 @@ const toggleDropdown = (id) => {
     <div class="w-full pb-10" @click="openDropdown = null">
 
         <!-- Header -->
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div class="bg-white dark:bg-slate-850 rounded-xl shadow-sm p-5 mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4 transition-colors">
             <div>
-                <h1 class="text-xl font-bold text-gray-800 uppercase tracking-wide">Quản lý Đơn hàng</h1>
-                <p class="text-gray-500 text-sm mt-1">Theo dõi và xử lý đơn hàng của hệ thống.</p>
+                <h1 class="text-xl font-bold text-gray-800 dark:text-white uppercase tracking-wide">Quản lý Đơn hàng</h1>
+                <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">Theo dõi và xử lý đơn hàng của hệ thống.</p>
             </div>
             <div class="flex items-center gap-2">
                 <a :href="route('admin.orders.export')"
@@ -173,7 +173,7 @@ const toggleDropdown = (id) => {
         </div>
 
         <!-- Search -->
-        <div class="bg-white rounded-xl shadow-sm mb-6 flex items-center p-2 border border-gray-100">
+        <div class="bg-white dark:bg-slate-850 rounded-xl shadow-sm mb-6 flex items-center p-2 border border-gray-100 dark:border-slate-800 transition-colors">
             <div class="flex-grow flex items-center pl-3">
                 <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -182,9 +182,9 @@ const toggleDropdown = (id) => {
                     :value="filters.search"
                     @change="handleSearch"
                     placeholder="Tìm kiếm theo Mã đơn (ORD...), Tên khách hoặc SĐT..."
-                    class="w-full border-0 focus:ring-0 text-sm py-3 px-3 text-gray-700 bg-transparent outline-none" />
+                    class="w-full border-0 focus:ring-0 text-sm py-3 px-3 text-gray-700 dark:text-slate-200 bg-transparent outline-none" />
             </div>
-            <button class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-semibold transition border border-gray-200 mr-1">
+            <button class="bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 px-6 py-2.5 rounded-lg text-sm font-semibold transition border border-gray-200 dark:border-slate-700 mr-1">
                 Tìm kiếm
             </button>
         </div>
@@ -198,14 +198,14 @@ const toggleDropdown = (id) => {
                 :class="[
                     (filters.status ?? 'tat-ca') === tab.slug
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
+                        : 'bg-white dark:bg-slate-850 border-gray-200 dark:border-slate-750 text-gray-650 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800',
                     isFetching ? 'opacity-50' : 'opacity-100'
                 ]">
                 {{ tab.label }}
                 <span class="px-2 py-0.5 rounded-full text-xs font-bold transition-colors"
                     :class="(filters.status ?? 'tat-ca') === tab.slug
                         ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-gray-100 text-gray-600'">
+                        : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-450'">
                     {{ statusCounts?.[tab.slug] || 0 }}
                 </span>
             </button>
@@ -214,28 +214,28 @@ const toggleDropdown = (id) => {
         <!-- Order Cards -->
         <div class="space-y-4">
             <div v-for="order in orders.data" :key="order.id"
-                class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300">
+                class="bg-white dark:bg-slate-850 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden hover:shadow-md transition duration-300">
 
                 <!-- Card Header: order code + status -->
-                <div class="p-5 border-b border-gray-50 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div class="p-5 border-b border-gray-50 dark:border-slate-800 flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div class="flex gap-3">
-                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-900 text-base">#{{ order.order_code }}</h3>
-                            <div class="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-base">#{{ order.order_code }}</h3>
+                            <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-slate-400 mt-1">
                                 <span class="flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     {{ new Date(order.created_at).toLocaleString('vi-VN') }}
                                 </span>
-                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                <span class="flex items-center gap-1 font-medium text-gray-700">
+                                <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-slate-700"></span>
+                                <span class="flex items-center gap-1 font-medium text-gray-700 dark:text-slate-300">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
@@ -253,7 +253,7 @@ const toggleDropdown = (id) => {
 
                         <div v-if="getAvailableActions(order.status).length > 0" class="relative">
                             <button @click.stop="toggleDropdown(order.id)"
-                                class="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 rounded-full text-xs font-semibold transition border border-gray-300 shadow-sm">
+                                class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-350 rounded-full text-xs font-semibold transition border border-gray-300 dark:border-slate-700 shadow-sm">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
@@ -264,12 +264,12 @@ const toggleDropdown = (id) => {
                             </button>
 
                             <div v-if="openDropdown === order.id"
-                                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-2"
+                                class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-100 dark:border-slate-700 z-50 py-2"
                                 @click.stop>
                                 <div class="px-4 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Chuyển trạng thái</div>
                                 <button v-for="action in getAvailableActions(order.status)" :key="action.status"
                                     @click="confirmStatusUpdate(order.id, order.order_code, action.status); openDropdown = null"
-                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition flex items-center gap-2"
+                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center gap-2"
                                     :class="action.color">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.icon"/>
@@ -282,27 +282,27 @@ const toggleDropdown = (id) => {
                 </div>
 
                 <!-- Card Body: product preview + total -->
-                <div class="p-5 flex flex-col lg:flex-row justify-between gap-6">
+                <div class="p-5 flex flex-col lg:flex-row justify-between gap-6 bg-white dark:bg-slate-850 transition-colors">
                     <!-- Product preview -->
                     <div class="flex-grow flex items-center gap-4">
                         <div v-if="order.items && order.items.length > 0" class="flex gap-4 items-center">
                             <div class="relative shrink-0">
                                 <img :src="order.items[0].image_url || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Image'"
-                                    class="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50"
+                                    class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800"
                                     @error="$event.target.src='https://placehold.co/100x100/e2e8f0/64748b?text=No+Image'; $event.target.onerror=null;">
                                 <span class="absolute -bottom-2 -right-2 bg-gray-800 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm border border-white">
                                     x{{ order.items[0].quantity }}
                                 </span>
                             </div>
                             <div>
-                                <h4 class="text-sm font-bold text-gray-800 line-clamp-1">{{ order.items[0].name }}</h4>
-                                <p class="text-xs text-gray-500 mt-1">
+                                <h4 class="text-sm font-bold text-gray-800 dark:text-white line-clamp-1">{{ order.items[0].name }}</h4>
+                                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
                                     Phân loại: <span class="text-indigo-600">{{ parseVariantOptions(order.items[0]) }}</span>
                                 </p>
                             </div>
                         </div>
-                        <div v-if="order.items && order.items.length > 1" class="pl-4 border-l border-gray-100">
-                            <span class="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                        <div v-if="order.items && order.items.length > 1" class="pl-4 border-l border-gray-100 dark:border-slate-800">
+                            <span class="text-xs font-medium text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 px-2 py-1 rounded">
                                 +{{ order.items.length - 1 }} sản phẩm khác
                             </span>
                         </div>
@@ -312,20 +312,20 @@ const toggleDropdown = (id) => {
                     </div>
 
                     <!-- Financial summary -->
-                    <div class="lg:w-60 shrink-0 flex flex-col justify-center lg:items-end gap-1 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6">
-                        <div class="text-xs text-gray-500">Tổng thanh toán:</div>
-                        <div class="text-lg font-bold text-red-600">{{ formatCurrency(order.grand_total) }}</div>
+                    <div class="lg:w-60 shrink-0 flex flex-col justify-center lg:items-end gap-1 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6">
+                        <div class="text-xs text-gray-500 dark:text-slate-450">Tổng thanh toán:</div>
+                        <div class="text-lg font-bold text-red-650">{{ formatCurrency(order.grand_total) }}</div>
                         <div class="text-xs mt-1">
                             <span v-if="order.payment_status === 'paid'"
-                                class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                class="text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30">
                                 ✓ Đã thanh toán
                             </span>
                             <span v-else-if="order.payment_status === 'failed'"
-                                class="text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
+                                class="text-red-600 bg-red-50 dark:bg-red-950/20 dark:text-red-400 px-2 py-0.5 rounded border border-red-100 dark:border-red-900/30">
                                 Lỗi thanh toán
                             </span>
                             <span v-else
-                                class="text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
+                                class="text-amber-600 bg-amber-50 dark:bg-amber-950/20 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-100 dark:border-amber-900/30">
                                 Chưa thanh toán
                             </span>
                         </div>
@@ -333,9 +333,9 @@ const toggleDropdown = (id) => {
                 </div>
 
                 <!-- Card Footer: CTA button -->
-                <div class="px-5 pb-5">
+                <div class="px-5 pb-5 bg-white dark:bg-slate-850">
                     <Link :href="route('admin.orders.show', order.id)"
-                        class="block w-full text-center py-2.5 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 text-gray-700 hover:text-indigo-700 text-sm font-bold rounded-lg transition-colors group">
+                        class="block w-full text-center py-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 border border-gray-200 dark:border-slate-700 hover:border-indigo-200 text-gray-700 dark:text-slate-300 hover:text-indigo-700 text-sm font-bold rounded-lg transition-colors group">
                         Xem chi tiết &amp; Quản lý
                         <span class="group-hover:translate-x-1 inline-block transition-transform">→</span>
                     </Link>
@@ -344,23 +344,23 @@ const toggleDropdown = (id) => {
 
             <!-- Empty state -->
             <div v-if="!orders.data || orders.data.length === 0"
-                class="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                class="bg-white dark:bg-slate-850 rounded-xl p-12 text-center shadow-sm border border-gray-100 dark:border-slate-800 transition-colors">
+                <div class="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
-                <p class="text-gray-500">Không tìm thấy đơn hàng nào.</p>
+                <p class="text-gray-505 dark:text-slate-400">Không tìm thấy đơn hàng nào.</p>
             </div>
         </div>
 
         <!-- Pagination -->
         <div v-if="orders.last_page > 1"
-            class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-4">
-            <p class="text-sm text-gray-500">
-                Hiển thị <span class="font-semibold text-gray-700">{{ orders.from }}</span>–<span class="font-semibold text-gray-700">{{ orders.to }}</span>
-                trong <span class="font-semibold text-gray-700">{{ orders.total }}</span> đơn hàng
+            class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-850 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 px-5 py-4 transition-colors">
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+                Hiển thị <span class="font-semibold text-gray-700 dark:text-white">{{ orders.from }}</span>–<span class="font-semibold text-gray-700 dark:text-white">{{ orders.to }}</span>
+                trong <span class="font-semibold text-gray-700 dark:text-white">{{ orders.total }}</span> đơn hàng
             </p>
             <nav class="flex gap-1">
                 <template v-for="(link, i) in orders.links" :key="i">
@@ -368,9 +368,9 @@ const toggleDropdown = (id) => {
                         class="inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 rounded-lg text-sm border transition-colors"
                         :class="link.active
                             ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow'
-                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'" />
+                            : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-650 dark:text-slate-355 hover:bg-gray-50 dark:hover:bg-slate-700'" />
                     <span v-else v-html="link.label"
-                        class="inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 rounded-lg text-sm text-gray-300 border border-gray-200 bg-white cursor-not-allowed" />
+                        class="inline-flex items-center justify-center min-w-[2.25rem] h-9 px-2 rounded-lg text-sm text-gray-300 dark:text-slate-600 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-850 cursor-not-allowed" />
                 </template>
             </nav>
         </div>

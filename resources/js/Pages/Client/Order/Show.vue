@@ -43,7 +43,7 @@ const cancelOrder = (id) => {
 <template>
     <Head :title="'Chi tiết đơn hàng #' + order.order_code" />
     <ClientLayout>
-        <div class="bg-[#f8f9fa] min-h-[85vh] py-10 px-4">
+        <div class="bg-[#f8f9fa] dark:bg-slate-950 min-h-[85vh] py-10 px-4 transition-colors duration-300">
 
             <!-- Top nav -->
             <div class="max-w-6xl mx-auto mb-4 flex justify-between items-end">
@@ -56,7 +56,7 @@ const cancelOrder = (id) => {
                 </Link>
                 <div class="text-right">
                     <p class="text-xs text-gray-500 uppercase tracking-widest">Mã đơn hàng</p>
-                    <h1 class="text-2xl font-black text-indigo-900">#{{ order.order_code }}</h1>
+                    <h1 class="text-2xl font-black text-indigo-900 dark:text-indigo-400">#{{ order.order_code }}</h1>
                 </div>
             </div>
 
@@ -85,8 +85,8 @@ const cancelOrder = (id) => {
                     </div>
 
                     <!-- Timeline -->
-                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h3 class="text-sm font-black text-gray-900 mb-6 uppercase tracking-wider border-b pb-3">Tiến trình xử lý</h3>
+                    <div class="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                        <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 mb-6 uppercase tracking-wider border-b dark:border-slate-800 pb-3">Tiến trình xử lý</h3>
                         <div v-if="order.status_histories?.length" class="space-y-4">
                             <div v-for="(history, index) in order.status_histories" :key="history.id" class="flex gap-4">
                                 <div class="flex flex-col items-center">
@@ -109,15 +109,15 @@ const cancelOrder = (id) => {
 
                     <!-- Delivery + Payment cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 border-b pb-2">Thông tin nhận hàng</h3>
-                            <p class="font-black text-gray-900">{{ order.name }}</p>
-                            <p class="text-sm text-gray-600 mt-1">{{ order.phone }}</p>
-                            <p class="text-sm text-gray-600 mt-1">{{ order.address }}</p>
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 border-b dark:border-slate-800 pb-2">Thông tin nhận hàng</h3>
+                            <p class="font-black text-gray-900 dark:text-gray-100">{{ order.name }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ order.phone }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ order.address }}</p>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 border-b pb-2">Phương thức thanh toán</h3>
-                            <p class="font-bold text-gray-900 mb-2">
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 border-b dark:border-slate-800 pb-2">Phương thức thanh toán</h3>
+                            <p class="font-bold text-gray-900 dark:text-gray-100 mb-2">
                                 <span v-if="order.payment_method === 'COD'">💵 Tiền mặt khi nhận hàng</span>
                                 <span v-else-if="order.payment_method === 'VietQR'">📲 Chuyển khoản VietQR</span>
                                 <span v-else>💳 Cổng thanh toán VNPay</span>
@@ -131,25 +131,25 @@ const cancelOrder = (id) => {
                 </div>
 
                 <!-- ── RIGHT: Product list + Price + Actions ──────── -->
-                <div class="lg:w-[35%] bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+                <div class="lg:w-[35%] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col overflow-hidden">
 
-                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider">Sản phẩm đã mua</h3>
+                    <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+                        <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-wider">Sản phẩm đã mua</h3>
                     </div>
 
                     <!-- Items scrollable -->
-                    <div class="flex-1 overflow-y-auto max-h-[360px] p-4 space-y-3 bg-gray-50/30">
+                    <div class="flex-1 overflow-y-auto max-h-[360px] p-4 space-y-3 bg-gray-50/30 dark:bg-slate-950/30">
                         <div v-for="item in order.items" :key="item.id"
-                            class="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                            class="flex gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm">
                             <img :src="resolveItemImage(item)"
-                                class="w-16 h-16 object-cover rounded-lg border border-gray-100 shrink-0">
+                                class="w-16 h-16 object-cover rounded-lg border border-gray-100 dark:border-slate-700 shrink-0">
                             <div class="flex-1 min-w-0">
-                                <h4 class="text-sm font-bold text-gray-900 line-clamp-2">{{ item.name }}</h4>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-2">{{ item.name }}</h4>
                                 <p class="text-xs text-gray-500 mt-0.5">
                                     {{ item.variant?.attribute_values?.map(av => av.value?.value).filter(Boolean).join(' / ') || 'Mặc định' }}
                                 </p>
                                 <div class="flex justify-between items-center mt-2">
-                                    <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">x{{ item.quantity }}</span>
+                                    <span class="text-xs font-bold text-gray-400 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded">x{{ item.quantity }}</span>
                                     <span class="text-sm font-black text-red-600">{{ vnd(item.price) }}</span>
                                 </div>
                             </div>
@@ -157,13 +157,13 @@ const cancelOrder = (id) => {
                     </div>
 
                     <!-- Price summary -->
-                    <div class="p-6 border-t border-gray-100">
+                    <div class="p-6 border-t border-gray-100 dark:border-slate-800">
                         <div class="space-y-2 mb-5 text-sm">
-                            <div class="flex justify-between text-gray-600">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                 <span>Tạm tính:</span>
                                 <span class="font-bold">{{ vnd(order.subtotal) }}</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                 <span>Phí vận chuyển:</span>
                                 <span class="font-bold">{{ vnd(order.shipping_fee) }}</span>
                             </div>
@@ -171,9 +171,9 @@ const cancelOrder = (id) => {
                                 <span>Giảm giá:</span>
                                 <span class="font-bold">-{{ vnd(order.discount_amount) }}</span>
                             </div>
-                            <div class="flex justify-between items-center pt-3 border-t border-gray-200">
-                                <span class="font-bold text-gray-900">Tổng cộng:</span>
-                                <span class="text-2xl font-black text-red-600">{{ vnd(order.grand_total) }}</span>
+                            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-slate-700">
+                                <span class="font-bold text-gray-900 dark:text-gray-100">Tổng cộng:</span>
+                                <span class="text-2xl font-black text-red-600 dark:text-red-400">{{ vnd(order.grand_total) }}</span>
                             </div>
                         </div>
 

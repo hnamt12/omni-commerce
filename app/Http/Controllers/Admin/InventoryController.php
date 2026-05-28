@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
+use App\Models\Supplier;
+use App\Models\ProductLot;
+
 class InventoryController extends Controller
 {
     public function index(Request $request)
@@ -72,18 +75,25 @@ class InventoryController extends Controller
 
     public function edit($id)
     {
-        $product = Product::with(['variants.attributeValues.value'])->findOrFail($id);
-        return Inertia::render('Admin/Inventory/Edit', ['product' => $product]);
+        $product = Product::with(['variants.attributeValues.value', 'variants.lots.supplier'])->findOrFail($id);
+        $suppliers = Supplier::where('is_active', 1)->orderBy('name')->get();
+        return Inertia::render('Admin/Inventory/Edit', [
+            'product' => $product,
+            'suppliers' => $suppliers,
+        ]);
     }
 
     public function updateBulk(Request $request, $id)
     {
         $request->validate([
-            'items'              => 'required|array',
-            'items.*.variant_id' => 'required|exists:product_variants,id',
-            'items.*.type'       => 'required|in:add,sub,set',
-            'items.*.quantity'   => 'required|numeric|min:0',
-            'items.*.note'       => 'required_if:items.*.type,add,sub|nullable|string|min:5|max:255',
+            'items'                => 'required|array',
+            'items.*.variant_id'   => 'required|exists:product_variants,id',
+            'items.*.type'         => 'required|in:add,sub,set',
+            'items.*.quantity'     => 'required|numeric|min:0',
+            'items.*.supplier_id'  => 'nullable|exists:suppliers,id',
+            'items.*.lot_number'   => 'nullable|string|max:50',
+            'items.*.expiry_date'  => 'nullable|date',
+            'items.*.note'         => 'required_if:items.*.type,add,sub|nullable|string|min:5|max:255',
         ], [
             'items.*.note.required_if' => 'Vui lòng nhập lý do kiểm kho (ít nhất 5 ký tự) khi thay đổi số lượng!',
             'items.*.note.min'         => 'Lý do quá ngắn, vui lòng nhập rõ ràng hơn (≥ 5 ký tự).',
@@ -99,13 +109,25 @@ class InventoryController extends Controller
                     $stockBefore = $variant->stock;
                     $stockAfter  = $stockBefore;
                     $actionType  = 'system';
+                    $lot         = null;
 
                     if ($item['type'] === 'add') {
                         $stockAfter += $item['quantity'];
                         $actionType  = 'import';
+
+                        // Create a specific lot for the import batch
+                        $lot = ProductLot::create([
+                            'product_variant_id' => $variant->id,
+                            'supplier_id'        => $item['supplier_id'] ?? null,
+                            'lot_number'         => $item['lot_number'] ?? ('LOT-' . strtoupper(\Illuminate\Support\Str::random(6))),
+                            'expiry_date'        => $item['expiry_date'] ?? null,
+                            'quantity'           => $item['quantity'],
+                            'initial_quantity'   => $item['quantity'],
+                        ]);
                     } elseif ($item['type'] === 'sub') {
                         $stockAfter -= $item['quantity'];
                         $actionType  = 'export';
+                        // FIFO subtraction is automatically executed via the ProductVariant Eloquent updating observer!
                     } elseif ($item['type'] === 'set') {
                         $stockAfter  = $item['quantity'];
                         $actionType  = 'adjustment';
@@ -127,6 +149,9 @@ class InventoryController extends Controller
                         'stock_before'       => $stockBefore,
                         'stock_after'        => $stockAfter,
                         'note'               => $item['note'] ?? 'Kiểm kê hệ thống',
+                        'supplier_id'        => $item['supplier_id'] ?? null,
+                        'lot_number'         => $item['lot_number'] ?? ($lot ? $lot->lot_number : null),
+                        'expiry_date'        => $item['expiry_date'] ?? null,
                     ]);
                 }
             });

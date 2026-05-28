@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -17,9 +18,14 @@ class ProfileController extends Controller
             ->orderByDesc('is_default')
             ->get();
 
+        $favoriteProducts = $customer->favoriteProducts()
+            ->with(['variants.attributeValues.value', 'brand'])
+            ->get();
+
         return Inertia::render('Client/Profile/Index', [
-            'customer'  => $customer,
-            'addresses' => $addresses,
+            'customer'          => $customer,
+            'addresses'         => $addresses,
+            'favoriteProducts'  => $favoriteProducts,
         ]);
     }
 
@@ -32,11 +38,26 @@ class ProfileController extends Controller
             'name'   => 'required|string|max:255',
             'phone'  => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,other',
+            'avatar' => 'nullable|image|max:2048',
         ], [
             'name.required' => 'Vui lòng nhập họ tên.',
+            'avatar.image'  => 'Định dạng ảnh đại diện không hợp lệ.',
+            'avatar.max'    => 'Ảnh đại diện tối đa 2MB.',
         ]);
 
-        $customer->update($request->only(['name', 'phone', 'gender']));
+        $data = $request->only(['name', 'phone', 'gender']);
+
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists and not default
+            if ($customer->avatar && Storage::disk('public')->exists(str_replace('/storage/', '', $customer->avatar))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $customer->avatar));
+            }
+            // Store new avatar
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = '/storage/' . $path;
+        }
+
+        $customer->update($data);
 
         return back()->with('success', 'Đã cập nhật hồ sơ thành công!');
     }
@@ -80,5 +101,27 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('success', 'Đã thêm địa chỉ mới!');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password:customer'],
+            'password'         => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'current_password.required'         => 'Vui lòng nhập mật khẩu hiện tại.',
+            'current_password.current_password' => 'Mật khẩu hiện tại không đúng.',
+            'password.required'                 => 'Vui lòng nhập mật khẩu mới.',
+            'password.min'                      => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+            'password.confirmed'                => 'Mật khẩu xác nhận không khớp.',
+        ]);
+
+        /** @var Customer $customer */
+        $customer = auth('customer')->user();
+        $customer->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return back()->with('success', 'Đã đổi mật khẩu thành công!');
     }
 }

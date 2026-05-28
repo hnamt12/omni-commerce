@@ -93,6 +93,24 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
+        try {
+            // Lấy những user có role là admin hoặc super admin bằng cách join bảng trực tiếp (Xuyên Guard)
+            $receivers = \App\Models\User::whereHas('roles', function($q) {
+                $q->whereIn('name', ['admin', 'super admin', 'Super Admin']);
+            })->orWhere('id', 1)->get(); // Luôn luôn fallback về ID 1 để đảm bảo không bao giờ trượt
+
+            if ($receivers->isNotEmpty()) {
+                \Illuminate\Support\Facades\Notification::send($receivers, new \App\Notifications\SystemAlertNotification(
+                    'Cảnh báo xóa dữ liệu',
+                    'Một danh mục/thương hiệu vừa bị xóa khỏi hệ thống bởi nhân viên.',
+                    'danger'
+                ));
+            }
+        } catch (\Throwable $e) {
+            logger()->error('[Notification] Failed to send SystemAlertNotification for category deletion: ' . $e->getMessage());
+        }
+
         return redirect()->back()->with('success', 'Xóa danh mục thành công.');
     }
 

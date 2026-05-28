@@ -1,14 +1,17 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import { usePermission } from '@/Composables/usePermission';
 import { adminMenuGroups } from '@/Constants/adminMenu';
+import Swal from 'sweetalert2';
 
 defineProps({
     expanded: { type: Boolean, default: true },
 });
 
 const { hasPermission } = usePermission();
+const page = usePage();
+const unreadChatCount = computed(() => page.props.auth?.user?.unread_chat_count ?? 0);
 
 // ── Accordion state (persisted) ──────────────────────────────────────────────
 const expandedGroups = ref(
@@ -34,9 +37,72 @@ const isActive = (routeName) => {
 // ── Filtered menu (permission-aware) ────────────────────────────────────────
 const menuGroups = computed(() =>
     adminMenuGroups
-        .map(group => ({ ...group, items: group.items.filter(item => hasPermission(item.permission)) }))
+        .map(group => ({
+            ...group,
+            items: group.items.map(item => {
+                if (item.route === 'admin.chat.index') {
+                    return {
+                        ...item,
+                        badge: unreadChatCount.value > 0 ? String(unreadChatCount.value) : null
+                    };
+                }
+                return item;
+            }).filter(item => hasPermission(item.permission))
+        }))
         .filter(group => group.items.length > 0)
 );
+
+// ── Real-time: lắng nghe kênh admin-notifications ───────────────────────────
+onMounted(() => {
+    if (!window.Echo || !page.props.auth?.user) return;
+
+    window.Echo.private('admin-notifications')
+        .listen('.MessageSent', (e) => {
+            const message = e.message;
+            if (!message || message.sender_type !== 'customer') return;
+
+            // ① Luôn dispatch để ConversationList đồng bộ last_message
+            window.dispatchEvent(new CustomEvent('new-chat-message', { detail: message }));
+
+            // ② Bỏ qua badge + Toast nếu admin đang xem đúng hội thoại đó
+            if (window.activeConversationId === message.conversation_id) return;
+
+            // ③ Tăng badge unread_chat_count trên Sidebar
+            if (page.props.auth.user) {
+                page.props.auth.user.unread_chat_count =
+                    (page.props.auth.user.unread_chat_count || 0) + 1;
+            }
+
+            // ④ Hiển thị Toast thông báo
+            const customerName = message.customer_name || `Khách hàng #${message.conversation_id}`;
+            const content = message.type === 'img' ? '📷 Đã gửi một ảnh' : message.content;
+
+            Swal.fire({
+                title: 'Bạn có tin nhắn mới từ khách hàng',
+                text: `${customerName}: ${content}`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: 'Xem ngay',
+                cancelButtonText: 'Đóng',
+                toast: true,
+                position: 'top-end',
+                timer: 12000,
+                timerProgressBar: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.visit(route('admin.chat.index', { conversation_id: message.conversation_id }));
+                }
+            });
+        });
+});
+
+onUnmounted(() => {
+    if (window.Echo) {
+        window.Echo.leave('admin-notifications');
+    }
+});
 </script>
 
 <template>

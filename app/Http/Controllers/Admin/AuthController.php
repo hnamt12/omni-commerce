@@ -31,6 +31,20 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::guard('web')->user();
+        if ($user) {
+            \App\Models\ActionLog::create([
+                'user_id'      => $user->id,
+                'action'       => 'login',
+                'loggable_type' => get_class($user),
+                'loggable_id'  => $user->id,
+                'old_values'   => null,
+                'new_values'   => ['email' => $user->email, 'name' => $user->name],
+                'ip_address'   => $request->ip(),
+                'user_agent'   => $request->userAgent(),
+            ]);
+        }
+
         return redirect()->route('dashboard');
     }
 
@@ -39,6 +53,20 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $user = Auth::guard('web')->user();
+        if ($user) {
+            \App\Models\ActionLog::create([
+                'user_id'      => $user->id,
+                'action'       => 'logout',
+                'loggable_type' => get_class($user),
+                'loggable_id'  => $user->id,
+                'old_values'   => null,
+                'new_values'   => ['email' => $user->email, 'name' => $user->name],
+                'ip_address'   => $request->ip(),
+                'user_agent'   => $request->userAgent(),
+            ]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

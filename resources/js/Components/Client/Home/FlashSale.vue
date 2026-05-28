@@ -56,7 +56,7 @@ const vnd = (v) => new Intl.NumberFormat('vi-VN').format(v) + 'đ';
     </section>
 
     <!-- ── ACTIVE FLASH SALE ── -->
-    <section v-else class="w-full bg-gray-100 rounded-2xl overflow-hidden border border-red-100">
+    <section v-else class="w-full bg-gray-100 dark:bg-slate-900 rounded-2xl overflow-hidden border border-red-100 dark:border-red-900/30">
         <!-- ── Header ── -->
         <div class="bg-gradient-to-r from-red-700 via-red-600 to-orange-500 px-5 py-3.5 flex items-center justify-between gap-4">
             <!-- Title -->
@@ -87,7 +87,7 @@ const vnd = (v) => new Intl.NumberFormat('vi-VN').format(v) + 'đ';
         <!-- ── Product grid ── -->
         <div class="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <div v-for="p in items" :key="p.id"
-                class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-transparent hover:border-red-100 transition-all duration-200 cursor-pointer flex flex-col">
+                class="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-transparent hover:border-red-100 dark:hover:border-red-900/50 transition-all duration-200 cursor-pointer flex flex-col">
 
                 <!-- Image + Discount tag -->
                 <div class="relative overflow-hidden">
@@ -102,13 +102,13 @@ const vnd = (v) => new Intl.NumberFormat('vi-VN').format(v) + 'đ';
 
                 <!-- Info -->
                 <div class="p-2.5 flex flex-col flex-1">
-                    <p class="text-xs text-gray-800 font-semibold line-clamp-2 leading-snug mb-auto">
+                    <p class="text-xs text-gray-800 dark:text-gray-200 font-semibold line-clamp-2 leading-snug mb-auto">
                         {{ p.product.name || 'Sản phẩm Flash Sale' }}
                     </p>
 
                     <!-- Prices -->
                     <div class="mt-2">
-                        <p class="text-red-600 font-black text-base leading-tight">{{ vnd(p.sale) }}</p>
+                        <p class="text-red-600 dark:text-red-400 font-black text-base leading-tight">{{ vnd(p.sale) }}</p>
                         <p v-if="p.discount > 0" class="text-gray-400 text-xs line-through leading-tight mt-0.5">
                             {{ vnd(p.original) }}
                         </p>
@@ -116,7 +116,7 @@ const vnd = (v) => new Intl.NumberFormat('vi-VN').format(v) + 'đ';
 
                     <!-- Progress bar -->
                     <div class="mt-2.5">
-                        <div class="relative h-5 bg-red-100 rounded-full overflow-hidden">
+                        <div class="relative h-5 bg-red-100 dark:bg-red-950/50 rounded-full overflow-hidden">
                             <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-700"
                             :style="{ width: p.pct + '%' }"></div>
                             <div class="absolute inset-0 flex items-center justify-center">

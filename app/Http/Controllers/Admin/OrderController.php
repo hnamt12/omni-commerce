@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
+use App\Notifications\OrderStatusNotification;
+use App\Notifications\ReviewPromptNotification;
 use App\Services\OrderService;
 
 class OrderController extends Controller
@@ -126,7 +128,39 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            $subtotal        = collect($request->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+            // Sort cart by variant ID to avoid deadlocks when locking rows
+            $cartItems = collect($request->cart)->sortBy('id')->values();
+            
+            $variantIds = $cartItems->pluck('id')->toArray();
+            
+            // Lock rows for update to prevent race conditions (CRITICAL-2)
+            $variants = \App\Models\ProductVariant::whereIn('id', $variantIds)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $subtotal = 0;
+            
+            // Verify stock and calculate real price (CRITICAL-1 & CRITICAL-2)
+            foreach ($cartItems as &$item) {
+                $variant = $variants->get($item['id']);
+                
+                if (!$variant) {
+                    throw new \Exception("Không tìm thấy biến thể sản phẩm có ID: " . $item['id']);
+                }
+
+                if ($variant->stock < $item['quantity']) {
+                    throw new \Exception("Sản phẩm {$variant->sku} không đủ tồn kho! (Còn: {$variant->stock})");
+                }
+
+                // Prevent price manipulation: force use DB price
+                $realPrice = $variant->final_price ?? $variant->price;
+                $item['db_price'] = $realPrice;
+                
+                $subtotal += $realPrice * $item['quantity'];
+            }
+            unset($item);
+
             $shipping_fee    = $request->shipping_fee ?? 0;
             $discount_amount = $request->discount_amount ?? 0;
             $grand_total     = $subtotal + $shipping_fee - $discount_amount;
@@ -149,7 +183,15 @@ class OrderController extends Controller
                 'staff_id'       => Auth::id(),
             ]);
 
-            foreach ($request->cart as $item) {
+            // Save VAT metadata & calculate 10% inclusive VAT amount for POS order
+            $order->update([
+                'tax_amount'           => round(($subtotal - $discount_amount) * 10 / 110, 2),
+                'vat_invoice_number'   => str_pad($order->id, 7, '0', STR_PAD_LEFT),
+                'vat_invoice_serial'   => \App\Models\Setting::get('invoice_serial_prefix', 'AA/22E'),
+                'vat_invoice_template' => \App\Models\Setting::get('invoice_template_code', '01GTKT0/001'),
+            ]);
+
+            foreach ($cartItems as $item) {
                 $productName = $item['product']['name'] ?? 'Unknown';
                 if (is_array($productName)) {
                     $productName = collect($productName)->first() ?? 'Unknown';
@@ -160,12 +202,15 @@ class OrderController extends Controller
                     'product_id' => $item['product_id'],
                     'variant_id' => $item['id'],
                     'name'       => $productName,
-                    'price'      => $item['price'],
+                    'price'      => $item['db_price'], // use validated DB price
                     'quantity'   => $item['quantity'],
-                    'total_price' => $item['price'] * $item['quantity'],
+                    'total_price' => $item['db_price'] * $item['quantity'],
                 ]);
 
-                \App\Models\ProductVariant::where('id', $item['id'])->decrement('stock', $item['quantity']);
+                // Update stock using eloquent save() to trigger updated events (for FIFO and Notifications)
+                $variant = $variants->get($item['id']);
+                $variant->stock -= $item['quantity'];
+                $variant->save();
             }
 
             OrderStatusHistory::create([
@@ -247,6 +292,38 @@ class OrderController extends Controller
             ]);
 
             DB::commit();
+
+            // Gửi thông báo tới khách hàng (nếu có)
+            try {
+                if ($order->customer) {
+                    $order->customer->notify(new OrderStatusNotification(
+                        $order->id,
+                        $order->order_code,
+                        $oldStatus,
+                        $newStatus
+                    ));
+
+                    // Khi đơn hoàn thành → nhắc khách đánh giá từng sản phẩm
+                    if ($newStatus === 'Đã hoàn thành') {
+                        // Reload items with product if not already loaded
+                        $order->load('items.product');
+                        $reviewedProductIds = [];
+                        foreach ($order->items as $item) {
+                            if (!$item->product || in_array($item->product_id, $reviewedProductIds)) continue;
+                            $reviewedProductIds[] = $item->product_id;
+                            $order->customer->notify(new ReviewPromptNotification(
+                                $order->order_code,
+                                $item->product_id,
+                                $item->product->name ?? $item->name,
+                                $item->product->thumbnail ?? null,
+                            ));
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                logger()->error('[Notification] Failed to send notification: ' . $e->getMessage());
+            }
+
             return back()->with('success', "Đã chuyển đơn hàng sang: $newStatus");
 
         } catch (\Exception $e) {
@@ -264,7 +341,7 @@ class OrderController extends Controller
         );
     }
 
-    public function print($id)
+    public function print(Request $request, $id)
     {
         $order = Order::with([
             'items.product',
@@ -272,7 +349,23 @@ class OrderController extends Controller
             'items.variant.attributeValues.value',
         ])->findOrFail($id);
 
-        return view('admin.orders.print', compact('order'));
+        $paperSize = $request->query('paper_size', 'a4');
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+
+        return view('admin.orders.print', compact('order', 'paperSize', 'settings'));
+    }
+
+    public function pickingSlip($id)
+    {
+        $order = Order::with([
+            'items.product',
+            'items.variant.attributeValues.attribute',
+            'items.variant.attributeValues.value',
+        ])->findOrFail($id);
+
+        $settings = \App\Models\Setting::all()->pluck('value', 'key');
+
+        return view('admin.orders.picking_slip', compact('order', 'settings'));
     }
 
     public function destroy($id)

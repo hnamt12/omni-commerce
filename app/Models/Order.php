@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\Auditable;
 
 class Order extends Model
 {
+    use Auditable;
     protected $fillable = [
         'order_code',
         'customer_id',
@@ -38,6 +40,9 @@ class Order extends Model
         'voucher_code',
         'shipping_voucher_code',
         'payment_date',
+        'vat_invoice_number',
+        'vat_invoice_serial',
+        'vat_invoice_template',
     ];
 
     /**

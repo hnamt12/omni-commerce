@@ -61,8 +61,8 @@ const downloadQR = async () => {
 <template>
     <Head title="Thanh toán đơn hàng" />
     <ClientLayout>
-        <div class="bg-[#f5f5fa] min-h-[80vh] py-10 px-4 flex items-center justify-center">
-            <div class="max-w-5xl w-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="bg-[#f5f5fa] dark:bg-slate-950 min-h-[80vh] py-10 px-4 flex items-center justify-center transition-colors duration-300">
+            <div class="max-w-5xl w-full bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-800 overflow-hidden">
 
                 <!-- ── Header Bar ── -->
                 <div class="bg-indigo-600 px-8 py-5 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -80,9 +80,9 @@ const downloadQR = async () => {
                 <div class="p-10 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-10">
 
                     <!-- LEFT: QR Code -->
-                    <div class="flex flex-col items-center justify-center pb-8 md:pb-0 border-b md:border-b-0 md:border-r border-dashed border-gray-200 md:pr-10">
+                    <div class="flex flex-col items-center justify-center pb-8 md:pb-0 border-b md:border-b-0 md:border-r border-dashed border-gray-200 dark:border-slate-700 md:pr-10">
                         <!-- QR Image -->
-                        <div class="bg-white p-3 rounded-2xl shadow-md border border-gray-100 mb-5">
+                        <div class="bg-white dark:bg-white p-3 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 mb-5">
                             <img v-if="generateVietQrUrl()"
                                  :src="generateVietQrUrl()"
                                  alt="VietQR Payment"
@@ -114,39 +114,39 @@ const downloadQR = async () => {
 
                         <!-- Bank info table -->
                         <div class="space-y-4">
-                            <h3 class="font-black text-gray-900 uppercase tracking-wide text-sm border-b border-gray-100 pb-3">
+                            <h3 class="font-black text-gray-900 dark:text-gray-100 uppercase tracking-wide text-sm border-b border-gray-100 dark:border-slate-800 pb-3">
                                 Thông tin chuyển khoản
                             </h3>
                             <div class="space-y-3 text-sm">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-gray-500">Ngân hàng:</span>
-                                    <span class="font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">{{ vietqr.bank_id }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Ngân hàng:</span>
+                                    <span class="font-bold text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-lg">{{ vietqr.bank_id }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-gray-500">Số tài khoản:</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Số tài khoản:</span>
                                     <span class="font-black text-indigo-600 text-lg font-mono tracking-widest">{{ vietqr.bank_account }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-gray-500">Chủ tài khoản:</span>
-                                    <span class="font-bold text-gray-900 uppercase">{{ vietqr.bank_owner }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Chủ tài khoản:</span>
+                                    <span class="font-bold text-gray-900 dark:text-gray-100 uppercase">{{ vietqr.bank_owner }}</span>
                                 </div>
-                                <div class="flex justify-between items-center border-t border-dashed border-gray-200 pt-3 mt-3">
-                                    <span class="text-gray-500">Số tiền:</span>
-                                    <span class="font-black text-red-600 text-2xl">{{ vnd(order.grand_total) }}</span>
+                                <div class="flex justify-between items-center border-t border-dashed border-gray-200 dark:border-slate-700 pt-3 mt-3">
+                                    <span class="text-gray-500 dark:text-gray-400">Số tiền:</span>
+                                    <span class="font-black text-red-600 dark:text-red-400 text-2xl">{{ vnd(order.grand_total) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center bg-amber-50 border border-amber-100 px-4 py-3 rounded-xl">
                                     <span class="text-amber-800 font-medium text-xs uppercase tracking-wide">Nội dung CK:</span>
-                                    <span class="font-black text-gray-900 uppercase tracking-widest text-sm font-mono">{{ transferContent }}</span>
+                                    <span class="font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest text-sm font-mono">{{ transferContent }}</span>
                                 </div>
                             </div>
 
-                            <p class="text-xs text-gray-400 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 leading-relaxed">
+                            <p class="text-xs text-gray-400 bg-gray-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-gray-100 dark:border-slate-700 leading-relaxed">
                                 ⚡ Sau khi chuyển khoản, nhấn <strong>"Tôi đã thanh toán"</strong> bên dưới. Admin sẽ đối soát và xử lý đơn hàng cho bạn sớm nhất.
                             </p>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="mt-6 pt-5 border-t border-gray-100 flex gap-3">
+                        <div class="mt-6 pt-5 border-t border-gray-100 dark:border-slate-800 flex gap-3">
                             <Link :href="route('client.order.show', order.id)"
                                 class="px-5 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition text-center shrink-0">
                                 ← Quay lại

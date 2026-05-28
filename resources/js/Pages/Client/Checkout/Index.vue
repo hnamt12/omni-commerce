@@ -113,7 +113,7 @@ const variantLabel = (item) => {
 <template>
     <Head title="Thanh toán – OmniCommerce" />
     <ClientLayout>
-        <div class="bg-gray-50 min-h-screen pb-16 pt-6">
+        <div class="bg-gray-50 dark:bg-slate-950 min-h-screen pb-16 pt-6 transition-colors duration-300">
             <div class="max-w-[1200px] mx-auto px-4">
 
                 <!-- Breadcrumb -->
@@ -122,7 +122,7 @@ const variantLabel = (item) => {
                     <span>/</span>
                     <Link :href="route('cart.index')" class="hover:text-red-500 transition">Giỏ hàng</Link>
                     <span>/</span>
-                    <span class="text-gray-700 font-semibold">Thanh toán</span>
+                    <span class="text-gray-700 dark:text-gray-300 font-semibold">Thanh toán</span>
                 </nav>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
@@ -131,34 +131,34 @@ const variantLabel = (item) => {
                     <div class="lg:col-span-8 space-y-5">
 
                         <!-- STEP 1: Shipping Info -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h2 class="text-base font-black text-gray-900 mb-4 flex items-center gap-3">
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                            <h2 class="text-base font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-3">
                                 <span class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-black shrink-0">1</span>
                                 Thông tin giao hàng
                             </h2>
 
                             <!-- Tab switcher -->
-                            <div v-if="addresses.length" class="flex border border-gray-200 rounded-xl overflow-hidden mb-5 text-sm font-bold">
+                            <div v-if="addresses.length" class="flex border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-5 text-sm font-bold">
                                 <button @click="addressMode = 'existing'"
-                                    :class="addressMode === 'existing' ? 'bg-red-500 text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'"
+                                    :class="addressMode === 'existing' ? 'bg-red-500 text-white' : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'"
                                     class="flex-1 py-2.5 transition">
                                     📋 Chọn từ sổ địa chỉ
                                 </button>
                                 <button @click="addressMode = 'new'"
-                                    :class="addressMode === 'new' ? 'bg-red-500 text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'"
-                                    class="flex-1 py-2.5 transition border-l border-gray-200">
+                                    :class="addressMode === 'new' ? 'bg-red-500 text-white' : 'bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'"
+                                    class="flex-1 py-2.5 transition border-l border-gray-200 dark:border-slate-700">
                                     ✏️ Nhập địa chỉ mới
                                 </button>
                             </div>
 
                             <!-- Existing address card -->
                             <div v-if="addressMode === 'existing' && selectedAddress"
-                                class="relative border-2 border-red-400 bg-red-50 rounded-xl p-4">
-                                <p class="font-black text-gray-900">
+                                class="relative border-2 border-red-400 bg-red-50 dark:bg-red-950/20 rounded-xl p-4">
+                                <p class="font-black text-gray-900 dark:text-gray-100">
                                     {{ selectedAddress.name }}
-                                    <span class="font-normal text-gray-500 ml-2">| {{ selectedAddress.phone_number }}</span>
+                                    <span class="font-normal text-gray-500 dark:text-gray-400 ml-2">| {{ selectedAddress.phone_number }}</span>
                                 </p>
-                                <p class="text-sm text-gray-600 mt-1">{{ selectedAddress.address }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ selectedAddress.address }}</p>
                                 <button @click="showAddressModal = true"
                                     class="absolute right-4 top-1/2 -translate-y-1/2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full transition shadow-sm">
                                     Thay đổi
@@ -175,16 +175,16 @@ const variantLabel = (item) => {
                             <div v-if="addressMode === 'new'" class="space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Họ và tên <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase">Họ và tên <span class="text-red-500">*</span></label>
                                         <input v-model="form.new_name" type="text" placeholder="Nguyễn Văn A"
                                             autocomplete="name"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none">
+                                            class="w-full border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none bg-white dark:bg-slate-800 dark:text-gray-200">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Số điện thoại <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase">Số điện thoại <span class="text-red-500">*</span></label>
                                         <input v-model="form.new_phone" type="text" placeholder="0912 345 678"
                                             autocomplete="tel"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none">
+                                            class="w-full border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none bg-white dark:bg-slate-800 dark:text-gray-200">
                                     </div>
                                 </div>
                                 <div>
@@ -195,7 +195,7 @@ const variantLabel = (item) => {
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Tỉnh / Thành phố <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase">Tỉnh / Thành phố <span class="text-red-500">*</span></label>
                                         <SearchableSelect
                                             v-model="form.province_id"
                                             :options="provinces"
@@ -203,7 +203,7 @@ const variantLabel = (item) => {
                                         />
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Quận / Huyện <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase">Quận / Huyện <span class="text-red-500">*</span></label>
                                         <SearchableSelect
                                             v-model="form.district_id"
                                             :options="districts"
@@ -212,7 +212,7 @@ const variantLabel = (item) => {
                                         />
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">Phường / Xã <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 uppercase">Phường / Xã <span class="text-red-500">*</span></label>
                                         <SearchableSelect
                                             v-model="form.ward_id"
                                             :options="wards"
@@ -226,36 +226,36 @@ const variantLabel = (item) => {
                                     <textarea v-model="form.new_address" rows="3"
                                         autocomplete="street-address"
                                         placeholder="Số nhà, ngõ, tên đường... (Tiếp theo nếu cần)"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none resize-y"></textarea>
+                                        class="w-full border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-300 focus:outline-none resize-y bg-white dark:bg-slate-800 dark:text-gray-200"></textarea>
                                 </div>
                                 <label class="flex items-center gap-2 cursor-pointer mt-2">
                                     <input type="checkbox" v-model="form.save_address" class="w-5 h-5 text-green-500 rounded focus:ring-green-500">
-                                    <span class="text-sm font-bold text-gray-700">Lưu địa chỉ này vào sổ địa chỉ</span>
+                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300">Lưu địa chỉ này vào sổ địa chỉ</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- STEP 2: Payment Method -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h2 class="text-base font-black text-gray-900 mb-4 flex items-center gap-3">
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                            <h2 class="text-base font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-3">
                                 <span class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-black shrink-0">2</span>
                                 Phương thức thanh toán
                             </h2>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <label v-if="isMethodActive('cod')" class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
-                                    :class="form.payment_method === 'COD' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                                    :class="form.payment_method === 'COD' ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'">
                                     <input type="radio" v-model="form.payment_method" value="COD" class="text-red-500 w-4 h-4">
                                     <div class="flex-1">
-                                        <p class="font-bold text-gray-900 text-sm">Tiền mặt khi nhận (COD)</p>
+                                        <p class="font-bold text-gray-900 dark:text-gray-100 text-sm">Tiền mặt khi nhận (COD)</p>
                                         <p class="text-xs text-gray-400">Trả khi có hàng</p>
                                     </div>
                                     <span class="text-xl">💵</span>
                                 </label>
                                 <label v-if="isMethodActive('vietqr')" class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
-                                    :class="form.payment_method === 'VietQR' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'">
+                                    :class="form.payment_method === 'VietQR' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'">
                                     <input type="radio" v-model="form.payment_method" value="VietQR" class="text-indigo-600 w-4 h-4 focus:ring-indigo-500">
                                     <div class="flex-1">
-                                        <p class="font-bold text-gray-900 text-sm">Chuyển khoản (VietQR)</p>
+                                        <p class="font-bold text-gray-900 dark:text-gray-100 text-sm">Chuyển khoản (VietQR)</p>
                                         <p class="text-xs text-gray-400">Quét mã QR ngân hàng</p>
                                     </div>
                                     <svg class="w-6 h-6 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,10 +263,10 @@ const variantLabel = (item) => {
                                     </svg>
                                 </label>
                                 <label v-if="isMethodActive('vnpay')" class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
-                                    :class="form.payment_method === 'VNPay' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                                    :class="form.payment_method === 'VNPay' ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'">
                                     <input type="radio" v-model="form.payment_method" value="VNPay" class="text-red-500 w-4 h-4">
                                     <div class="flex-1">
-                                        <p class="font-bold text-gray-900 text-sm">Thanh toán VNPay</p>
+                                        <p class="font-bold text-gray-900 dark:text-gray-100 text-sm">Thanh toán VNPay</p>
                                         <p class="text-xs text-gray-400">ATM, Visa, QR Code</p>
                                     </div>
                                     <span class="text-xl">💳</span>
@@ -275,13 +275,13 @@ const variantLabel = (item) => {
                         </div>
 
                         <!-- STEP 3: Note -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h2 class="text-base font-black text-gray-900 mb-3 flex items-center gap-3">
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                            <h2 class="text-base font-black text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-3">
                                 <span class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-black shrink-0">3</span>
                                 Ghi chú đơn hàng
                             </h2>
                             <textarea v-model="form.note" rows="2"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
+                                class="w-full border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none bg-white dark:bg-slate-800 dark:text-gray-200"
                                 placeholder="Giao giờ hành chính, gọi trước khi giao..."></textarea>
                         </div>
 
@@ -289,23 +289,23 @@ const variantLabel = (item) => {
 
                     <!-- ══════════════ RIGHT COL (col-span-4) ══════════════ -->
                     <div class="lg:col-span-4">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 lg:sticky lg:top-24 space-y-5">
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 lg:sticky lg:top-24 space-y-5">
 
                             <!-- Cart items summary -->
                             <div>
-                                <h3 class="font-black text-gray-900 text-sm mb-3 pb-3 border-b border-gray-100">
+                                <h3 class="font-black text-gray-900 dark:text-gray-100 text-sm mb-3 pb-3 border-b border-gray-100 dark:border-slate-800">
                                     Đơn hàng <span class="text-gray-400 font-normal">({{ cartItems.length }} SP)</span>
                                 </h3>
                                 <div class="space-y-3 max-h-52 overflow-y-auto pr-1">
                                     <div v-for="item in cartItems" :key="item.id" class="flex gap-2.5">
                                         <img :src="item.product?.thumbnail ?? 'https://placehold.co/56x56/f8fafc/94a3b8?text=IMG'"
-                                            class="w-14 h-14 rounded-lg object-contain border border-gray-100 bg-gray-50 p-0.5 shrink-0">
+                                            class="w-14 h-14 rounded-lg object-contain border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-0.5 shrink-0">
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-bold text-gray-800 line-clamp-1">{{ item.product?.name }}</p>
+                                            <p class="text-xs font-bold text-gray-800 dark:text-gray-200 line-clamp-1">{{ item.product?.name }}</p>
                                             <p v-if="variantLabel(item)" class="text-[10px] text-gray-400 mt-0.5">{{ variantLabel(item) }}</p>
                                             <div class="flex justify-between mt-1">
                                                 <span class="text-xs font-black text-red-600">{{ vnd(item.price) }}</span>
-                                                <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full font-bold">×{{ item.quantity }}</span>
+                                                <span class="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-full font-bold">×{{ item.quantity }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -315,12 +315,12 @@ const variantLabel = (item) => {
                             <!-- Voucher input -->
                             <div>
                                 <div class="flex items-center justify-between mb-2">
-                                    <p class="text-xs font-black text-gray-700">🎫 Mã ưu đãi / Freeship</p>
+                                    <p class="text-xs font-black text-gray-700 dark:text-gray-300">🎫 Mã ưu đãi / Freeship</p>
                                     <button @click="showVoucherModal = true" class="text-indigo-600 text-xs font-bold hover:underline">Chọn Voucher</button>
                                 </div>
                                 <div class="flex gap-2 mb-3">
                                     <input v-model="voucherCode" type="text"
-                                        class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                        class="flex-1 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white dark:bg-slate-800 dark:text-gray-200"
                                         placeholder="Nhập mã...">
                                     <button @click="applyVoucher"
                                         class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-4 rounded-xl transition">
@@ -343,14 +343,14 @@ const variantLabel = (item) => {
                             </div>
 
                             <!-- Price breakdown -->
-                            <div class="space-y-2 text-sm border-t border-dashed border-gray-200 pt-4">
-                                <div class="flex justify-between text-gray-600">
+                            <div class="space-y-2 text-sm border-t border-dashed border-gray-200 dark:border-slate-700 pt-4">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Tạm tính</span>
-                                    <span class="font-semibold text-gray-800">{{ vnd(subtotal) }}</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">{{ vnd(subtotal) }}</span>
                                 </div>
-                                <div class="flex justify-between text-gray-600">
+                                <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                     <span>Phí vận chuyển</span>
-                                    <span class="font-semibold text-gray-800">{{ vnd(shippingFee) }}</span>
+                                    <span class="font-semibold text-gray-800 dark:text-gray-200">{{ vnd(shippingFee) }}</span>
                                 </div>
                                 <div v-if="orderDiscount > 0" class="flex justify-between text-red-500">
                                     <span>Giảm giá SP</span>
@@ -363,9 +363,9 @@ const variantLabel = (item) => {
                             </div>
 
                             <!-- Grand total -->
-                            <div class="flex justify-between items-center pt-3 border-t border-gray-200">
-                                <span class="font-black text-gray-900 text-sm">Tổng thanh toán</span>
-                                <span class="font-black text-red-600 text-2xl">{{ vnd(finalTotal) }}</span>
+                            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-slate-700">
+                                <span class="font-black text-gray-900 dark:text-gray-100 text-sm">Tổng thanh toán</span>
+                                <span class="font-black text-red-600 dark:text-red-400 text-2xl">{{ vnd(finalTotal) }}</span>
                             </div>
 
                             <!-- Error display -->
@@ -396,9 +396,9 @@ const variantLabel = (item) => {
         <Teleport to="body">
             <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0" leave-active-class="transition duration-150" leave-to-class="opacity-0">
                 <div v-if="showAddressModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" @click.self="showAddressModal = false">
-                    <div class="bg-white rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh]">
-                        <div class="flex items-center justify-between p-6 border-b border-gray-100">
-                            <h3 class="font-black text-gray-900 text-lg">Chọn địa chỉ nhận hàng</h3>
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh]">
+                        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-800">
+                            <h3 class="font-black text-gray-900 dark:text-gray-100 text-lg">Chọn địa chỉ nhận hàng</h3>
                             <button @click="showAddressModal = false" class="text-gray-400 hover:text-gray-900 text-xl font-bold">✕</button>
                         </div>
                         <div class="space-y-3 p-6 overflow-y-auto flex-1">
@@ -432,8 +432,8 @@ const variantLabel = (item) => {
             <div v-if="showVoucherModal"
                 class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
                 @click.self="showVoucherModal = false">
-                <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
-                    <h3 class="font-black text-gray-900 text-lg mb-4 border-b pb-2">Chọn Mã Giảm Giá</h3>
+                <div class="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
+                    <h3 class="font-black text-gray-900 dark:text-gray-100 text-lg mb-4 border-b dark:border-slate-800 pb-2">Chọn Mã Giảm Giá</h3>
                     <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                         <div v-for="v in availableVouchers" :key="v.id"
                             class="border border-red-200 bg-red-50 rounded-xl p-4 flex justify-between items-center">

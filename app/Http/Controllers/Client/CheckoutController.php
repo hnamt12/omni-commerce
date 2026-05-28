@@ -10,7 +10,10 @@ use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use App\Services\PaymentService;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -166,6 +169,14 @@ class CheckoutController extends Controller
                 'status'          => 'Chờ xác nhận',
             ]);
 
+            // Save VAT metadata & calculate 10% inclusive VAT amount
+            $order->update([
+                'tax_amount'           => round($subtotal * 10 / 110, 2),
+                'vat_invoice_number'   => str_pad($order->id, 7, '0', STR_PAD_LEFT),
+                'vat_invoice_serial'   => \App\Models\Setting::get('invoice_serial_prefix', 'AA/22E'),
+                'vat_invoice_template' => \App\Models\Setting::get('invoice_template_code', '01GTKT0/001'),
+            ]);
+
             // ── 4. Create order items & deduct stock ──────
             foreach ($cartItems as $item) {
                 $variant = ProductVariant::lockForUpdate()->find($item->variant_id);
@@ -209,6 +220,37 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            // ── 7. Gửi thông báo tới Admin có quyền quản lý đơn hàng ─────────
+            try {
+                // 🛑 [BẮT ĐẦU DEBUG]
+                \Illuminate\Support\Facades\Log::channel('single')->info('--- BẮT ĐẦU TEST THÔNG BÁO ĐƠN HÀNG ---');
+                \Illuminate\Support\Facades\Log::channel('single')->info('1. Đơn hàng vừa tạo ID: ' . ($order->id ?? 'KHÔNG_CÓ_ID'));
+
+                // Lấy danh sách người nhận (Thêm ID 2 vào fallback để đảm bảo bắt trúng Admin test)
+                $receivers = \App\Models\User::whereHas('roles', function($q) {
+                    $q->whereIn('name', ['admin', 'super admin', 'Super Admin']);
+                })->orWhereIn('id', [1, 2])->get(); 
+
+                \Illuminate\Support\Facades\Log::channel('single')->info('2. Số lượng người nhận tìm thấy: ' . $receivers->count());
+                \Illuminate\Support\Facades\Log::channel('single')->info('3. Danh sách ID người nhận: ' . json_encode($receivers->pluck('id')));
+
+                if ($receivers->isNotEmpty()) {
+                    try {
+                        \Illuminate\Support\Facades\Log::channel('single')->info('4. Đang tiến hành gọi hàm Notification::send...');
+                        \Illuminate\Support\Facades\Notification::send($receivers, new \App\Notifications\NewOrderNotification($order));
+                        \Illuminate\Support\Facades\Log::channel('single')->info('5. ✅ GỬI THÔNG BÁO THÀNH CÔNG (KHÔNG VĂNG LỖI).');
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::channel('single')->error('❌ LỖI NGHIÊM TRỌNG KHI GỬI THÔNG BÁO: ' . $e->getMessage());
+                        \Illuminate\Support\Facades\Log::channel('single')->error('File lỗi: ' . $e->getFile() . ' - Dòng: ' . $e->getLine());
+                    }
+                } else {
+                    \Illuminate\Support\Facades\Log::channel('single')->warning('⚠️ KHÔNG TÌM THẤY AI ĐỂ GỬI THÔNG BÁO!');
+                }
+                // 🛑 [KẾT THÚC DEBUG]
+            } catch (\Throwable $e) {
+                logger()->error('[Notification] Failed to send NewOrderNotification: ' . $e->getMessage());
+            }
 
             // ── 7. Payment gateway redirect ───────────────
             if ($request->payment_method === 'VNPay') {
