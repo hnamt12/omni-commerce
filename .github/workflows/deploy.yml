@@ -1,4 +1,4 @@
-name: Build & Deploy Laravel Vue to Tenten
+name: Đẩy code lên hosting tenten
 
 on:
   push:
