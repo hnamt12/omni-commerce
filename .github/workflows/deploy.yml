@@ -29,6 +29,7 @@ jobs:
         run: |
           npm install
           npm run build
+          rm -f public/hot  # Xóa file hot để production không bị kéo về Vite dev server
           rm -rf node_modules # Xóa node_modules đi cho nhẹ, server không cần cái này
 
       # BƯỚC ĐỘT PHÁ: Nén toàn bộ code thành 1 file ZIP duy nhất và tạo file giải nén tự động

@@ -330,3 +330,25 @@ Route::get('/tin-tuc', [NewsController::class, 'index'])->name('client.news.inde
 Route::get('/tin-tuc/{slug}', [NewsController::class, 'show'])->name('client.news.show');
 
 Route::get('/lien-he', [ContactController::class, 'index'])->name('client.contact.index');
+
+// ═══════════════════════════════════════════════════════════════════════
+// MAINTENANCE: Dọn dẹp cache & file hot trên Production
+// Truy cập 1 lần sau deploy, sau đó có thể xóa route này đi
+// ═══════════════════════════════════════════════════════════════════════
+Route::get('/clear-cache', function () {
+    // Xóa file public/hot nếu vô tình bị đẩy lên hosting
+    // (file này khiến Laravel cố gọi Vite dev server thay vì đọc build tĩnh)
+    if (file_exists(public_path('hot'))) {
+        unlink(public_path('hot'));
+    }
+
+    Illuminate\Support\Facades\Artisan::call('view:clear');
+    Illuminate\Support\Facades\Artisan::call('config:clear');
+    Illuminate\Support\Facades\Artisan::call('cache:clear');
+    Illuminate\Support\Facades\Artisan::call('route:clear');
+
+    return response()->json([
+        'status'  => 'ok',
+        'message' => 'Đã xóa file hot (nếu có) và clear toàn bộ cache.',
+    ]);
+})->name('clear-cache');
