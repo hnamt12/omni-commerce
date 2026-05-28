@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -21,9 +21,9 @@ jobs:
         run: composer install --optimize-autoloader --no-dev --no-interaction
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18' # Hoặc 20 tùy dự án của bạn
+          node-version: '22' # Hoặc 20 tùy dự án của bạn
 
       - name: Install NPM & Build Vue/Inertia Assets
         run: |
