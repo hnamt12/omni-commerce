@@ -3,7 +3,7 @@ name: Build & Deploy Laravel Vue to Tenten
 on:
   push:
     branches:
-      - main # Chạy action này khi có code push vào nhánh main
+      - main
 
 jobs:
   deploy:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # Thay đổi theo phiên bản PHP bạn dùng trên Tenten
+          php-version: '8.2' # Thay bằng phiên bản PHP của bạn
 
       - name: Install Composer Dependencies
         run: composer install --optimize-autoloader --no-dev --no-interaction
@@ -23,23 +23,45 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # Hoặc 20 tùy dự án của bạn
+          node-version: '22'
 
       - name: Install NPM & Build Vue/Inertia Assets
         run: |
           npm install
           npm run build
+          rm -rf node_modules # Xóa node_modules đi cho nhẹ, server không cần cái này
 
+      # BƯỚC ĐỘT PHÁ: Nén toàn bộ code thành 1 file ZIP duy nhất và tạo file giải nén tự động
+      - name: Prepare Zip and Extract Script
+        run: |
+          mkdir deploy_dist
+          zip -q -r deploy_dist/archive.zip . -x "*.git*" "tests/*" ".env.example"
+          cat << 'EOF' > deploy_dist/unzip.php
+          <?php
+          $zip = new ZipArchive;
+          if ($zip->open('archive.zip') === TRUE) {
+              $zip->extractTo(__DIR__);
+              $zip->close();
+              unlink('archive.zip'); // Giải nén xong tự xóa file zip
+              unlink(__FILE__);      // Tự sát (xóa luôn file unzip.php) để bảo mật
+              echo "Deploy Success!";
+          } else {
+              http_response_code(500);
+              echo "Deploy Failed!";
+          }
+          ?>
+          EOF
+
+      # Upload đúng 2 file (archive.zip và unzip.php) qua FTP -> Mất 10 giây
       - name: Deploy to Tenten via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_dist/
           server-dir: /hainam.id.vn/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            tests/**
-            .env.example
+
+      # Kích hoạt script giải nén trên server
+      - name: Extract on Server
+        run: curl -s https://hainam.id.vn/unzip.php
