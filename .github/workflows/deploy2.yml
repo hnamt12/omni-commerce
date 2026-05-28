@@ -1,0 +1,45 @@
+name: Build & Deploy Laravel Vue to Tenten
+
+on:
+  push:
+    branches:
+      - main # Chạy action này khi có code push vào nhánh main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # Thay đổi theo phiên bản PHP bạn dùng trên Tenten
+
+      - name: Install Composer Dependencies
+        run: composer install --optimize-autoloader --no-dev --no-interaction
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Hoặc 20 tùy dự án của bạn
+
+      - name: Install NPM & Build Vue/Inertia Assets
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy to Tenten via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /hainam.id.vn/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            tests/**
+            .env.example
