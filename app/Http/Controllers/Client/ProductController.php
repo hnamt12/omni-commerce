@@ -22,10 +22,10 @@ class ProductController extends Controller
 
         $query = Product::with($relations)->where('is_active', '=', true);
 
-        if ($request->has('categories') && !empty($request->categories)) {
+        if ($request->has('categories') && ! empty($request->categories)) {
             $query->whereIn('category_id', (array) $request->categories);
         }
-        if ($request->has('brands') && !empty($request->brands)) {
+        if ($request->has('brands') && ! empty($request->brands)) {
             $query->whereIn('brand_id', (array) $request->brands);
         }
         if ($request->filled('min_price')) {
@@ -36,13 +36,13 @@ class ProductController extends Controller
         }
 
         match ($request->input('sort', 'latest')) {
-            'price_asc'  => $query->withMin('variants', 'price')->orderBy('variants_min_price', 'asc'),
+            'price_asc' => $query->withMin('variants', 'price')->orderBy('variants_min_price', 'asc'),
             'price_desc' => $query->withMin('variants', 'price')->orderBy('variants_min_price', 'desc'),
-            'popular'    => $query->orderBy('views_count', 'desc'),
-            default      => $query->latest(),
+            'popular' => $query->orderBy('views_count', 'desc'),
+            default => $query->latest(),
         };
 
-        $products   = $query->paginate(12)->withQueryString();
+        $products = $query->paginate(12)->withQueryString();
 
         $categories = Category::whereNull('parent_id')
             ->where('is_active', '=', true)
@@ -55,10 +55,10 @@ class ProductController extends Controller
             ->get();
 
         return inertia('Client/Shop/Index', [
-            'products'   => $products,
+            'products' => $products,
             'categories' => $categories,
-            'brands'     => $brands,
-            'filters'    => $request->only(['categories', 'brands', 'min_price', 'max_price', 'sort']),
+            'brands' => $brands,
+            'filters' => $request->only(['categories', 'brands', 'min_price', 'max_price', 'sort']),
         ]);
     }
 
@@ -79,16 +79,20 @@ class ProductController extends Controller
         // ── 2. Nhóm thuộc tính (cho selector) ──────────────────────
         $groupedAttributes = [];
         foreach ($product->variants as $variant) {
-            if (!$variant->attributeValues) continue;
+            if (! $variant->attributeValues) {
+                continue;
+            }
             foreach ($variant->attributeValues as $pivot) {
                 $attribute = $pivot->attribute;
                 $attrValue = $pivot->value;
-                if (!$attribute || !$attrValue) continue;
+                if (! $attribute || ! $attrValue) {
+                    continue;
+                }
                 $attrName = $attribute->name;
-                if (!isset($groupedAttributes[$attrName])) {
+                if (! isset($groupedAttributes[$attrName])) {
                     $groupedAttributes[$attrName] = ['id' => $attribute->id, 'values' => collect([])];
                 }
-                if (!$groupedAttributes[$attrName]['values']->contains('id', $attrValue->id)) {
+                if (! $groupedAttributes[$attrName]['values']->contains('id', $attrValue->id)) {
                     $groupedAttributes[$attrName]['values']->push($attrValue);
                 }
             }
@@ -103,7 +107,7 @@ class ProductController extends Controller
         $specsRaw = $product->specifications;
         $specGroups = [];
 
-        if (!empty($specsRaw) && is_array($specsRaw)) {
+        if (! empty($specsRaw) && is_array($specsRaw)) {
             // Kiểm tra định dạng có nhóm hay flat
             $hasGroups = isset($specsRaw[0]['group']) || isset($specsRaw[0]['specs']);
             if ($hasGroups) {
@@ -130,7 +134,7 @@ class ProductController extends Controller
         }
 
         // Bổ sung thông số từ groupedAttributes nếu specGroups rỗng
-        if (empty($specGroups) && !empty($groupedAttributes)) {
+        if (empty($specGroups) && ! empty($groupedAttributes)) {
             $attrSpecs = [];
             foreach ($groupedAttributes as $attrName => $group) {
                 $valueList = implode(', ', array_map(fn ($v) => $v['value']['value'] ?? '', $group['values']));
@@ -167,8 +171,8 @@ class ProductController extends Controller
         }
 
         // ── 5. Đánh giá + thống kê ──────────────────────────────────
-        $customer   = auth('customer')->user();
-        $canReview  = false;
+        $customer = auth('customer')->user();
+        $canReview = false;
         $userReview = null;
 
         if ($customer) {
@@ -181,21 +185,21 @@ class ProductController extends Controller
                 ->where('product_id', $product->id)
                 ->first();
 
-            $canReview = $hasPurchased && !$userReview;
+            $canReview = $hasPurchased && ! $userReview;
         }
 
-        $reviews      = Review::with('customer')
+        $reviews = Review::with('customer')
             ->where('product_id', $product->id)
             ->latest()
             ->get();
-        $reviewCount  = $reviews->count();
+        $reviewCount = $reviews->count();
         $averageRating = $reviewCount > 0 ? round($reviews->avg('rating'), 1) : 0;
 
         $starDistribution = [];
         for ($i = 5; $i >= 1; $i--) {
             $count = $reviews->where('rating', $i)->count();
             $starDistribution[$i] = [
-                'count'   => $count,
+                'count' => $count,
                 'percent' => $reviewCount > 0 ? round($count / $reviewCount * 100) : 0,
             ];
         }
@@ -211,7 +215,7 @@ class ProductController extends Controller
             ->select(['id', 'title', 'slug', 'thumbnail', 'summary', 'published_at', 'views'])
             ->where(function ($q) use ($keywords) {
                 foreach ($keywords as $kw) {
-                    $q->orWhere('title', 'like', '%' . $kw . '%');
+                    $q->orWhere('title', 'like', '%'.$kw.'%');
                 }
             })
             ->orderByDesc('views')
@@ -242,18 +246,18 @@ class ProductController extends Controller
         }
 
         return inertia('Client/Products/Show', [
-            'product'           => $product,
+            'product' => $product,
             'groupedAttributes' => $groupedAttributes,
-            'specGroups'        => $specGroups,           // Thông số kỹ thuật đã nhóm
-            'relatedProducts'   => $relatedProducts,
+            'specGroups' => $specGroups,           // Thông số kỹ thuật đã nhóm
+            'relatedProducts' => $relatedProducts,
             'sameBrandProducts' => $sameBrandProducts,    // Sản phẩm cùng hãng
-            'relatedPosts'      => $relatedPosts,          // Tin tức liên quan
-            'reviews'           => $reviews,
-            'reviewCount'       => $reviewCount,
-            'averageRating'     => $averageRating,
-            'starDistribution'  => $starDistribution,
-            'canReview'         => $canReview,
-            'userReview'        => $userReview,
+            'relatedPosts' => $relatedPosts,          // Tin tức liên quan
+            'reviews' => $reviews,
+            'reviewCount' => $reviewCount,
+            'averageRating' => $averageRating,
+            'starDistribution' => $starDistribution,
+            'canReview' => $canReview,
+            'userReview' => $userReview,
         ]);
     }
 
@@ -263,6 +267,7 @@ class ProductController extends Controller
     public function incrementViews(Request $request, $id)
     {
         Product::where('id', '=', $id)->increment('views_count');
+
         return response()->json(['success' => true]);
     }
 }

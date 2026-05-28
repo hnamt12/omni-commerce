@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -30,7 +31,7 @@ class AdminPermission
 
         // Không xác thực → Đã được route middleware auth:web bắt trước rồi
         // Nhưng defensive check ở đây để chắc chắn
-        if (!$user) {
+        if (! $user) {
             return $this->forbiddenResponse($request, 401, 'Bạn cần đăng nhập để truy cập trang này.');
         }
 
@@ -53,13 +54,13 @@ class AdminPermission
 
         // ─── Không có quyền → 403 ─────────────────────────────────────────────
         $missingPermissions = implode(', ', $permissions);
-        \Illuminate\Support\Facades\Log::warning('[AdminPermission] Access denied', [
-            'user_id'    => $user->id,
-            'user_name'  => $user->name,
-            'route'      => $request->path(),
-            'method'     => $request->method(),
-            'required'   => $permissions,
-            'ip'         => $request->ip(),
+        Log::warning('[AdminPermission] Access denied', [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'route' => $request->path(),
+            'method' => $request->method(),
+            'required' => $permissions,
+            'ip' => $request->ip(),
         ]);
 
         return $this->forbiddenResponse(
@@ -77,7 +78,7 @@ class AdminPermission
         // Inertia request (Vue SPA) → Render trang lỗi Vue
         if ($request->header('X-Inertia')) {
             return inertia('Errors/Forbidden', [
-                'status'  => $status,
+                'status' => $status,
                 'message' => $message,
             ])->toResponse($request)->setStatusCode($status);
         }
@@ -87,7 +88,7 @@ class AdminPermission
             return response()->json([
                 'success' => false,
                 'message' => $message,
-                'code'    => $status,
+                'code' => $status,
             ], $status);
         }
 

@@ -28,11 +28,11 @@ class ReviewController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
-        if (!$customer) {
+        if (! $customer) {
             return back()->with('error', 'Vui lòng đăng nhập để đánh giá sản phẩm.');
         }
 
-        if (!$this->hasPurchased($customer->id, $productId)) {
+        if (! $this->hasPurchased($customer->id, $productId)) {
             return back()->with('error', 'Bạn chỉ có thể đánh giá sản phẩm đã mua và đã nhận hàng.');
         }
 
@@ -46,15 +46,15 @@ class ReviewController extends Controller
         }
 
         $validated = $request->validate([
-            'rating'  => 'required|integer|min:1|max:5',
+            'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:2000',
         ]);
 
         Review::create([
-            'product_id'  => $productId,
+            'product_id' => $productId,
             'customer_id' => $customer->id,
-            'rating'      => $validated['rating'],
-            'comment'     => $validated['comment'] ?? null,
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'] ?? null,
         ]);
 
         return back()->with('success', 'Cảm ơn bạn đã đánh giá sản phẩm!');
@@ -66,17 +66,17 @@ class ReviewController extends Controller
     public function update(Request $request, int $reviewId)
     {
         $customer = Auth::guard('customer')->user();
-        $review   = Review::where('id', $reviewId)
+        $review = Review::where('id', $reviewId)
             ->where('customer_id', $customer->id)
             ->firstOrFail();
 
         $validated = $request->validate([
-            'rating'  => 'required|integer|min:1|max:5',
+            'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:2000',
         ]);
 
         $review->update([
-            'rating'  => $validated['rating'],
+            'rating' => $validated['rating'],
             'comment' => $validated['comment'] ?? null,
         ]);
 
@@ -89,7 +89,7 @@ class ReviewController extends Controller
     public function destroy(int $reviewId)
     {
         $customer = Auth::guard('customer')->user();
-        $review   = Review::where('id', $reviewId)
+        $review = Review::where('id', $reviewId)
             ->where('customer_id', $customer->id)
             ->firstOrFail();
 

@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Models\VoucherUsage;
-use App\Models\InventoryHistory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class AccountingController extends Controller
 {
@@ -19,12 +19,12 @@ class AccountingController extends Controller
      */
     private function getFilterDates(Request $request): array
     {
-        $startDate = $request->input('start_date') 
-            ? Carbon::parse($request->input('start_date'))->startOfDay() 
+        $startDate = $request->input('start_date')
+            ? Carbon::parse($request->input('start_date'))->startOfDay()
             : Carbon::now()->subDays(29)->startOfDay();
-            
-        $endDate = $request->input('end_date') 
-            ? Carbon::parse($request->input('end_date'))->endOfDay() 
+
+        $endDate = $request->input('end_date')
+            ? Carbon::parse($request->input('end_date'))->endOfDay()
             : Carbon::now()->endOfDay();
 
         return [$startDate, $endDate];
@@ -52,11 +52,11 @@ class AccountingController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('transaction_code', 'like', "%{$search}%")
-                  ->orWhereHas('order', function($oq) use ($search) {
-                      $oq->where('order_code', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('order', function ($oq) use ($search) {
+                        $oq->where('order_code', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -98,9 +98,9 @@ class AccountingController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->whereHas('voucher', function($q) use ($search) {
+            $query->whereHas('voucher', function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+                    ->orWhere('name', 'like', "%{$search}%");
             });
         }
 
@@ -142,10 +142,10 @@ class AccountingController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -194,12 +194,12 @@ class AccountingController extends Controller
         [$startDate, $endDate] = $this->getFilterDates($request);
 
         // Thống kê doanh thu theo phương thức thanh toán
-        $reconciliation = Order::select('payment_method', 
-                DB::raw('COUNT(*) as total_orders'),
-                DB::raw('SUM(CASE WHEN payment_status = "paid" THEN grand_total ELSE 0 END) as paid_amount'),
-                DB::raw('SUM(CASE WHEN payment_status = "unpaid" THEN grand_total ELSE 0 END) as unpaid_amount'),
-                DB::raw('SUM(grand_total) as total_amount')
-            )
+        $reconciliation = Order::select('payment_method',
+            DB::raw('COUNT(*) as total_orders'),
+            DB::raw('SUM(CASE WHEN payment_status = "paid" THEN grand_total ELSE 0 END) as paid_amount'),
+            DB::raw('SUM(CASE WHEN payment_status = "unpaid" THEN grand_total ELSE 0 END) as unpaid_amount'),
+            DB::raw('SUM(grand_total) as total_amount')
+        )
             ->whereNotIn('status', ['Đã hủy', 'Trả hàng/Hoàn tiền'])
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('payment_method')
@@ -260,7 +260,7 @@ class AccountingController extends Controller
         $valuationData = [];
         foreach ($rawHistory as $row) {
             $sku = $row->sku;
-            if (!isset($valuationData[$sku])) {
+            if (! isset($valuationData[$sku])) {
                 $valuationData[$sku] = [
                     'product_name' => $row->product_name,
                     'sku' => $sku,
@@ -293,7 +293,7 @@ class AccountingController extends Controller
         $valuationCollection = collect(array_values($valuationData));
         $page = $request->integer('page', 1);
         $perPage = 15;
-        $paginatedValuation = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedValuation = new LengthAwarePaginator(
             $valuationCollection->forPage($page, $perPage)->values(),
             $valuationCollection->count(),
             $perPage,

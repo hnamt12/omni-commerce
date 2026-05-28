@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\FlashSale;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class HomeController extends Controller
@@ -22,16 +24,16 @@ class HomeController extends Controller
             ->orderBy('id', 'asc')
             ->get()
             ->map(function ($cat) {
-                $cat->top_products = \App\Models\Product::where('category_id', $cat->id)
+                $cat->top_products = Product::where('category_id', $cat->id)
                     ->where('is_active', true)
                     ->orderBy('is_featured', 'desc')->orderBy('id', 'desc')
                     ->take(3)
                     ->get(['id', 'name', 'slug', 'thumbnail', 'base_price', 'sale_price']);
-                
-                $cat->top_brands = \App\Models\Brand::whereHas('products', function($q) use ($cat) {
+
+                $cat->top_brands = Brand::whereHas('products', function ($q) use ($cat) {
                     $q->where('category_id', $cat->id);
                 })->take(10)->get(['id', 'name', 'slug']);
-            
+
                 return $cat;
             });
 
@@ -62,47 +64,49 @@ class HomeController extends Controller
             ->take(10)
             ->get();
 
-        $featuredBrands = \App\Models\Brand::where('is_active', true)->take(8)->get();
+        $featuredBrands = Brand::where('is_active', true)->take(8)->get();
 
         return Inertia::render('Client/Home', [
-            'categories'       => $categories,
-            'banners'          => $banners,
-            'flashSale'        => $flashSale,
-            'newProducts'      => $newProducts,
+            'categories' => $categories,
+            'banners' => $banners,
+            'flashSale' => $flashSale,
+            'newProducts' => $newProducts,
             'trendingProducts' => $trendingProducts,
-            'featuredBrands'   => $featuredBrands,
+            'featuredBrands' => $featuredBrands,
         ]);
     }
 
-    public function getRecentlyViewed(\Illuminate\Http\Request $request)
+    public function getRecentlyViewed(Request $request)
     {
         $ids = $request->input('ids', []);
-        if (empty($ids)) return response()->json([]);
+        if (empty($ids)) {
+            return response()->json([]);
+        }
 
         // Fetch products with necessary relations for ProductCard
-        $products = \App\Models\Product::with(['brand', 'variants'])
+        $products = Product::with(['brand', 'variants'])
             ->whereIn('id', $ids)
             ->where('is_active', true)
             ->get()
             // Sort exactly as the IDs array order (most recent first)
-            ->sortBy(function($model) use ($ids) {
+            ->sortBy(function ($model) use ($ids) {
                 return array_search($model->id, $ids);
             })->values();
 
         return response()->json($products);
     }
 
-    public function searchSuggestions(\Illuminate\Http\Request $request)
+    public function searchSuggestions(Request $request)
     {
         $keyword = $request->input('q');
-        if (!$keyword || mb_strlen($keyword) < 2) {
+        if (! $keyword || mb_strlen($keyword) < 2) {
             return response()->json([]);
         }
 
-        $products = \App\Models\Product::where('is_active', true)
-            ->where(function($q) use ($keyword) {
+        $products = Product::where('is_active', true)
+            ->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
-                  ->orWhere('sku', 'like', "%{$keyword}%");
+                    ->orWhere('sku', 'like', "%{$keyword}%");
             })
             ->take(5)
             ->get(['id', 'name', 'slug', 'thumbnail', 'base_price', 'sale_price']);

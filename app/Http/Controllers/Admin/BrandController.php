@@ -4,17 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\User;
+use App\Notifications\SystemAlertNotification;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class BrandController extends Controller
 {
     public function show(Brand $brand)
     {
         return Inertia::render('Admin/Brands/Show', [
-            'brand' => $brand
+            'brand' => $brand,
         ]);
     }
 
@@ -23,7 +26,7 @@ class BrandController extends Controller
         $query = Brand::query();
 
         if ($request->has('search') && $request->search != '') {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $sortField = $request->input('sort', 'id');
@@ -34,7 +37,7 @@ class BrandController extends Controller
 
         return Inertia::render('Admin/Brands/Index', [
             'brands' => $brands,
-            'filters' => $request->only(['search', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
 
@@ -49,14 +52,14 @@ class BrandController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
-        
+
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('brands', 'public');
-            $data['logo_url'] = '/storage/' . $path;
+            $data['logo_url'] = '/storage/'.$path;
         }
 
         Brand::create($data);
@@ -67,7 +70,7 @@ class BrandController extends Controller
     public function edit(Brand $brand)
     {
         return Inertia::render('Admin/Brands/Form', [
-            'brand' => $brand
+            'brand' => $brand,
         ]);
     }
 
@@ -77,9 +80,9 @@ class BrandController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
-        
+
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
 
         if ($request->hasFile('logo')) {
@@ -87,7 +90,7 @@ class BrandController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $brand->logo_url));
             }
             $path = $request->file('logo')->store('brands', 'public');
-            $data['logo_url'] = '/storage/' . $path;
+            $data['logo_url'] = '/storage/'.$path;
         }
 
         $brand->update($data);
@@ -102,19 +105,19 @@ class BrandController extends Controller
 
         try {
             // Lấy những user có role là admin hoặc super admin bằng cách join bảng trực tiếp (Xuyên Guard)
-            $receivers = \App\Models\User::whereHas('roles', function($q) {
+            $receivers = User::whereHas('roles', function ($q) {
                 $q->whereIn('name', ['admin', 'super admin', 'Super Admin']);
             })->orWhere('id', 1)->get(); // Luôn luôn fallback về ID 1 để đảm bảo không bao giờ trượt
 
             if ($receivers->isNotEmpty()) {
-                \Illuminate\Support\Facades\Notification::send($receivers, new \App\Notifications\SystemAlertNotification(
+                Notification::send($receivers, new SystemAlertNotification(
                     'Cảnh báo xóa dữ liệu',
                     'Một danh mục/thương hiệu vừa bị xóa khỏi hệ thống bởi nhân viên.',
                     'danger'
                 ));
             }
         } catch (\Throwable $e) {
-            logger()->error('[Notification] Failed to send SystemAlertNotification for brand deletion: ' . $e->getMessage());
+            logger()->error('[Notification] Failed to send SystemAlertNotification for brand deletion: '.$e->getMessage());
         }
 
         return redirect()->back()->with('success', 'Xóa thương hiệu thành công.');
@@ -133,7 +136,7 @@ class BrandController extends Controller
 
         return Inertia::render('Admin/Brands/Trashed', [
             'brands' => $brands,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -141,19 +144,21 @@ class BrandController extends Controller
     {
         $brand = Brand::withTrashed()->findOrFail($id);
         $brand->restore();
+
         return redirect()->back()->with('success', 'Khôi phục thương hiệu thành công.');
     }
 
     public function forceDelete($id)
     {
         $brand = Brand::withTrashed()->findOrFail($id);
-        
+
         // Physically delete file on force delete
         if ($brand->logo_url && Str::startsWith($brand->logo_url, '/storage/')) {
             Storage::disk('public')->delete(str_replace('/storage/', '', $brand->logo_url));
         }
 
         $brand->forceDelete();
+
         return redirect()->back()->with('success', 'Đã xóa vĩnh viễn thương hiệu.');
     }
 }

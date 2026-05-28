@@ -11,11 +11,11 @@ class PostSeeder extends Seeder
     {
         $posts = [
             [
-                'title'            => 'Đánh giá iPhone 17 Pro Max: Đỉnh cao công nghệ hay chỉ là nâng cấp nhỏ?',
-                'slug'             => 'danh-gia-iphone-17-pro-max-dinh-cao-cong-nghe',
-                'thumbnail'        => 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&q=80',
-                'summary'          => 'iPhone 17 Pro Max chính thức ra mắt với chip A19 Bionic và camera periscope 5x — nhưng liệu đây có phải là bước đột phá thực sự hay Apple chỉ đang "an toàn"? Chúng tôi đã dùng thử trong 2 tuần để tìm câu trả lời.',
-                'content'          => '<h2>Thiết kế & Màn hình</h2>
+                'title' => 'Đánh giá iPhone 17 Pro Max: Đỉnh cao công nghệ hay chỉ là nâng cấp nhỏ?',
+                'slug' => 'danh-gia-iphone-17-pro-max-dinh-cao-cong-nghe',
+                'thumbnail' => 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&q=80',
+                'summary' => 'iPhone 17 Pro Max chính thức ra mắt với chip A19 Bionic và camera periscope 5x — nhưng liệu đây có phải là bước đột phá thực sự hay Apple chỉ đang "an toàn"? Chúng tôi đã dùng thử trong 2 tuần để tìm câu trả lời.',
+                'content' => '<h2>Thiết kế & Màn hình</h2>
 <p>Apple đã dũng cảm thay đổi thiết kế của dòng Pro năm nay. Khung titanium grade 5 mỏng hơn 8% so với thế hệ trước, trong khi màn hình ProMotion 6.9 inch đạt độ sáng tối đa 3000 nits — con số đủ để bạn đọc màn hình ngay cả giữa trưa hè Sài Gòn.</p>
 <p>Dynamic Island tiếp tục được cải tiến, giờ đây hỗ trợ đa nhiệm tốt hơn với giao diện context-aware: khi bạn đang chạy bộ, nó tự động hiển thị số liệu sức khỏe; khi điều hướng, nó thu nhỏ lại bản đồ thu nhỏ dạng PiP.</p>
 
@@ -33,17 +33,17 @@ class PostSeeder extends Seeder
 <h2>Kết luận</h2>
 <p>iPhone 17 Pro Max là chiếc smartphone tốt nhất Apple từng làm, nhưng "tốt nhất" không có nghĩa là "cần phải mua ngay". Nếu bạn đang dùng iPhone 15 Pro hoặc cũ hơn, đây là lý do chính đáng để nâng cấp. Nếu bạn vừa mua iPhone 16 Pro Max năm ngoái, hãy chờ thêm một chu kỳ nữa.</p>
 <p><strong>Điểm đánh giá: 9.2/10</strong></p>',
-                'is_active'        => true,
-                'views'            => 1247,
-                'meta_title'       => 'Đánh giá iPhone 17 Pro Max 2026 — Có đáng mua không? | OmniCommerce',
+                'is_active' => true,
+                'views' => 1247,
+                'meta_title' => 'Đánh giá iPhone 17 Pro Max 2026 — Có đáng mua không? | OmniCommerce',
                 'meta_description' => 'Review chi tiết iPhone 17 Pro Max: chip A19 Bionic, camera 200MP periscope 5x, pin 1.5 ngày. Phân tích khách quan để giúp bạn quyết định có nên mua không.',
             ],
             [
-                'title'            => 'Top 5 Mẹo Tiết Kiệm Pin Samsung Galaxy S25 Ultra Mà Ít Ai Biết',
-                'slug'             => 'top-5-meo-tiet-kiem-pin-samsung-galaxy-s25-ultra',
-                'thumbnail'        => 'https://images.unsplash.com/photo-1567581935884-3349723552ca?w=800&q=80',
-                'summary'          => 'Galaxy S25 Ultra có viên pin 5000mAh nhưng nhiều người dùng vẫn phàn nàn về thời lượng. 5 mẹo thực chiến dưới đây sẽ giúp bạn kéo dài thêm 30–50% thời gian sử dụng mà không cần hy sinh trải nghiệm.',
-                'content'          => '<h2>1. Tắt Always-On Display khi không cần thiết</h2>
+                'title' => 'Top 5 Mẹo Tiết Kiệm Pin Samsung Galaxy S25 Ultra Mà Ít Ai Biết',
+                'slug' => 'top-5-meo-tiet-kiem-pin-samsung-galaxy-s25-ultra',
+                'thumbnail' => 'https://images.unsplash.com/photo-1567581935884-3349723552ca?w=800&q=80',
+                'summary' => 'Galaxy S25 Ultra có viên pin 5000mAh nhưng nhiều người dùng vẫn phàn nàn về thời lượng. 5 mẹo thực chiến dưới đây sẽ giúp bạn kéo dài thêm 30–50% thời gian sử dụng mà không cần hy sinh trải nghiệm.',
+                'content' => '<h2>1. Tắt Always-On Display khi không cần thiết</h2>
 <p>Always-On Display (AOD) của Galaxy S25 Ultra trông rất đẹp nhưng tiêu thụ khoảng 8–12% pin mỗi ngày. Thay vì tắt hoàn toàn, hãy vào <strong>Settings → Lock Screen → Always On Display</strong> và chọn chế độ <em>"Show as scheduled"</em> — chỉ bật trong giờ làm việc từ 8h–22h.</p>
 
 <h2>2. Giới hạn Refresh Rate về 60Hz khi đọc sách hoặc duyệt web</h2>
@@ -60,17 +60,17 @@ class PostSeeder extends Seeder
 
 <h2>Kết quả thực tế</h2>
 <p>Áp dụng cả 5 mẹo trên, chúng tôi đo được thời lượng sử dụng tăng từ 6.5 giờ lên 9.2 giờ screen-on time — tương đương tăng 41% thời gian sử dụng thực tế trên cùng một chiếc Galaxy S25 Ultra.</p>',
-                'is_active'        => true,
-                'views'            => 892,
-                'meta_title'       => 'Top 5 Mẹo Tiết Kiệm Pin Samsung Galaxy S25 Ultra Hiệu Quả Nhất 2026',
+                'is_active' => true,
+                'views' => 892,
+                'meta_title' => 'Top 5 Mẹo Tiết Kiệm Pin Samsung Galaxy S25 Ultra Hiệu Quả Nhất 2026',
                 'meta_description' => 'Khám phá 5 mẹo tiết kiệm pin Galaxy S25 Ultra mà Samsung không nói với bạn. Tăng thêm 30–50% thời lượng pin chỉ trong vài phút thiết lập.',
             ],
             [
-                'title'            => 'Xu Hướng Smartphone 2026: AI On-Device, Màn Hình Gập và Sạc Không Dây 100W',
-                'slug'             => 'xu-huong-smartphone-2026-ai-ondevice-man-hinh-gap',
-                'thumbnail'        => 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80',
-                'summary'          => 'Năm 2026 đánh dấu bước chuyển đổi lớn nhất của ngành smartphone kể từ khi iPhone đầu tiên ra mắt năm 2007. AI on-device, màn hình gập thế hệ 3 và sạc không dây siêu nhanh đang định hình lại cách chúng ta dùng điện thoại.',
-                'content'          => '<h2>1. AI On-Device — Trí Tuệ Nhân Tạo Không Cần Internet</h2>
+                'title' => 'Xu Hướng Smartphone 2026: AI On-Device, Màn Hình Gập và Sạc Không Dây 100W',
+                'slug' => 'xu-huong-smartphone-2026-ai-ondevice-man-hinh-gap',
+                'thumbnail' => 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80',
+                'summary' => 'Năm 2026 đánh dấu bước chuyển đổi lớn nhất của ngành smartphone kể từ khi iPhone đầu tiên ra mắt năm 2007. AI on-device, màn hình gập thế hệ 3 và sạc không dây siêu nhanh đang định hình lại cách chúng ta dùng điện thoại.',
+                'content' => '<h2>1. AI On-Device — Trí Tuệ Nhân Tạo Không Cần Internet</h2>
 <p>Xu hướng lớn nhất của 2026 không phải là camera nhiều MP hơn hay màn hình to hơn — mà là AI chạy hoàn toàn trên thiết bị, không cần kết nối cloud. Qualcomm Snapdragon 8 Elite Gen 2 và Apple A19 Bionic đều được tích hợp NPU (Neural Processing Unit) đủ mạnh để chạy các mô hình ngôn ngữ 7B tham số.</p>
 <p>Điều này có nghĩa là: phiên dịch thời gian thực trong cuộc gọi, tóm tắt tài liệu PDF dài 100 trang, và chỉnh sửa ảnh bằng lệnh thoại — tất cả thực hiện ngay trên máy, bảo mật hoàn toàn và không tốn data.</p>
 
@@ -89,17 +89,17 @@ class PostSeeder extends Seeder
 
 <h2>Nhận định</h2>
 <p>Năm 2026 là năm của sự trưởng thành. Thay vì chạy theo spec, các nhà sản xuất đang tập trung vào trải nghiệm thực tế: AI hữu ích, thiết kế bền đẹp và sạc nhanh tiện lợi. Người dùng Việt Nam sẽ được hưởng lợi nhiều nhất từ xu hướng này.</p>',
-                'is_active'        => true,
-                'views'            => 1489,
-                'meta_title'       => 'Xu Hướng Smartphone 2026: AI, Màn Hình Gập, Sạc 100W | OmniCommerce',
+                'is_active' => true,
+                'views' => 1489,
+                'meta_title' => 'Xu Hướng Smartphone 2026: AI, Màn Hình Gập, Sạc 100W | OmniCommerce',
                 'meta_description' => 'Phân tích 5 xu hướng smartphone lớn nhất năm 2026: AI on-device, nếp gập vô hình, sạc không dây 100W, camera dưới màn hình và vật liệu nano-ceramic.',
             ],
             [
-                'title'            => 'So Sánh Chi Tiết: Xiaomi 15 Ultra vs Samsung Galaxy S25 Ultra — Ai Thắng Cuộc?',
-                'slug'             => 'so-sanh-xiaomi-15-ultra-vs-samsung-galaxy-s25-ultra',
-                'thumbnail'        => 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&q=80',
-                'summary'          => 'Hai flagship Android đỉnh nhất đầu 2026 đối đầu trực tiếp: Xiaomi 15 Ultra với camera Leica và pin 6000mAh, đối đầu Samsung Galaxy S25 Ultra với bút S Pen và hệ sinh thái One UI. Đây là bài so sánh toàn diện nhất bạn sẽ đọc.',
-                'content'          => '<h2>Thiết Kế & Cầm Nắm</h2>
+                'title' => 'So Sánh Chi Tiết: Xiaomi 15 Ultra vs Samsung Galaxy S25 Ultra — Ai Thắng Cuộc?',
+                'slug' => 'so-sanh-xiaomi-15-ultra-vs-samsung-galaxy-s25-ultra',
+                'thumbnail' => 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&q=80',
+                'summary' => 'Hai flagship Android đỉnh nhất đầu 2026 đối đầu trực tiếp: Xiaomi 15 Ultra với camera Leica và pin 6000mAh, đối đầu Samsung Galaxy S25 Ultra với bút S Pen và hệ sinh thái One UI. Đây là bài so sánh toàn diện nhất bạn sẽ đọc.',
+                'content' => '<h2>Thiết Kế & Cầm Nắm</h2>
 <p><strong>Xiaomi 15 Ultra</strong> có thiết kế ceramic đặc trưng, cụm camera tròn nổi bật với logo Leica. Máy nặng 226g — khá nặng nhưng phân phối trọng lượng tốt. Mặt lưng ceramic cho cảm giác cao cấp và chống trầy xuất sắc.</p>
 <p><strong>Samsung Galaxy S25 Ultra</strong> giữ thiết kế titan quen thuộc nhưng mỏng hơn 2025. Góc bo tròn hơn so với các thế hệ trước, bỏ cạnh thẳng góc — một thay đổi gây tranh cãi nhưng cầm thoải mái hơn. S Pen tích hợp vẫn là điểm khác biệt không ai bắt chước được.</p>
 
@@ -128,17 +128,17 @@ class PostSeeder extends Seeder
 <p>Chọn <strong>Xiaomi 15 Ultra</strong> nếu: bạn ưu tiên camera, pin mạnh và sạc nhanh, và không ngại học MIUI.</p>
 <p>Chọn <strong>Samsung Galaxy S25 Ultra</strong> nếu: bạn cần S Pen, muốn hệ sinh thái Samsung DeX, và ưu tiên sự ổn định phần mềm lâu dài.</p>
 <p>Không có kẻ thua trong cuộc đua này — cả hai đều là những flagship Android xuất sắc nhất hiện tại.</p>',
-                'is_active'        => true,
-                'views'            => 763,
-                'meta_title'       => 'So Sánh Xiaomi 15 Ultra vs Samsung Galaxy S25 Ultra: Flagship nào đáng mua hơn?',
+                'is_active' => true,
+                'views' => 763,
+                'meta_title' => 'So Sánh Xiaomi 15 Ultra vs Samsung Galaxy S25 Ultra: Flagship nào đáng mua hơn?',
                 'meta_description' => 'So sánh chi tiết Xiaomi 15 Ultra và Samsung Galaxy S25 Ultra về thiết kế, màn hình, camera, hiệu năng, pin và giá. Bài phân tích đầy đủ nhất 2026.',
             ],
             [
-                'title'            => 'Hướng Dẫn Toàn Diện: Chọn Mua Tai Nghe Bluetooth Đúng Loại Cho Nhu Cầu Của Bạn',
-                'slug'             => 'huong-dan-chon-mua-tai-nghe-bluetooth-dung-loai',
-                'thumbnail'        => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-                'summary'          => 'Thị trường tai nghe Bluetooth 2026 có hàng trăm lựa chọn từ 200 nghìn đến 10 triệu đồng. Bài viết này phân tích các tiêu chí quan trọng nhất để bạn không mất tiền oan vào những tính năng không cần thiết.',
-                'content'          => '<h2>Bước 1: Xác Định Mục Đích Sử Dụng</h2>
+                'title' => 'Hướng Dẫn Toàn Diện: Chọn Mua Tai Nghe Bluetooth Đúng Loại Cho Nhu Cầu Của Bạn',
+                'slug' => 'huong-dan-chon-mua-tai-nghe-bluetooth-dung-loai',
+                'thumbnail' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
+                'summary' => 'Thị trường tai nghe Bluetooth 2026 có hàng trăm lựa chọn từ 200 nghìn đến 10 triệu đồng. Bài viết này phân tích các tiêu chí quan trọng nhất để bạn không mất tiền oan vào những tính năng không cần thiết.',
+                'content' => '<h2>Bước 1: Xác Định Mục Đích Sử Dụng</h2>
 <p>Trước khi xem bất kỳ thông số kỹ thuật nào, hãy tự hỏi: bạn dùng tai nghe chủ yếu để làm gì?</p>
 <ul>
   <li><strong>Nghe nhạc tại nhà/văn phòng:</strong> Ưu tiên chất âm và ANC. Chọn dạng over-ear (chụp tai).</li>
@@ -174,9 +174,9 @@ class PostSeeder extends Seeder
 
 <h2>Kết Luận</h2>
 <p>Không có tai nghe "tốt nhất" — chỉ có tai nghe phù hợp nhất với nhu cầu và ngân sách của bạn. Ưu tiên thử tai nghe trực tiếp tại cửa hàng trước khi quyết định, đặc biệt với các sản phẩm trên 3 triệu đồng.</p>',
-                'is_active'        => true,
-                'views'            => 534,
-                'meta_title'       => 'Hướng Dẫn Chọn Mua Tai Nghe Bluetooth 2026: ANC, Codec, Pin và Giá | OmniCommerce',
+                'is_active' => true,
+                'views' => 534,
+                'meta_title' => 'Hướng Dẫn Chọn Mua Tai Nghe Bluetooth 2026: ANC, Codec, Pin và Giá | OmniCommerce',
                 'meta_description' => 'Cách chọn tai nghe Bluetooth đúng nhu cầu: phân tích ANC, codec LDAC/aptX/AAC, thời lượng pin thực tế và gợi ý sản phẩm theo tầm giá từ 200K đến 10 triệu đồng.',
             ],
         ];
@@ -185,10 +185,10 @@ class PostSeeder extends Seeder
             Post::updateOrCreate(
                 ['slug' => $post['slug']],
                 array_merge($post, [
-                    'status'       => 'published',
+                    'status' => 'published',
                     'published_at' => now()->subDays(rand(1, 30))->subHours(rand(0, 23)),
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ])
             );
         }

@@ -19,7 +19,7 @@ return new class extends Migration
             if (Schema::hasColumn('users', 'permissions')) {
                 $columns[] = 'permissions';
             }
-            if (!empty($columns)) {
+            if (! empty($columns)) {
                 $table->dropColumn($columns);
             }
         });
@@ -31,10 +31,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'role')) {
+            if (! Schema::hasColumn('users', 'role')) {
                 $table->string('role')->default('staff');
             }
-            if (!Schema::hasColumn('users', 'permissions')) {
+            if (! Schema::hasColumn('users', 'permissions')) {
                 $table->json('permissions')->nullable();
             }
         });

@@ -13,9 +13,9 @@ class SettingController extends Controller
     {
         // Safe fallback: Ensure default settings exist
         $defaultKeys = [
-            'contact_phone' => '', 
-            'contact_email' => '', 
-            'contact_address' => '', 
+            'contact_phone' => '',
+            'contact_email' => '',
+            'contact_address' => '',
             'map_embed_code' => '',
             'min_stock_threshold' => '10',
             'company_name' => 'Công ty TNHH OmniCommerce',
@@ -26,15 +26,15 @@ class SettingController extends Controller
             'invoice_serial_prefix' => 'AA/22E',
             'invoice_template_code' => '01GTKT0/001',
         ];
-        
+
         foreach ($defaultKeys as $key => $val) {
             Setting::firstOrCreate(['key' => $key], ['value' => $val]);
         }
 
         $settings = Setting::all()->pluck('value', 'key');
-        
+
         return Inertia::render('Admin/Settings/Index', [
-            'settings' => $settings
+            'settings' => $settings,
         ]);
     }
 

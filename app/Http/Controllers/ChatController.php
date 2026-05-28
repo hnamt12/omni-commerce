@@ -22,14 +22,14 @@ class ChatController extends Controller
      */
     public function index()
     {
-        $conversations = Conversation::with(['customer', 'messages' => function($query) {
+        $conversations = Conversation::with(['customer', 'messages' => function ($query) {
             $query->latest()->limit(1);
         }])
-        ->withCount(['messages as unread_messages_count' => function ($query) {
-            $query->where('sender_type', 'customer')->where('status', 'unread');
-        }])
-        ->get();
-        
+            ->withCount(['messages as unread_messages_count' => function ($query) {
+                $query->where('sender_type', 'customer')->where('status', 'unread');
+            }])
+            ->get();
+
         return response()->json($conversations);
     }
 
@@ -48,7 +48,7 @@ class ChatController extends Controller
         if ($user = Auth::user()) {
             $user->unreadNotifications()
                 ->where('type', 'App\Notifications\NewChatMessageNotification')
-                ->where('data->conversation_id', (int)$conversationId)
+                ->where('data->conversation_id', (int) $conversationId)
                 ->get()
                 ->each(function ($notification) {
                     $notification->markAsRead();
@@ -58,7 +58,7 @@ class ChatController extends Controller
         $messages = Message::where('conversation_id', $conversationId)
             ->orderBy('created_at', 'asc')
             ->get();
-            
+
         return response()->json($messages);
     }
 
@@ -77,7 +77,7 @@ class ChatController extends Controller
         // Xử lý upload ảnh (lưu URL thay vì Base64)
         if ($request->type === 'img' && $request->hasFile('image')) {
             $path = $request->file('image')->store('chat_images', 'public');
-            $content = '/storage/' . $path;
+            $content = '/storage/'.$path;
         } else {
             $request->validate([
                 'content' => 'required|string',
@@ -118,7 +118,7 @@ class ChatController extends Controller
             ->first();
 
         // Nếu chưa có → tạo mới
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = Conversation::create([
                 'customer_id' => $customer->id,
                 'admin_id' => null, // Chưa assign admin
@@ -161,7 +161,7 @@ class ChatController extends Controller
         // Xử lý upload ảnh
         if ($request->type === 'img' && $request->hasFile('image')) {
             $path = $request->file('image')->store('chat_images', 'public');
-            $content = '/storage/' . $path;
+            $content = '/storage/'.$path;
         } else {
             $request->validate([
                 'content' => 'required|string',
@@ -182,7 +182,7 @@ class ChatController extends Controller
 
         // Gửi thông báo database tới Admin
         try {
-            $receivers = User::whereHas('roles', function($q) {
+            $receivers = User::whereHas('roles', function ($q) {
                 $q->whereIn('name', ['admin', 'super admin', 'Super Admin']);
             })->orWhereIn('id', [1, 2])->get();
 
@@ -190,7 +190,7 @@ class ChatController extends Controller
                 Notification::send($receivers, new NewChatMessageNotification($message, $customer->name));
             }
         } catch (\Throwable $e) {
-            logger()->error('[Notification] Failed to send NewChatMessageNotification: ' . $e->getMessage());
+            logger()->error('[Notification] Failed to send NewChatMessageNotification: '.$e->getMessage());
         }
 
         return response()->json($message);
@@ -209,9 +209,10 @@ class ChatController extends Controller
             ->get();
 
         $notifications = $unreadMessages->map(function ($message) {
-            $customerName = $message->conversation->customer->name ?? 'Khách hàng #' . $message->conversation->customer_id;
+            $customerName = $message->conversation->customer->name ?? 'Khách hàng #'.$message->conversation->customer_id;
+
             return [
-                'id' => 'chat-' . $message->id . '-' . strtotime($message->created_at),
+                'id' => 'chat-'.$message->id.'-'.strtotime($message->created_at),
                 'type' => 'chat',
                 'conversationId' => $message->conversation_id,
                 'customerName' => $customerName,

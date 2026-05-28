@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Order;
 use App\Models\PayrollRecord;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class PayrollController extends Controller
 {
@@ -29,7 +29,7 @@ class PayrollController extends Controller
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%");
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
@@ -53,7 +53,7 @@ class PayrollController extends Controller
                 'month' => (int) $month,
                 'year' => (int) $year,
                 'search' => $search,
-            ]
+            ],
         ]);
     }
 
@@ -115,7 +115,7 @@ class PayrollController extends Controller
             'filters' => [
                 'month' => (int) $month,
                 'year' => (int) $year,
-            ]
+            ],
         ]);
     }
 
@@ -167,10 +167,11 @@ class PayrollController extends Controller
             DB::commit();
 
             return redirect()->route('admin.payroll.index', ['month' => $month, 'year' => $year])
-                ->with('success', 'Bảng tính lương tháng ' . $month . '/' . $year . ' đã được lưu thành công.');
+                ->with('success', 'Bảng tính lương tháng '.$month.'/'.$year.' đã được lưu thành công.');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Lỗi lưu bảng lương: ' . $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Lỗi lưu bảng lương: '.$e->getMessage()]);
         }
     }
 
@@ -191,7 +192,7 @@ class PayrollController extends Controller
 
         return Inertia::render('Admin/Payroll/Show', [
             'record' => $record,
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 
@@ -203,12 +204,12 @@ class PayrollController extends Controller
         try {
             $record = PayrollRecord::findOrFail($id);
             $record->update([
-                'paid_at' => Carbon::now()
+                'paid_at' => Carbon::now(),
             ]);
 
-            return back()->with('success', 'Đã xác nhận thanh toán lương cho ' . $record->user->name);
+            return back()->with('success', 'Đã xác nhận thanh toán lương cho '.$record->user->name);
         } catch (\Throwable $e) {
-            return back()->withErrors(['error' => 'Lỗi cập nhật thanh toán: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Lỗi cập nhật thanh toán: '.$e->getMessage()]);
         }
     }
 
@@ -218,7 +219,7 @@ class PayrollController extends Controller
     public function exportPdf($id)
     {
         $record = PayrollRecord::with(['user', 'creator'])->findOrFail($id);
-        
+
         // Trả về view HTML đơn giản tối ưu cho in ấn (print)
         return view('admin.payroll.payslip', compact('record'));
     }

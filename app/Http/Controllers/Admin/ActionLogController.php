@@ -16,7 +16,7 @@ class ActionLogController extends Controller
     public function index(Request $request)
     {
         $query = ActionLog::with([
-            'user'     => fn ($q) => $q->select('id', 'name', 'email'),
+            'user' => fn ($q) => $q->select('id', 'name', 'email'),
             'customer' => fn ($q) => $q->select('id', 'name', 'email'),
         ]);
 
@@ -58,7 +58,7 @@ class ActionLogController extends Controller
         $logs = $query->latest()->paginate(20)->withQueryString();
 
         return Inertia::render('Admin/ActionLogs/Index', [
-            'logs'    => $logs,
+            'logs' => $logs,
             'filters' => $request->only(['user_id', 'customer_id', 'action', 'loggable_type', 'date_from', 'date_to']),
         ]);
     }
@@ -70,7 +70,7 @@ class ActionLogController extends Controller
     {
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="action-logs-' . now()->format('Y-m-d') . '.csv"',
+            'Content-Disposition' => 'attachment; filename="action-logs-'.now()->format('Y-m-d').'.csv"',
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
@@ -78,7 +78,7 @@ class ActionLogController extends Controller
 
         $callback = function () use ($query) {
             $file = fopen('php://output', 'w');
-            
+
             // Thêm UTF-8 BOM cho Excel mở tiếng Việt chuẩn không lỗi font
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -96,7 +96,7 @@ class ActionLogController extends Controller
                 'Dữ liệu cũ',
                 'Dữ liệu mới',
                 'Địa chỉ IP',
-                'User Agent'
+                'User Agent',
             ]);
 
             // Dùng chunk để tránh quá tải bộ nhớ RAM
@@ -148,6 +148,7 @@ class ActionLogController extends Controller
     private function translateLoggableType(string $type): string
     {
         $class = class_basename($type);
+
         return match ($class) {
             'User' => 'Nhân sự quản trị',
             'Customer' => 'Khách hàng',

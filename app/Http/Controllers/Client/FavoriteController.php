@@ -12,7 +12,7 @@ class FavoriteController extends Controller
     public function toggle(Request $request, $productId)
     {
         $customerId = auth('customer')->id();
-        if (!$customerId) {
+        if (! $customerId) {
             return back()->with('error', 'Vui lòng đăng nhập để lưu sản phẩm yêu thích.');
         }
 

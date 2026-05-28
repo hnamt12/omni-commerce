@@ -2,9 +2,9 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -22,20 +22,20 @@ return new class extends Migration
         // MySQL 8.0+ keeps the JSON check constraint even after changing column type to TEXT. We must drop it.
         try {
             DB::statement('ALTER TABLE payment_methods DROP CHECK payment_methods_chk_1');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // ignore if it doesn't exist or is already dropped
         }
 
         // 2. Chạy kịch bản mã hóa dữ liệu cũ
         $methods = DB::table('payment_methods')->get();
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             $configStr = trim($method->config);
-            
+
             // Nếu dữ liệu cũ đang ở dạng JSON thô
             if ($configStr && (str_starts_with($configStr, '{') || str_starts_with($configStr, '['))) {
                 // Mã hóa và lưu lại (bây giờ cột đã là TEXT nên sẽ không bị lỗi constraint)
                 DB::table('payment_methods')->where('id', $method->id)->update([
-                    'config' => Crypt::encryptString($configStr)
+                    'config' => Crypt::encryptString($configStr),
                 ]);
             }
         }
@@ -48,17 +48,17 @@ return new class extends Migration
     {
         // 1. Giải mã trước khi quay về JSON
         $methods = DB::table('payment_methods')->get();
-        foreach($methods as $method) {
+        foreach ($methods as $method) {
             $configStr = trim($method->config);
-            
+
             // Nếu là chuỗi đã mã hóa
-            if ($configStr && !str_starts_with($configStr, '{') && !str_starts_with($configStr, '[')) {
+            if ($configStr && ! str_starts_with($configStr, '{') && ! str_starts_with($configStr, '[')) {
                 try {
                     $decrypted = Crypt::decryptString($configStr);
                     DB::table('payment_methods')->where('id', $method->id)->update([
-                        'config' => $decrypted
+                        'config' => $decrypted,
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // ignore
                 }
             }

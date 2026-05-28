@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Traits\Auditable;
 
 class Customer extends Authenticatable
 {
-    use HasFactory, SoftDeletes, Notifiable, Auditable;
+    use Auditable, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -43,23 +45,23 @@ class Customer extends Authenticatable
         ];
     }
 
-    public function orders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function orders(): HasMany
     {
-        return $this->hasMany(\App\Models\Order::class);
+        return $this->hasMany(Order::class);
     }
 
-    public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function addresses(): HasMany
     {
-        return $this->hasMany(\App\Models\Address::class);
+        return $this->hasMany(Address::class);
     }
 
-    public function favorites(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function favorites(): HasMany
     {
-        return $this->hasMany(\App\Models\Favorite::class);
+        return $this->hasMany(Favorite::class);
     }
 
-    public function favoriteProducts(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function favoriteProducts(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\Product::class, 'favorites', 'customer_id', 'product_id');
+        return $this->belongsToMany(Product::class, 'favorites', 'customer_id', 'product_id');
     }
 }
