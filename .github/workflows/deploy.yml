@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Hoặc 20 tùy dự án của bạn
+          node-version: '22' # Hoặc 20 tùy dự án của bạn
 
       - name: Install NPM & Build Vue/Inertia Assets
         run: |
